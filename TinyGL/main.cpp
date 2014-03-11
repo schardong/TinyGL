@@ -17,6 +17,10 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
+static const int W_SPHERES = 10;
+static const int H_SPHERES = 10;
+static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
+
 using namespace std;
 using namespace ggraf;
 
@@ -30,12 +34,10 @@ int reshape(Ihandle* self, int w, int h);
 int keyPress(Ihandle* self, int c);
 int exit_cb(Ihandle* self);
 
-Shader* s1;
+Shader* simple;
 
-Mesh* p1;
-Mesh* p2;
-Mesh* p3;
-Mesh* axes;
+Mesh* ground;
+Mesh** spheres;
 
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
@@ -50,11 +52,6 @@ bool gridOn = false;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void toggleAxis()
-{
-  axisOn = !axisOn;
-}
-
 void toggleSphere()
 {
   sphereOn = !sphereOn;
@@ -65,23 +62,14 @@ void toggleGrid()
   gridOn = !gridOn;
 }
 
-void drawAxes()
-{
-  axes->bind();
-  glDrawElements(GL_LINES, 6, GL_UNSIGNED_BYTE, NULL);
-}
-
 void drawSphere()
 {
-  p1->bind();
-  //glDrawArrays(GL_LINE_STRIP, 0, 7350);
-  glDrawElements(GL_TRIANGLES, 49 * 49 * 6, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLES, 19 * 19 * 6, GL_UNSIGNED_INT, NULL);
 }
 
 void drawGrid()
 {
-  p3->bind();
-  glDrawElements(GL_TRIANGLES, 4 * 4 * 6, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLES, 9 * 9 * 6, GL_UNSIGNED_INT, NULL);
 }
 
 int main(int argc, char** argv)
@@ -101,7 +89,7 @@ int main(int argc, char** argv)
 
 void initIUP(int argc, char** argv)
 {
-  Ihandle *finale, *axisToggle, *sphereToggle, *gridToggle, *toggleButtons;
+  Ihandle *finale, *sphereToggle, *gridToggle, *toggleButtons;
   IupOpen(&argc, &argv);
   IupGLCanvasOpen();
 
@@ -115,17 +103,14 @@ void initIUP(int argc, char** argv)
 
   IupSetAttribute(canvas, IUP_BUFFER, IUP_DOUBLE);
   IupSetAttribute(canvas, "RASTERSIZE", "600x600");
-
-  axisToggle = IupToggle("Toggle axes", NULL);
-  IupSetCallback(axisToggle, "ACTION", (Icallback)toggleAxis);
-
+  
   sphereToggle = IupToggle("Toggle sphere", NULL);
   IupSetCallback(sphereToggle, "ACTION", (Icallback)toggleSphere);
 
   gridToggle = IupToggle("Toggle grid", NULL);
   IupSetCallback(gridToggle, "ACTION", (Icallback)toggleGrid);
 
-  toggleButtons = IupHbox(IupFill(), axisToggle, sphereToggle, gridToggle, IupFill(), NULL);
+  toggleButtons = IupHbox(IupFill(), sphereToggle, gridToggle, IupFill(), NULL);
   finale = IupVbox(IupFill(), canvas, toggleButtons, IupFill(), NULL);
 
   dialogue = IupDialog(finale);
@@ -156,59 +141,56 @@ void init()
 {
   IupGLMakeCurrent(canvas);
 
-  p1 = new Mesh();
+  /*p1 = new Mesh();
   p1->createSphereBuffer(50, 50);
   p1->setDrawCb(&drawSphere);
-  p2 = new Mesh();
-  //p2->createGridBuffer(30, 30);
   p3 = new Mesh();
-  p3->createGridBuffer(5, 5);
+  p3->createGridBuffer(50, 50);
   p3->setDrawCb(&drawGrid);
   axes = new Mesh();
   axes->createAxesBuffer();
-  axes->setDrawCb(&drawAxes);
+  axes->setDrawCb(&drawAxes);*/
 
-  viewMatrix = glm::lookAt(glm::vec3(3, 5, 7.5), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+  ground = new Mesh();
+  ground->createGridBuffer(10, 10);
+  ground->setDrawCb(drawGrid);
+
+  spheres = new Mesh*[NUM_SPHERES];
+  
+  for (int i = 0; i < NUM_SPHERES; i++) {
+    spheres[i] = new Mesh();
+    spheres[i]->createSphereBuffer(20, 20);
+    spheres[i]->setDrawCb(drawSphere);
+    TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
+  }
+
+  for (int i = 0; i < W_SPHERES; i++) {
+    for (int j = 0; j < H_SPHERES; j++) {
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(3*i, 1, 3*j));
+    }
+  }
+
+  viewMatrix = glm::lookAt(glm::vec3(0, 15, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 1.f, 100.f);
 
-  s1 = new Shader("simple.vs", "simple.fs");
-  s1->bind();
-  s1->bindFragDataLoc("out_vColor", 0);
-  s1->setUniformMatrix("viewMatrix", viewMatrix);
-  s1->setUniformMatrix("projMatrix", projMatrix);
+  simple = new Shader("simple.vs", "simple.fs", "simple.gs");
+  simple->bind();
+  simple->bindFragDataLoc("out_vColor", 0);
+  simple->setUniformMatrix("viewMatrix", viewMatrix);
+  simple->setUniformMatrix("projMatrix", projMatrix);
   
-  TinyGL::getInstance()->addMesh("sphere", p1);
-  TinyGL::getInstance()->addMesh("grid", p3);
-  TinyGL::getInstance()->addMesh("axes", axes);
-
-  TinyGL::getInstance()->addShader("simple", s1);
+  TinyGL::getInstance()->addMesh("ground", ground);
+  TinyGL::getInstance()->addShader("simple", simple);
+    
+  ground->m_modelMatrix = glm::scale(glm::vec3(30, 1, 30)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
+  ground->m_normalMatrix = glm::inverseTranspose(viewMatrix * ground->m_modelMatrix);
   
-  p1->m_modelMatrix = glm::translate(glm::vec3(0, 1, 0));
-  p1->m_normalMatrix = glm::inverseTranspose(p1->m_modelMatrix);
-
-  p2->m_modelMatrix = glm::translate(glm::vec3(0, 0, 0.2)) *
-                      glm::scale(glm::vec3(15, 1, 15)) *
-                      glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
-
-  p3->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10))*glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
-  p3->m_normalMatrix = glm::inverseTranspose(p3->m_modelMatrix);
-
-  axes->m_modelMatrix = glm::scale(glm::vec3(5.0, 5.0, 5.0));
-  axes->m_normalMatrix = glm::inverseTranspose(axes->m_modelMatrix);
-
   initCalled = true;
 }
 
 void destroy()
 {
-  Shader::unbind();
   TinyGL::getInstance()->freeResources();
-  delete s1;
-
-  delete p1;
-  delete p2;
-  delete p3;
-  delete axes;
 }
 
 int update(Ihandle* self)
@@ -231,22 +213,18 @@ int draw(Ihandle* self)
   ggraf::Shader* s = glPtr->getShader("simple");
   s->bind();
 
-  if (axisOn) {
-    s->setUniformMatrix("modelMatrix", axes->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", axes->m_normalMatrix);
-    glPtr->draw("axes");
-  }
-
   if (sphereOn) {
-    s->setUniformMatrix("modelMatrix", p1->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", p1->m_normalMatrix);
-    glPtr->draw("sphere");
+    for (int i = 0; i < NUM_SPHERES; i++) {
+      s->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
+      s->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
+      glPtr->draw("sphere" + to_string(i));
+    }
   }
 
   if (gridOn) {
-    s->setUniformMatrix("modelMatrix", p3->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", p3->m_normalMatrix);
-    glPtr->draw("grid");
+    s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
+    s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
+    glPtr->draw("ground");
   }
 
   glBindVertexArray(0);
@@ -264,9 +242,11 @@ int reshape(Ihandle* self, int w, int h)
   IupGLMakeCurrent(self);
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
-  s1->bind();
-  s1->setUniformMatrix("projMatrix", projMatrix);
-  s1->setUniformMatrix("viewMatrix", viewMatrix);
+
+  simple->bind();
+  simple->setUniformMatrix("projMatrix", projMatrix);
+  simple->setUniformMatrix("viewMatrix", viewMatrix);
+
   Shader::unbind();
   draw(canvas);
   return IUP_DEFAULT;
@@ -274,9 +254,50 @@ int reshape(Ihandle* self, int w, int h)
 
 int keyPress(Ihandle* self, int c)
 {
-  if (c == K_q) {
+  bool cameraChanged = false;
+  switch (c) {
+  case K_q:
     destroy();
     return IUP_CLOSE;
-  } 
+    break;
+  case K_w:
+    viewMatrix *= glm::translate(glm::vec3(0, 0, 1));
+    cameraChanged = true;
+    break;
+  case K_s:
+    viewMatrix *= glm::translate(glm::vec3(0, 0, -1));
+    cameraChanged = true;
+    break;
+  case K_a:
+    viewMatrix *= glm::translate(glm::vec3(1, 0, 0));
+    cameraChanged = true;
+    break;
+  case K_d:
+    viewMatrix *= glm::translate(glm::vec3(-1, 0, 0));
+    cameraChanged = true;
+    break;
+  case K_r:
+    viewMatrix *= glm::translate(glm::vec3(0, -1, 0));
+    cameraChanged = true;
+    break;
+  case K_f:
+    viewMatrix *= glm::translate(glm::vec3(0, 1, 0));
+    cameraChanged = true;
+    break;
+  }
+
+  if (cameraChanged) {
+    Shader* s = TinyGL::getInstance()->getShader("simple");
+    s->bind();
+    s->setUniformMatrix("viewMatrix", viewMatrix);
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        cerr << viewMatrix[i][j] << " ";
+      }
+      cerr << endl;
+    }
+    cerr << endl;
+  }
+
   return IUP_DEFAULT;
 }

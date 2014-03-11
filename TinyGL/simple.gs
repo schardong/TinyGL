@@ -1,16 +1,26 @@
 #version 330
 
 layout (triangles) in;
-layout (points, max_vertices = 3) out;
+layout (triangle_strip, max_vertices = 6) out;
 
-in vec4 ex_vColor[];
-out vec4 ex_gColor[];
+in VertexAttrib
+{
+  vec4 color;
+  vec4 normal;
+} in_vData[];
+
+out Attrib
+{
+  vec4 color;
+  vec4 normal;
+} out_gData;
 
 void main()
 {
   for(int i = 0; i < gl_in.length(); i++) {
     gl_Position = gl_in[i].gl_Position;
-    ex_gColor[i] = ex_vColor[i];
+    out_gData.color = in_vData[i].color;
+    out_gData.normal = in_vData[i].normal;
     EmitVertex();
   }
 

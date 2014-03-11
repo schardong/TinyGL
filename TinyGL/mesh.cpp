@@ -101,17 +101,17 @@ void Mesh::createGridBuffer(int nx, int ny)
     glm::vec3 b = glm::vec3(vertices[3 * t], vertices[3 * t + 1], vertices[3 * t + 2]);
     glm::vec3 normal = glm::normalize(glm::cross((a - o), (b - o)));
 
-    normals[r] = normal.x;
-    normals[r + 1] = normal.y;
-    normals[r + 2] = normal.z;
+    normals[3 * r] = normal.x;
+    normals[3 * r + 1] = normal.y;
+    normals[3 * r + 2] = normal.z;
 
-    normals[s] = normal.x;
-    normals[s + 1] = normal.y;
-    normals[s + 2] = normal.z;
+    normals[3 * s] = normal.x;
+    normals[3 * s + 1] = normal.y;
+    normals[3 * s + 2] = normal.z;
 
-    normals[t] = normal.x;
-    normals[t + 1] = normal.y;
-    normals[t + 2] = normal.z;
+    normals[3 * t] = normal.x;
+    normals[3 * t + 1] = normal.y;
+    normals[3 * t + 2] = normal.z;
   }
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
@@ -122,7 +122,7 @@ void Mesh::createGridBuffer(int nx, int ny)
   cbuff->sendData(colors);
   m_buffers.push_back(cbuff);
 
-  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
   nbuff->sendData(normals);
   m_buffers.push_back(nbuff);
 
@@ -200,8 +200,8 @@ void Mesh::createSphereBuffer(int stacks, int slices)
   GLfloat* colors = new GLfloat[buff_size];
   for (size_t i = 0; i < buff_size;) {
     colors[i++] = 0.0f;
-    colors[i++] = 0.8f;
-    colors[i++] = 0.2f;
+    colors[i++] = 0.5f;
+    colors[i++] = (float)rand() / (float)RAND_MAX;
   }
 
   int k = 0;
@@ -217,6 +217,30 @@ void Mesh::createSphereBuffer(int stacks, int slices)
       indices[k++] = i * stacks + (j + 1);
     }
   }
+
+  GLfloat* normals = new GLfloat[buff_size];
+  for (int i = 0; i < k; i += 3) {
+    size_t r = indices[i];
+    size_t s = indices[i + 1];
+    size_t t = indices[i + 2];
+
+    glm::vec3 o = glm::vec3(vertices[3 * r], vertices[3 * r + 1], vertices[3 * r + 2]);
+    glm::vec3 a = glm::vec3(vertices[3 * s], vertices[3 * s + 1], vertices[3 * s + 2]);
+    glm::vec3 b = glm::vec3(vertices[3 * t], vertices[3 * t + 1], vertices[3 * t + 2]);
+    glm::vec3 normal = glm::normalize(glm::cross((a - o), (b - o)));
+
+    normals[3 * r] = normal.x;
+    normals[3 * r + 1] = normal.y;
+    normals[3 * r + 2] = normal.z;
+
+    normals[3 * s] = normal.x;
+    normals[3 * s + 1] = normal.y;
+    normals[3 * s + 2] = normal.z;
+
+    normals[3 * t] = normal.x;
+    normals[3 * t + 1] = normal.y;
+    normals[3 * t + 2] = normal.z;
+  }
     
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
   vbuff->sendData(vertices);
@@ -225,6 +249,10 @@ void Mesh::createSphereBuffer(int stacks, int slices)
   BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
   cbuff->sendData(colors);
   m_buffers.push_back(cbuff);
+
+  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  nbuff->sendData(normals);
+  m_buffers.push_back(nbuff);
 
   glGenVertexArrays(1, &m_vao);
   glBindVertexArray(m_vao);
@@ -241,10 +269,16 @@ void Mesh::createSphereBuffer(int stacks, int slices)
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
 
+  nbuff->bind();
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(2);
+
   glBindVertexArray(0);
 
   delete[] vertices;
   delete[] colors;
+  delete[] indices;
+  delete[] normals;
 }
 
 void Mesh::createAxesBuffer()

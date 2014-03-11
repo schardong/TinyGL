@@ -1,14 +1,14 @@
 #version 330
 
-in VertexAttrib
+in Attrib
 {
   vec4 color;
   vec4 normal;
-} in_vData;
+} in_gData;
 
 layout (location = 0) out vec4 out_vColor;
 
 void main()
 {
-  out_vColor = in_vData.color;
+  out_vColor = in_gData.color;
 }
