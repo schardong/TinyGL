@@ -76,10 +76,10 @@
     <None Include="cube.gs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="axes.gs">
+    <None Include="cube.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="cube.fs">
+    <None Include="points.gs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

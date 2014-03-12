@@ -17,8 +17,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static const int W_SPHERES = 10;
-static const int H_SPHERES = 10;
+static const int W_SPHERES = 1;
+static const int H_SPHERES = 1;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
@@ -35,6 +35,7 @@ int keyPress(Ihandle* self, int c);
 int exit_cb(Ihandle* self);
 
 Shader* simple;
+Shader* points;
 
 Mesh* ground;
 Mesh** spheres;
@@ -64,7 +65,8 @@ void toggleGrid()
 
 void drawSphere()
 {
-  glDrawElements(GL_TRIANGLES, 19 * 19 * 6, GL_UNSIGNED_INT, NULL);
+  //glDrawElements(GL_TRIANGLES, 5 * 5 * 6, GL_UNSIGNED_INT, NULL);
+  glDrawArrays(GL_POINTS, 0, 5 * 5 + 2);
 }
 
 void drawGrid()
@@ -135,7 +137,6 @@ void initGLEW()
   glEnable(GL_DEPTH_TEST);
 
   initGLEWCalled = true;
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void init()
@@ -148,7 +149,7 @@ void init()
   spheres = new Mesh*[NUM_SPHERES];
   
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = createSphereMesh(20, 20);
+    spheres[i] = createSphereMesh(5, 5);
     spheres[i]->setDrawCb(drawSphere);
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
@@ -167,13 +168,23 @@ void init()
   simple->bindFragDataLoc("out_vColor", 0);
   simple->setUniformMatrix("viewMatrix", viewMatrix);
   simple->setUniformMatrix("projMatrix", projMatrix);
+
+  points = new Shader("simple.vs", "simple.fs", "points.gs");
+  points->bind();
+  points->bindFragDataLoc("out_fColor", 0);
+  points->setUniformMatrix("viewMatrix", viewMatrix);
+  points->setUniformMatrix("projMatrix", projMatrix);
   
   TinyGL::getInstance()->addMesh("ground", ground);
   TinyGL::getInstance()->addShader("simple", simple);
+  TinyGL::getInstance()->addShader("points", points);
     
   ground->m_modelMatrix = glm::scale(glm::vec3(30, 1, 30)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::inverseTranspose(viewMatrix * ground->m_modelMatrix);
   
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glPointSize(3.f);
+
   initCalled = true;
 }
 
@@ -200,16 +211,18 @@ int draw(Ihandle* self)
 
   TinyGL* glPtr = TinyGL::getInstance();
   ggraf::Shader* s = glPtr->getShader("simple");
-  s->bind();
-
+  ggraf::Shader* p = glPtr->getShader("points");
+  
+  p->bind();
   if (sphereOn) {
     for (int i = 0; i < NUM_SPHERES; i++) {
-      s->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
-      s->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
+      p->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
+      p->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
       glPtr->draw("sphere" + to_string(i));
     }
   }
 
+  s->bind();
   if (gridOn) {
     s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
     s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
@@ -231,10 +244,17 @@ int reshape(Ihandle* self, int w, int h)
   IupGLMakeCurrent(self);
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
+  
+  Shader* s = TinyGL::getInstance()->getShader("simple");
+  Shader* p = TinyGL::getInstance()->getShader("points");
 
-  simple->bind();
-  simple->setUniformMatrix("projMatrix", projMatrix);
-  simple->setUniformMatrix("viewMatrix", viewMatrix);
+  s->bind();
+  s->setUniformMatrix("projMatrix", projMatrix);
+  s->setUniformMatrix("viewMatrix", viewMatrix);
+
+  p->bind();
+  p->setUniformMatrix("projMatrix", projMatrix);
+  p->setUniformMatrix("viewMatrix", viewMatrix);
 
   Shader::unbind();
   draw(canvas);
@@ -302,15 +322,20 @@ int keyPress(Ihandle* self, int c)
 
   if (cameraChanged) {
     Shader* s = TinyGL::getInstance()->getShader("simple");
+    Shader* p = TinyGL::getInstance()->getShader("points");
+
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-    for (int i = 0; i < 4; i++) {
+
+    p->bind();
+    p->setUniformMatrix("viewMatrix", viewMatrix);
+    /*for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         cerr << viewMatrix[i][j] << " ";
       }
       cerr << endl;
     }
-    cerr << endl;
+    cerr << endl;*/
   }
 
   return IUP_DEFAULT;

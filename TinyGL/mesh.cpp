@@ -140,82 +140,66 @@ Mesh* createSphereMesh(int nx, int ny)
 {
   float h_step = static_cast<float>(2 * M_PI) / nx;
   float v_step = static_cast<float>(M_PI) / ny;
-  size_t buff_size = (ny+1) * (nx+1) * 3;
 
-  GLfloat* vertices = new GLfloat[buff_size];
+  std::vector<GLfloat> vertices;
+  
   int idx = 0;
-
-  for (float phi = 0; phi <= M_PI; phi += v_step) {
-    for (float theta = 0; theta <= 2 * M_PI; theta += h_step) {
-      vertices[idx++] = cos(theta) * sin(phi);
-      vertices[idx++] = cos(phi);
-      vertices[idx++] = sin(theta) * sin(phi);
+  for (float phi = v_step; phi < M_PI; phi += v_step) {
+    for (float theta = 0; theta < 2 * M_PI; theta += h_step) {
+      vertices.push_back(cos(theta) * sin(phi));
+      vertices.push_back(cos(phi));
+      vertices.push_back(sin(theta) * sin(phi));
     }
   }
 
-  GLfloat* colors = new GLfloat[buff_size];
-  for (size_t i = 0; i < buff_size;) {
+  vertices.push_back(0);
+  vertices.push_back(1);
+  vertices.push_back(0);
+
+  vertices.push_back(0);
+  vertices.push_back(-1);
+  vertices.push_back(0);
+
+
+  std::vector<GLfloat> colors(vertices.size());
+  for (size_t i = 0; i < colors.size();) {
     colors[i++] = 0.0f;
-    colors[i++] = 0.5f;
+    colors[i++] = 0.3f;
     colors[i++] = (float)rand() / (float)RAND_MAX;
   }
 
-  idx = 0;
-  size_t idx_size = ny * nx * 6;
-  GLuint* indices = new GLuint[idx_size];
+  std::vector<GLuint> indices;
   for (int i = 0; i < nx; i++) {
     for (int j = 0; j < ny; j++) {
-      indices[idx++] = i * nx + j;
-      indices[idx++] = (i + 1) * nx + j;
-      indices[idx++] = i * nx + (j + 1);
-      indices[idx++] = (i + 1) * nx + j;
-      indices[idx++] = (i + 1) * nx + (j + 1);
-      indices[idx++] = i * nx + (j + 1);
+      indices.push_back(i * nx + j);
+      indices.push_back((i + 1) * nx + j);
+      indices.push_back(i * nx + (j + 1));
+      indices.push_back((i + 1) * nx + j);
+      indices.push_back((i + 1) * nx + (j + 1));
+      indices.push_back(i * nx + (j + 1));
     }
   }
 
-  GLfloat* normals = new GLfloat[buff_size];
-  for (int i = 0; i < idx; i += 3) {
-    size_t r = indices[i];
-    size_t s = indices[i + 1];
-    size_t t = indices[i + 2];
-
-    glm::vec3 o = glm::vec3(vertices[3 * r], vertices[3 * r + 1], vertices[3 * r + 2]);
-    glm::vec3 a = glm::vec3(vertices[3 * s], vertices[3 * s + 1], vertices[3 * s + 2]);
-    glm::vec3 b = glm::vec3(vertices[3 * t], vertices[3 * t + 1], vertices[3 * t + 2]);
-    glm::vec3 normal = glm::normalize(glm::cross((a - o), (b - o)));
-
-    normals[3 * r] = normal.x;
-    normals[3 * r + 1] = normal.y;
-    normals[3 * r + 2] = normal.z;
-
-    normals[3 * s] = normal.x;
-    normals[3 * s + 1] = normal.y;
-    normals[3 * s + 2] = normal.z;
-
-    normals[3 * t] = normal.x;
-    normals[3 * t + 1] = normal.y;
-    normals[3 * t + 2] = normal.z;
-  }
+  //GLfloat* normals = new GLfloat[buff_size];
 
   Mesh* mesh = new Mesh();
     
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
-  vbuff->sendData(vertices);
+  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), GL_STATIC_DRAW);
+  vbuff->sendData(&vertices[0]);
   mesh->attachBuffer(vbuff);
 
-  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * buff_size, GL_STATIC_DRAW);
-  cbuff->sendData(colors);
+  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), GL_STATIC_DRAW);
+  cbuff->sendData(&colors[0]);
   mesh->attachBuffer(cbuff);
 
-  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  /*BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
   nbuff->sendData(normals);
-  mesh->attachBuffer(nbuff);
+  mesh->attachBuffer(nbuff);*/
 
   mesh->bind();
 
-  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * idx_size, GL_STATIC_DRAW);
-  ibuff->sendData(indices);
+  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
+  ibuff->sendData(&indices[0]);
   mesh->attachBuffer(ibuff);
 
   vbuff->bind();
@@ -226,16 +210,16 @@ Mesh* createSphereMesh(int nx, int ny)
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
 
-  nbuff->bind();
+  /*nbuff->bind();
   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(2);*/
 
   glBindVertexArray(0);
 
-  delete[] vertices;
-  delete[] colors;
-  delete[] indices;
-  delete[] normals;
+  //delete[] vertices;
+  //delete[] colors;
+  //delete[] indices;
+  //delete[] normals;
 
   return mesh;
 }

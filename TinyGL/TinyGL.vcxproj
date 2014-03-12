@@ -95,7 +95,7 @@
     <ClInclude Include="tinygl.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="axes.gs" />
+    <None Include="points.gs" />
     <None Include="cube.fs" />
     <None Include="cube.gs" />
     <None Include="lines.gs" />
