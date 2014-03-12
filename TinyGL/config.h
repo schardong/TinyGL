@@ -9,7 +9,7 @@
 #define OPENGL_MINOR_VERSION 0
 
 #ifndef M_PI
-#define M_PI 3.141592
+#define M_PI 3.141592f
 #endif
 
 #endif // CONFIG_H

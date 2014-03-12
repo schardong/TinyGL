@@ -135,31 +135,20 @@ void initGLEW()
   glEnable(GL_DEPTH_TEST);
 
   initGLEWCalled = true;
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void init()
 {
   IupGLMakeCurrent(canvas);
-
-  /*p1 = new Mesh();
-  p1->createSphereBuffer(50, 50);
-  p1->setDrawCb(&drawSphere);
-  p3 = new Mesh();
-  p3->createGridBuffer(50, 50);
-  p3->setDrawCb(&drawGrid);
-  axes = new Mesh();
-  axes->createAxesBuffer();
-  axes->setDrawCb(&drawAxes);*/
-
-  ground = new Mesh();
-  ground->createGridBuffer(10, 10);
+  
+  ground = createGridMesh(10, 10);
   ground->setDrawCb(drawGrid);
 
   spheres = new Mesh*[NUM_SPHERES];
   
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Mesh();
-    spheres[i]->createSphereBuffer(20, 20);
+    spheres[i] = createSphereMesh(20, 20);
     spheres[i]->setDrawCb(drawSphere);
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
@@ -284,6 +273,31 @@ int keyPress(Ihandle* self, int c)
     viewMatrix *= glm::translate(glm::vec3(0, 1, 0));
     cameraChanged = true;
     break;
+  case K_LEFT:
+    viewMatrix *= glm::rotate(M_PI / 25.f, glm::vec3(0, 1, 0));
+    cameraChanged = true;
+    break;
+  case K_RIGHT:
+    viewMatrix *= glm::rotate(-M_PI / 25, glm::vec3(0, 1, 0));
+    cameraChanged = true;
+    break;
+  case K_UP:
+    viewMatrix *= glm::rotate(M_PI / 25, glm::vec3(1, 0, 0));
+    cameraChanged = true;
+    break;
+  case K_DOWN:
+    viewMatrix *= glm::rotate(-M_PI / 25, glm::vec3(1, 0, 0));
+    cameraChanged = true;
+    break;
+  case K_m:
+    viewMatrix *= glm::rotate(-M_PI / 25, glm::vec3(0, 0, 1));
+    cameraChanged = true;
+    break;
+  case K_n:
+    viewMatrix *= glm::rotate(M_PI / 25, glm::vec3(0, 0, 1));
+    cameraChanged = true;
+    break;
+
   }
 
   if (cameraChanged) {

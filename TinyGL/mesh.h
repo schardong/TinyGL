@@ -13,7 +13,6 @@ public:
   glm::mat4 m_normalMatrix;
 
   Mesh();
-  Mesh(size_t num_elements, size_t bytes_per_element);
   ~Mesh();
 
   void attachBuffer(BufferObject* buff);
@@ -28,18 +27,15 @@ public:
   {
     glBindVertexArray(m_vao);
   }
-
-  void createTriangleBuffer();
-  void createPointBuffer();
-  void createGridBuffer(int nx, int ny);
-  void createSphereBuffer(int stacks, int slices);
-  void createAxesBuffer();
-
+  
 protected:
   std::vector<BufferObject*> m_buffers;
   void(*m_drawCb)();
 
   GLuint m_vao;
 };
+
+Mesh* createGridMesh(int nx, int ny);
+Mesh* createSphereMesh(int nx, int ny);
 
 #endif // MESH_H
