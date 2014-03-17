@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyGL", "TinyGL\TinyGL.vcxproj", "{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IupBumpMap", "IupBumpMap\IupBumpMap.vcxproj", "{52800E54-7F60-4C23-8643-01AFFC7C4C23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,6 +17,10 @@ Global
 		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}.Debug|Win32.Build.0 = Debug|Win32
 		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}.Release|Win32.ActiveCfg = Release|Win32
 		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}.Release|Win32.Build.0 = Release|Win32
+		{52800E54-7F60-4C23-8643-01AFFC7C4C23}.Debug|Win32.ActiveCfg = Debug|Win32
+		{52800E54-7F60-4C23-8643-01AFFC7C4C23}.Debug|Win32.Build.0 = Debug|Win32
+		{52800E54-7F60-4C23-8643-01AFFC7C4C23}.Release|Win32.ActiveCfg = Release|Win32
+		{52800E54-7F60-4C23-8643-01AFFC7C4C23}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

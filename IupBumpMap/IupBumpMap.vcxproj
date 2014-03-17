@@ -10,19 +10,32 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cube.fs" />
+    <None Include="cube.gs" />
+    <None Include="lines.gs" />
+    <None Include="lines.vs" />
+    <None Include="points.gs" />
+    <None Include="simple.fs" />
+    <None Include="simple.gs" />
+    <None Include="simple.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}</ProjectGuid>
-    <RootNamespace>TinyGL</RootNamespace>
+    <ProjectGuid>{52800E54-7F60-4C23-8643-01AFFC7C4C23}</ProjectGuid>
+    <RootNamespace>IupBumpMap</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -41,19 +54,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../tecgraf/iup/include;../../freeglut/include;../../glm;../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL;../../tecgraf/iup/include;../../freeglut/include;../../glm;../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../tecgraf/iup/lib/x86;../../glew/lib;../../build/x86/freeglut/lib/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iup.lib;iupgl.lib;iupcontrols.lib;iupim.lib;iupcd.lib;glew32d.lib;freeglutd.lib;ole32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TinyGL.lib;iup.lib;iupgl.lib;iupcontrols.lib;iupim.lib;iupcd.lib;glew32d.lib;freeglutd.lib;ole32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../tecgraf/iup/lib/x86;../../glew/lib;../../build/x86/freeglut/lib/Debug;../Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <SubSystem>NotSet</SubSystem>
     </Link>
@@ -65,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../tecgraf/iup/include;../../freeglut/include;../../glm;../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL;../../tecgraf/iup/include;../../freeglut/include;../../glm;../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -73,26 +89,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../tecgraf/iup/lib/x86;../../glew/lib;../../build/x86/freeglut/lib/Release;../../build/x86/freeglut/lib/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>iup.lib;iupgl.lib;iupcontrols.lib;glew32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../tecgraf/iup/lib/x86;../../glew/lib;../../build/x86/freeglut/lib/Release;../../build/x86/freeglut/lib/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="bufferobject.cpp" />
-    <ClCompile Include="logger.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="tinygl.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="bufferobject.h" />
-    <ClInclude Include="config.h" />
-    <ClInclude Include="logger.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="singleton.h" />
-    <ClInclude Include="tinygl.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

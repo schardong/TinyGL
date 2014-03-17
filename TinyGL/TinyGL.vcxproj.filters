@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tinygl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -56,31 +53,5 @@
     <ClInclude Include="bufferobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="simple.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="simple.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="simple.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="lines.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="lines.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="cube.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="cube.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="points.gs">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>
