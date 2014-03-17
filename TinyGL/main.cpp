@@ -53,20 +53,10 @@ bool gridOn = false;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void toggleSphere()
-{
-  sphereOn = !sphereOn;
-}
-
-void toggleGrid()
-{
-  gridOn = !gridOn;
-}
-
 void drawSphere()
 {
-  //glDrawElements(GL_TRIANGLES, 5 * 5 * 6, GL_UNSIGNED_INT, NULL);
-  glDrawArrays(GL_POINTS, 0, 5 * 5 + 2);
+  glDrawElements(GL_TRIANGLES, 15 * 15 * 6, GL_UNSIGNED_INT, NULL);
+  //glDrawArrays(GL_POINTS, 0, num_points);
 }
 
 void drawGrid()
@@ -85,18 +75,18 @@ int main(int argc, char** argv)
 
   IupMainLoop();
   IupClose();
-  
-	return 0;
+
+  return 0;
 }
 
 void initIUP(int argc, char** argv)
 {
-  Ihandle *finale, *sphereToggle, *gridToggle, *toggleButtons;
+  Ihandle *finale, *file_menu, *file_open, *file_exit;
   IupOpen(&argc, &argv);
   IupGLCanvasOpen();
 
   canvas = IupGLCanvas("draw");
-    
+
   IupSetFunction("draw", (Icallback)draw);
   IupSetFunction(IUP_IDLE_ACTION, (Icallback)update);
 
@@ -105,18 +95,22 @@ void initIUP(int argc, char** argv)
 
   IupSetAttribute(canvas, IUP_BUFFER, IUP_DOUBLE);
   IupSetAttribute(canvas, "RASTERSIZE", "600x600");
+
+  file_open = IupItem("Open bump-map", NULL);
+  file_exit = IupItem("Exit", NULL);
+  IupSetCallback(file_exit, "ACTION", (Icallback)exit_cb);
   
-  sphereToggle = IupToggle("Toggle sphere", NULL);
-  IupSetCallback(sphereToggle, "ACTION", (Icallback)toggleSphere);
+  file_menu = IupMenu(file_open, file_exit, NULL);
 
-  gridToggle = IupToggle("Toggle grid", NULL);
-  IupSetCallback(gridToggle, "ACTION", (Icallback)toggleGrid);
+  Ihandle* sub_file = IupSubmenu("File", file_menu);
+  Ihandle* main_menu = IupMenu(sub_file, NULL);
 
-  toggleButtons = IupHbox(IupFill(), sphereToggle, gridToggle, IupFill(), NULL);
-  finale = IupVbox(IupFill(), canvas, toggleButtons, IupFill(), NULL);
+  IupSetHandle("mainmenu", main_menu);
 
+  finale = IupVbox(IupFill(), canvas, IupFill(), NULL);
   dialogue = IupDialog(finale);
   IupSetAttribute(dialogue, "TITLE", TINYGL_LIBNAME);
+  IupSetAttribute(dialogue, "MENU", "mainmenu");
 
   IupShow(dialogue);
   IupMap(canvas);
@@ -142,21 +136,21 @@ void initGLEW()
 void init()
 {
   IupGLMakeCurrent(canvas);
-  
+
   ground = createGridMesh(10, 10);
   ground->setDrawCb(drawGrid);
 
   spheres = new Mesh*[NUM_SPHERES];
-  
+
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = createSphereMesh(5, 5);
+    spheres[i] = createSphereMesh(15, 15);
     spheres[i]->setDrawCb(drawSphere);
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
   for (int i = 0; i < W_SPHERES; i++) {
     for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(3*i, 1, 3*j));
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(3 * i, 1, 3 * j));
     }
   }
 
@@ -174,14 +168,14 @@ void init()
   points->bindFragDataLoc("out_fColor", 0);
   points->setUniformMatrix("viewMatrix", viewMatrix);
   points->setUniformMatrix("projMatrix", projMatrix);
-  
+
   TinyGL::getInstance()->addMesh("ground", ground);
   TinyGL::getInstance()->addShader("simple", simple);
   TinyGL::getInstance()->addShader("points", points);
-    
+
   ground->m_modelMatrix = glm::scale(glm::vec3(30, 1, 30)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::inverseTranspose(viewMatrix * ground->m_modelMatrix);
-  
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPointSize(3.f);
 
@@ -212,22 +206,18 @@ int draw(Ihandle* self)
   TinyGL* glPtr = TinyGL::getInstance();
   ggraf::Shader* s = glPtr->getShader("simple");
   ggraf::Shader* p = glPtr->getShader("points");
-  
-  p->bind();
-  if (sphereOn) {
-    for (int i = 0; i < NUM_SPHERES; i++) {
-      p->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
-      p->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
-      glPtr->draw("sphere" + to_string(i));
-    }
-  }
 
   s->bind();
-  if (gridOn) {
-    s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
-    glPtr->draw("ground");
+  for (int i = 0; i < NUM_SPHERES; i++) {
+    s->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
+    s->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
+    glPtr->draw("sphere" + to_string(i));
   }
+
+  //s->bind();
+  s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
+  s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
+  glPtr->draw("ground");
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -244,7 +234,7 @@ int reshape(Ihandle* self, int w, int h)
   IupGLMakeCurrent(self);
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
-  
+
   Shader* s = TinyGL::getInstance()->getShader("simple");
   Shader* p = TinyGL::getInstance()->getShader("points");
 
@@ -331,12 +321,18 @@ int keyPress(Ihandle* self, int c)
     p->setUniformMatrix("viewMatrix", viewMatrix);
     /*for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        cerr << viewMatrix[i][j] << " ";
+      cerr << viewMatrix[i][j] << " ";
       }
       cerr << endl;
-    }
-    cerr << endl;*/
+      }
+      cerr << endl;*/
   }
 
   return IUP_DEFAULT;
+}
+
+int exit_cb(Ihandle* self)
+{
+  destroy();
+  return IUP_CLOSE;
 }

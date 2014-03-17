@@ -4,36 +4,42 @@
 #include "singleton.h"
 #include "mesh.h"
 #include "shader.h"
-#include <iup.h>
+
 #include <string>
 #include <map>
 
-using std::string;
-
+/**
+  TinyGL - A simple manager class that holds the meshes and shaders to be used
+  in an OpenGL application. To free the resources just call the method
+  "freeResources" declared bellow. TO draw the meshes, the class calls each
+  mesh's draw callback, so one must be defined or some error will happen. Since
+  this class doesn't  check for errors it will call an invalid method an unpleasant
+  things may happen.
+ */
 class TinyGL : public Singleton<TinyGL>
 {
 public:
 	friend class Singleton<TinyGL>;
   
-  bool addMesh(string name, Mesh* m);
-  bool addShader(string name, ggraf::Shader* s);
+  bool addMesh(std::string name, Mesh* m);
+  bool addShader(std::string name, ggraf::Shader* s);
 
   void freeResources();
   void draw();
 
-  void draw(string name)
+  void draw(std::string name)
   {
     m_meshMap[name]->draw();
   }
 
-  ggraf::Shader* getShader(string name)
+  ggraf::Shader* getShader(std::string name)
   {
     return m_shaderMap[name];
   }
 
 protected:
-  std::map<string, Mesh*> m_meshMap;
-  std::map<string, ggraf::Shader*> m_shaderMap;
+  std::map<std::string, Mesh*> m_meshMap;
+  std::map<std::string, ggraf::Shader*> m_shaderMap;
 
 private:
 };

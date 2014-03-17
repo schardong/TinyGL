@@ -160,7 +160,6 @@ Mesh* createSphereMesh(int nx, int ny)
   vertices.push_back(-1);
   vertices.push_back(0);
 
-
   std::vector<GLfloat> colors(vertices.size());
   for (size_t i = 0; i < colors.size();) {
     colors[i++] = 0.0f;
@@ -178,6 +177,10 @@ Mesh* createSphereMesh(int nx, int ny)
       indices.push_back((i + 1) * nx + (j + 1));
       indices.push_back(i * nx + (j + 1));
     }
+  }
+
+  for (int i = 0; i < nx; i++) {
+
   }
 
   //GLfloat* normals = new GLfloat[buff_size];
