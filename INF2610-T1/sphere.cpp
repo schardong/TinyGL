@@ -37,14 +37,6 @@ Sphere::Sphere(int nx, int ny)
     }
   }
 
-  /*vertices.push_back(0);
-  vertices.push_back(1);
-  vertices.push_back(0);
-
-  vertices.push_back(0);
-  vertices.push_back(-1);
-  vertices.push_back(0);*/
-
   std::vector<GLfloat> normals = vertices;
   
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
