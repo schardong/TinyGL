@@ -39,7 +39,6 @@ void exit_cb();
 int g_window = -1;
 
 Shader* simple;
-Shader* points;
 
 Grid* ground;
 Sphere** spheres;
@@ -134,15 +133,15 @@ void init()
   simple->setUniformMatrix("viewMatrix", viewMatrix);
   simple->setUniformMatrix("projMatrix", projMatrix);
 
-  points = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/points.gs");
+  /*points = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/points.gs");
   points->bind();
   points->bindFragDataLoc("out_fColor", 0);
   points->setUniformMatrix("viewMatrix", viewMatrix);
-  points->setUniformMatrix("projMatrix", projMatrix);
+  points->setUniformMatrix("projMatrix", projMatrix);*/
 
   TinyGL::getInstance()->addMesh("ground", ground);
   TinyGL::getInstance()->addShader("simple", simple);
-  TinyGL::getInstance()->addShader("points", points);
+  //TinyGL::getInstance()->addShader("points", points);
 
   ground->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10)) /* glm::translate(glm::vec3(-10, 0, -10)) */* glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::inverseTranspose(viewMatrix * ground->m_modelMatrix);
@@ -204,15 +203,10 @@ void reshape(int w, int h)
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
 
   Shader* s = TinyGL::getInstance()->getShader("simple");
-  Shader* p = TinyGL::getInstance()->getShader("points");
 
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
   s->setUniformMatrix("viewMatrix", viewMatrix);
-
-  p->bind();
-  p->setUniformMatrix("projMatrix", projMatrix);
-  p->setUniformMatrix("viewMatrix", viewMatrix);
 
   Shader::unbind();
 }

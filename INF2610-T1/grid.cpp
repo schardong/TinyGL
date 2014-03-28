@@ -18,8 +18,8 @@ Grid::Grid(int nx, int ny) : Mesh()
 
   std::vector<GLfloat> colors;
   for (size_t i = 0; i < vertices.size(); i += 3) {
-    colors.push_back(0.4f);
-    colors.push_back(0.6f);
+    colors.push_back(0.3f);
+    colors.push_back(0.8f);
     colors.push_back(0.f);
   }
 
