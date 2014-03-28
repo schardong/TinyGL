@@ -11,17 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cube.fs" />
-    <None Include="cube.gs" />
-    <None Include="lines.gs" />
-    <None Include="lines.vs" />
-    <None Include="points.gs" />
-    <None Include="simple.fs" />
-    <None Include="simple.gs" />
-    <None Include="simple.vs" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <None Include="..\Resources\simple.fs" />
+    <None Include="..\Resources\simple.gs" />
+    <None Include="..\Resources\simple.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{52800E54-7F60-4C23-8643-01AFFC7C4C23}</ProjectGuid>

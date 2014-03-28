@@ -15,34 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cube.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="cube.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="lines.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="lines.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="points.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="simple.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="simple.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="simple.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\simple.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resources\simple.gs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resources\simple.vs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

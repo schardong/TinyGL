@@ -157,13 +157,13 @@ void init()
   viewMatrix = glm::lookAt(glm::vec3(0, 15, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 1.f, 100.f);
 
-  simple = new Shader("simple.vs", "simple.fs", "simple.gs");
+  simple = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/simple.gs");
   simple->bind();
   simple->bindFragDataLoc("out_vColor", 0);
   simple->setUniformMatrix("viewMatrix", viewMatrix);
   simple->setUniformMatrix("projMatrix", projMatrix);
 
-  points = new Shader("simple.vs", "simple.fs", "points.gs");
+  points = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/points.gs");
   points->bind();
   points->bindFragDataLoc("out_fColor", 0);
   points->setUniformMatrix("viewMatrix", viewMatrix);
