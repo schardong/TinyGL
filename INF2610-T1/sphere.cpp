@@ -71,6 +71,8 @@ Sphere::Sphere(int nx, int ny)
 
   glBindVertexArray(0);
 
+  m_numPoints = indices.size();
+
   vertices.clear();
   colors.clear();
   indices.clear();

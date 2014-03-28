@@ -8,7 +8,7 @@ in Attrib
 
 layout (location = 0) out vec4 out_vColor;
 
-vec4 light_pos = vec4(10, 10, 5, 1);
+vec4 light_pos = vec4(5, 5, 5, 1);
 vec4 light_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void main()

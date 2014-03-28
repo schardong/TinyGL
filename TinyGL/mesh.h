@@ -18,7 +18,7 @@ public:
   void attachBuffer(BufferObject* buff);
   void draw();
 
-  inline void setDrawCb(void(*drawCb)())
+  inline void setDrawCb(void(*drawCb)(size_t))
   {
     m_drawCb = drawCb;
   }
@@ -30,12 +30,10 @@ public:
   
 protected:
   std::vector<BufferObject*> m_buffers;
-  void(*m_drawCb)();
+  void(*m_drawCb)(size_t);
 
   GLuint m_vao;
+  size_t m_numPoints;
 };
-
-Mesh* createGridMesh(int nx, int ny);
-Mesh* createSphereMesh(int nx, int ny);
 
 #endif // MESH_H

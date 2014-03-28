@@ -12,7 +12,7 @@ uniform mat4 normalMatrix;
 out VertexAttrib
 {
   vec4 color;
-  vec4 normal;
+  smooth vec4 normal;
 } out_vData;
 
 void main()

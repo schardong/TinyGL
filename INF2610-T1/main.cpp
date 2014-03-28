@@ -49,15 +49,14 @@ glm::mat4 projMatrix;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void drawSphere()
+void drawSphere(size_t num_points)
 {
-  glDrawElements(GL_TRIANGLES, 15 * 15 * 6, GL_UNSIGNED_INT, NULL);
-  //glDrawArrays(GL_POINTS, 0, num_points);
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
-void drawGrid()
+void drawGrid(size_t num_points)
 {
-  glDrawElements(GL_TRIANGLES, 9 * 9 * 6, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
 int main(int argc, char** argv)
@@ -113,7 +112,7 @@ void init()
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(15, 15);
+    spheres[i] = new Sphere(20, 20);
     spheres[i]->setDrawCb(drawSphere);
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
@@ -133,15 +132,8 @@ void init()
   simple->setUniformMatrix("viewMatrix", viewMatrix);
   simple->setUniformMatrix("projMatrix", projMatrix);
 
-  /*points = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/points.gs");
-  points->bind();
-  points->bindFragDataLoc("out_fColor", 0);
-  points->setUniformMatrix("viewMatrix", viewMatrix);
-  points->setUniformMatrix("projMatrix", projMatrix);*/
-
   TinyGL::getInstance()->addMesh("ground", ground);
   TinyGL::getInstance()->addShader("simple", simple);
-  //TinyGL::getInstance()->addShader("points", points);
 
   ground->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10)) /* glm::translate(glm::vec3(-10, 0, -10)) */* glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::inverseTranspose(viewMatrix * ground->m_modelMatrix);
@@ -253,13 +245,9 @@ void keyPress(unsigned char c, int x, int y)
 
   if (cameraChanged) {
     Shader* s = TinyGL::getInstance()->getShader("simple");
-    Shader* p = TinyGL::getInstance()->getShader("points");
 
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-
-    p->bind();
-    p->setUniformMatrix("viewMatrix", viewMatrix);
   }
 }
 
@@ -288,13 +276,9 @@ void specialKeyPress(int c, int x, int y)
 
   if (cameraChanged) {
     Shader* s = TinyGL::getInstance()->getShader("simple");
-    Shader* p = TinyGL::getInstance()->getShader("points");
 
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-
-    p->bind();
-    p->setUniformMatrix("viewMatrix", viewMatrix);
   }
 }
 

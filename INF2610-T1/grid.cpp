@@ -74,6 +74,8 @@ Grid::Grid(int nx, int ny) : Mesh()
 
   glBindVertexArray(0);
 
+  m_numPoints = indices.size();
+
   vertices.clear();
   colors.clear();
   indices.clear();
