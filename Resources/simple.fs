@@ -1,6 +1,6 @@
 #version 330
 
-in Attrib
+in VertexAttrib
 {
   vec4 color;
   vec4 normal;
@@ -18,5 +18,5 @@ void main()
 
   vec4 diffuseColor = intensity * light_color * in_gData.color;
   vec4 specularColor = pow(intensity, 5) * light_color * vec4(1.0);
-  out_vColor =  diffuseColor + specularColor;
+  out_vColor = diffuseColor;//in_gData.normals;
 }

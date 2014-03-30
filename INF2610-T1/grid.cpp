@@ -2,12 +2,10 @@
 
 Grid::Grid(int nx, int ny) : Mesh()
 {
-  size_t buff_size = nx * ny * 3;
   std::vector<GLfloat> vertices;
   float h_step = static_cast<float>(1.f / nx);
   float v_step = static_cast<float>(1.f / ny);
 
-  int k = 0;
   for (int i = 0; i < nx; i++) {
     for (int j = 0; j < ny; j++) {
       vertices.push_back(static_cast<float>(i * h_step));
@@ -42,15 +40,15 @@ Grid::Grid(int nx, int ny) : Mesh()
     normals.push_back(0);
   }
 
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
 
-  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* colors.size(), GL_STATIC_DRAW);
   cbuff->sendData(&colors[0]);
   attachBuffer(cbuff);
 
-  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* buff_size, GL_STATIC_DRAW);
+  BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* normals.size(), GL_STATIC_DRAW);
   nbuff->sendData(&normals[0]);
   attachBuffer(nbuff);
 

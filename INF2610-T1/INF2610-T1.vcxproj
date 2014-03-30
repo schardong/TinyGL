@@ -75,6 +75,7 @@
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sphere.cpp" />
+    <ClCompile Include="torus.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\simple.fs" />
@@ -84,6 +85,7 @@
   <ItemGroup>
     <ClInclude Include="grid.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="torus.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
