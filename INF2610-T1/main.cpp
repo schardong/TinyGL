@@ -92,6 +92,7 @@ void initGLUT(int argc, char** argv)
 
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutCloseFunc(exit_cb);
+  glutSetKeyRepeat(GLUT_KEY_REPEAT_ON);
 }
 
 void initGLEW()
@@ -104,8 +105,9 @@ void initGLEW()
     exit(1);
   }
 
-  glClearColor(0.5f, 0.5f, 0.5f, 1.f);
+  glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   initGLEWCalled = true;
 }
@@ -114,13 +116,13 @@ void init()
 {
   g_eye = glm::vec3(0, 7, 15);
   g_center = glm::vec3(0, 0, 0);
-  g_light = glm::vec3(5, 7, 5);
+  g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), 1.f, 1.f, 100.f);
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
-  ground->setMaterialColor(glm::vec4(0.3, 0.9, 0.0, 1.0));
+  ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
 
   light = new Sphere(30, 30);
@@ -131,7 +133,7 @@ void init()
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(20, 20);
+    spheres[i] = new Sphere(32, 32);
     spheres[i]->setDrawCb(drawSphere);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
@@ -139,7 +141,7 @@ void init()
 
   for (int i = 0; i < W_SPHERES; i++) {
     for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i, 0.4, j)) * glm::scale(glm::vec3(0.4, 0.4, 0.4));
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 2 - 10, 0.5, j * 2 - 10)) * glm::scale(glm::vec3(0.5));
       spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
     }
   }
@@ -150,35 +152,15 @@ void init()
   g_simple->setUniformMatrix("viewMatrix", viewMatrix);
   g_simple->setUniformMatrix("projMatrix", projMatrix);
 
-  float tmp[] = {g_eye[0], g_eye[1], g_eye[2]};
-  g_simple->setUniformfv("u_eyeCoord", tmp, 3);
-  tmp[0] = g_light[0]; tmp[1] = g_light[1]; tmp[2] = g_light[2];
+  float tmp[] = { g_light[0], g_light[1], g_light[2] };
   g_simple->setUniformfv("u_lightCoord", tmp, 3);
   
   TinyGL::getInstance()->addShader("simple", g_simple);
 
-  ground->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
+  ground->m_modelMatrix = glm::translate(glm::vec3(-10, 0, -10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-  light->m_modelMatrix = glm::translate(g_light);
+  light->m_modelMatrix = glm::translate(g_light) * glm::scale(glm::vec3(0.2));
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  /*for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      cout << viewMatrix[i][j] << " ";
-    }
-    cout << endl;
-  }
-
-  cout << endl;
-
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      cout << projMatrix[i][j] << " ";
-    }
-    cout << endl;
-  }*/
 
   initCalled = true;
 }
@@ -205,7 +187,6 @@ void draw()
 
   TinyGL* glPtr = TinyGL::getInstance();
   Shader* s = glPtr->getShader("simple");
-  Shader* p = glPtr->getShader("points");
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {
