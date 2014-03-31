@@ -38,8 +38,6 @@ void exit_cb();
 
 int g_window = -1;
 
-Shader* simple;
-
 Grid* ground;
 Sphere** spheres;
 Sphere* light;
@@ -107,7 +105,7 @@ void initGLEW()
     exit(1);
   }
 
-  glClearColor(1.f, 1.f, 1.f, 1.f);
+  glClearColor(0.5f, 0.5f, 0.5f, 1.f);
   glEnable(GL_DEPTH_TEST);
 
   initGLEWCalled = true;
@@ -117,7 +115,7 @@ void init()
 {
   g_eye = glm::vec3(0, 7, 15);
   g_center = glm::vec3(0, 0, 0);
-  g_light = glm::vec3(0, 7, 15);
+  g_light = glm::vec3(5, 7, 5);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), 1.f, 1.f, 100.f);
 
@@ -147,18 +145,18 @@ void init()
     }
   }
 
-  simple = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/simple.gs");
-  simple->bind();
-  simple->bindFragDataLoc("out_vColor", 0);
-  simple->setUniformMatrix("viewMatrix", viewMatrix);
-  simple->setUniformMatrix("projMatrix", projMatrix);
+  Shader* g_simple = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/simple.gs");
+  g_simple->bind();
+  g_simple->bindFragDataLoc("out_vColor", 0);
+  g_simple->setUniformMatrix("viewMatrix", viewMatrix);
+  g_simple->setUniformMatrix("projMatrix", projMatrix);
 
   float tmp[] = {g_eye[0], g_eye[1], g_eye[2]};
-  simple->setUniformfv("u_eyeCoord", tmp, 3);
+  g_simple->setUniformfv("u_eyeCoord", tmp, 3);
   tmp[0] = g_light[0]; tmp[1] = g_light[1]; tmp[2] = g_light[2];
-  simple->setUniformfv("u_lightCoord", tmp, 3);
+  g_simple->setUniformfv("u_lightCoord", tmp, 3);
   
-  TinyGL::getInstance()->addShader("simple", simple);
+  TinyGL::getInstance()->addShader("simple", g_simple);
 
   ground->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
