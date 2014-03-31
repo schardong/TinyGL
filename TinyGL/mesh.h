@@ -10,7 +10,7 @@ class Mesh
 {
 public:
   glm::mat4 m_modelMatrix;
-  glm::mat4 m_normalMatrix;
+  glm::mat3 m_normalMatrix;
 
   Mesh();
   ~Mesh();

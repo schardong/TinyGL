@@ -100,6 +100,15 @@ namespace ggraf
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
     }
 
+    void Shader::setUniformMatrix(std::string name, glm::mat3 m)
+    {
+      GLint loc = getUniformLocation(name.c_str());
+      if (loc == -1) {
+        return;
+      }
+      glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(m));
+    }
+
     void Shader::setUniform4fv(std::string name, glm::vec4 v)
     {
         GLint loc = getUniformLocation(name.c_str());

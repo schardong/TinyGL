@@ -44,6 +44,7 @@ namespace ggraf
         }
 
         void setUniformMatrix(std::string name, glm::mat4 m);
+        void setUniformMatrix(std::string name, glm::mat3 m);
         void setUniform4fv(std::string name, glm::vec4 v);
         void setUniform1f(std::string name, float m);
         void setUniformfv(std::string name, float m[], int size);
