@@ -159,7 +159,7 @@ void init()
 
   ground->m_modelMatrix = glm::translate(glm::vec3(-10, 0, -10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-  light->m_modelMatrix = glm::translate(g_light) * glm::scale(glm::vec3(0.2));
+  light->m_modelMatrix = glm::translate(g_light);
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
 
   initCalled = true;

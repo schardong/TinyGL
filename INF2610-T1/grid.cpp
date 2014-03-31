@@ -66,4 +66,9 @@ Grid::Grid(int nx, int ny) : Mesh()
 
 Grid::~Grid()
 {
+  for (unsigned int i = 0; i < m_buffers.size(); i++)
+    delete m_buffers[i];
+  m_buffers.clear();
+
+  glDeleteVertexArrays(1, &m_vao);
 }

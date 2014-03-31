@@ -1,11 +1,6 @@
 #include "bufferobject.h"
 #include <iostream>
 
-BufferObject::BufferObject()
-{
-  glGenBuffers(1, &m_id);
-}
-
 BufferObject::BufferObject(GLenum target, size_t buff_size, GLenum usage) :
   m_target(target), m_size(0), m_allocated(false), m_usage(usage)
 {

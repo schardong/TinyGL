@@ -3,10 +3,15 @@
 
 #include <GL/glew.h>
 
+/**
+ * Class BufferObject
+ * This class serves the purpose of abstracting the creation and management of
+ * buffer objects of any kind. The user must define the target, size and usage
+ * parameters using OpenGL values.
+ */
 class BufferObject
 {
 public:
-  BufferObject();
   BufferObject(GLenum target, size_t buff_size, GLenum usage);
   ~BufferObject();
 

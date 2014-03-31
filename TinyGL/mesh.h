@@ -6,6 +6,11 @@
 #include <vector>
 #include "bufferobject.h"
 
+/**
+ * class Mesh TODO
+ *
+ *
+ */
 class Mesh
 {
 public:
@@ -13,7 +18,7 @@ public:
   glm::mat3 m_normalMatrix;
 
   Mesh();
-  ~Mesh();
+  virtual ~Mesh();
 
   void attachBuffer(BufferObject* buff);
   void draw();
