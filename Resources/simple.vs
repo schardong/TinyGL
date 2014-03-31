@@ -32,7 +32,6 @@ void main()
 
   gl_Position = MVP * vec4(in_vPosition, 1.0);
 
-
   out_vData.coord = (modelMatrix) * vec4(in_vPosition, 1.0);
   out_vData.color = vec4(in_vColor, 1.0);
   out_vData.normal = vec4(normalMatrix * in_vNormal, 0);
