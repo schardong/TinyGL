@@ -5,7 +5,6 @@
 #include "mesh.h"
 #include "grid.h"
 #include "sphere.h"
-#include "torus.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -43,6 +42,7 @@ Shader* simple;
 
 Grid* ground;
 Sphere** spheres;
+Sphere* light;
 
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
@@ -123,13 +123,20 @@ void init()
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
+  ground->setMaterialColor(glm::vec4(0.3, 0.9, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
+
+  light = new Sphere(30, 30);
+  light->setDrawCb(drawSphere);
+  light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
+  TinyGL::getInstance()->addMesh("light01", light);
   
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
     spheres[i] = new Sphere(20, 20);
     spheres[i]->setDrawCb(drawSphere);
+    spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
@@ -155,10 +162,12 @@ void init()
 
   ground->m_modelMatrix = glm::scale(glm::vec3(10, 1, 10)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
+  light->m_modelMatrix = glm::translate(g_light);
+  light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  for (int i = 0; i < 4; i++) {
+  /*for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       cout << viewMatrix[i][j] << " ";
     }
@@ -172,7 +181,7 @@ void init()
       cout << projMatrix[i][j] << " ";
     }
     cout << endl;
-  }
+  }*/
 
   initCalled = true;
 }
@@ -205,12 +214,19 @@ void draw()
   for (int i = 0; i < NUM_SPHERES; i++) {
     s->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
     s->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
+    s->setUniform4fv("u_materialColor", spheres[i]->getMaterialColor());
     glPtr->draw("sphere" + to_string(i));
   }
 
   s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
+  s->setUniform4fv("u_materialColor", ground->getMaterialColor());
   glPtr->draw("ground");
+
+  s->setUniformMatrix("modelMatrix", light->m_modelMatrix);
+  s->setUniformMatrix("normalMatrix", light->m_normalMatrix);
+  s->setUniform4fv("u_materialColor", light->getMaterialColor());
+  glPtr->draw("light01");
   
   glBindVertexArray(0);
   Shader::unbind();
@@ -268,15 +284,6 @@ void keyPress(unsigned char c, int x, int y)
     g_center += glm::vec3(0, -1, 0);
     cameraChanged = true;
     break;
-  case 'm':
-    viewMatrix *= glm::rotate((float)-M_PI / 25, glm::vec3(0, 0, 1));
-    cameraChanged = true;
-    break;
-  case 'n':
-    viewMatrix *= glm::rotate((float)M_PI / 25, glm::vec3(0, 0, 1));
-    cameraChanged = true;
-    break;
-
   }
 
   if (cameraChanged) {
@@ -292,32 +299,51 @@ void keyPress(unsigned char c, int x, int y)
 
 void specialKeyPress(int c, int x, int y)
 {
-  bool cameraChanged = false;
+  bool lightChanged = false;
 
   switch (c) {
   case GLUT_KEY_LEFT:
-    viewMatrix *= glm::rotate((float)M_PI / 25.f, glm::vec3(0, 1, 0));
-    cameraChanged = true;
+    g_light.x -= 1;
+    light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
     break;
   case GLUT_KEY_RIGHT:
-    viewMatrix *= glm::rotate((float)-M_PI / 25, glm::vec3(0, 1, 0));
-    cameraChanged = true;
+    g_light.x += 1;
+    light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
     break;
   case GLUT_KEY_UP:
-    viewMatrix *= glm::rotate((float)M_PI / 25, glm::vec3(1, 0, 0));
-    cameraChanged = true;
+    g_light.z -= 1; light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
     break;
   case GLUT_KEY_DOWN:
-    viewMatrix *= glm::rotate((float)-M_PI / 25, glm::vec3(1, 0, 0));
-    cameraChanged = true;
+    g_light.z += 1;
+    light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
     break;
+  case GLUT_KEY_F1:
+    g_light.y += 1;
+    light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
+    break;
+  case GLUT_KEY_F2:
+    g_light.y -= 1;
+    light->m_modelMatrix = glm::translate(g_light);
+    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
+    lightChanged = true;
   }
 
-  if (cameraChanged) {
+  if (lightChanged) {
     Shader* s = TinyGL::getInstance()->getShader("simple");
+    float tmp[] = { g_light[0], g_light[1], g_light[2] };
 
     s->bind();
-    s->setUniformMatrix("viewMatrix", viewMatrix);
+    s->setUniformfv("u_lightCoord", tmp, 3);
   }
 }
 

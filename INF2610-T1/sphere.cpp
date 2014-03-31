@@ -18,12 +18,7 @@ Sphere::Sphere(int nx, int ny)
     }
   }
 
-  std::vector<GLfloat> colors(vertices.size());
-  for (size_t i = 0; i < colors.size();) {
-    colors[i++] = 1.f;
-    colors[i++] = 0.f;
-    colors[i++] = 0.f;
-  }
+  std::vector<GLfloat> normals = vertices;
 
   std::vector<GLuint> indices;
   for (int i = 0; i < nx; i++) {
@@ -37,15 +32,9 @@ Sphere::Sphere(int nx, int ny)
     }
   }
 
-  std::vector<GLfloat> normals = vertices;
-  
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
-
-  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* colors.size(), GL_STATIC_DRAW);
-  cbuff->sendData(&colors[0]);
-  attachBuffer(cbuff);
 
   BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* normals.size(), GL_STATIC_DRAW);
   nbuff->sendData(&normals[0]);
@@ -60,21 +49,16 @@ Sphere::Sphere(int nx, int ny)
   vbuff->bind();
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(0);
-
-  cbuff->bind();
+  
+  nbuff->bind();
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
-
-  nbuff->bind();
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
 
   m_numPoints = indices.size();
 
   vertices.clear();
-  colors.clear();
   indices.clear();
   normals.clear();
 }

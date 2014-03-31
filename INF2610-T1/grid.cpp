@@ -13,14 +13,7 @@ Grid::Grid(int nx, int ny) : Mesh()
       vertices.push_back(0.f);
     }
   }
-
-  std::vector<GLfloat> colors;
-  for (size_t i = 0; i < vertices.size(); i += 3) {
-    colors.push_back(0.3f);
-    colors.push_back(0.8f);
-    colors.push_back(0.f);
-  }
-
+  
   std::vector<GLuint> indices;
   for (int i = 0; i < nx - 1; i++) {
     for (int j = 0; j < ny - 1; j++) {
@@ -36,17 +29,13 @@ Grid::Grid(int nx, int ny) : Mesh()
   std::vector<GLfloat> normals;
   for (size_t i = 0; i < vertices.size(); i += 3) {
     normals.push_back(0);
-    normals.push_back(1);
     normals.push_back(0);
+    normals.push_back(-1);
   }
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
-
-  BufferObject* cbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* colors.size(), GL_STATIC_DRAW);
-  cbuff->sendData(&colors[0]);
-  attachBuffer(cbuff);
 
   BufferObject* nbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* normals.size(), GL_STATIC_DRAW);
   nbuff->sendData(&normals[0]);
@@ -61,21 +50,16 @@ Grid::Grid(int nx, int ny) : Mesh()
   vbuff->bind();
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(0);
-
-  cbuff->bind();
+  
+  nbuff->bind();
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
-
-  nbuff->bind();
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
 
   m_numPoints = indices.size();
 
   vertices.clear();
-  colors.clear();
   indices.clear();
   normals.clear();
 }

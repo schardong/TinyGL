@@ -27,12 +27,23 @@ public:
   {
     glBindVertexArray(m_vao);
   }
+
+  void setMaterialColor(glm::vec4 rhs)
+  {
+    m_materialColor = rhs;
+  }
+
+  glm::vec4 getMaterialColor()
+  {
+    return m_materialColor;
+  }
   
 protected:
   std::vector<BufferObject*> m_buffers;
   void(*m_drawCb)(size_t);
 
   GLuint m_vao;
+  glm::vec4 m_materialColor;
   size_t m_numPoints;
 };
 
