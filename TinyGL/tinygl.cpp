@@ -17,7 +17,7 @@ void TinyGL::freeResources()
   for (std::map<std::string, Mesh*>::iterator it = m_meshMap.begin(); it != m_meshMap.end(); it++)
     delete it->second;
 
-  for (std::map<std::string, ggraf::Shader*>::iterator it = m_shaderMap.begin(); it != m_shaderMap.end(); it++)
+  for (std::map<std::string, Shader*>::iterator it = m_shaderMap.begin(); it != m_shaderMap.end(); it++)
     delete it->second;
 
   m_meshMap.clear();
@@ -31,9 +31,9 @@ bool TinyGL::addMesh(std::string name, Mesh* m)
   return true;
 }
 
-bool TinyGL::addShader(std::string name, ggraf::Shader* s)
+bool TinyGL::addShader(std::string name, Shader* s)
 {
   if (s == NULL || name.empty()) return false;
-  m_shaderMap[name] = new ggraf::Shader(*s);
+  m_shaderMap[name] = new Shader(*s);
   return true;
 }

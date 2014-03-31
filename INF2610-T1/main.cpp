@@ -23,7 +23,6 @@ static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
-using namespace ggraf;
 
 void init();
 void initGLUT(int argc, char** argv);
@@ -205,8 +204,8 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  ggraf::Shader* s = glPtr->getShader("simple");
-  ggraf::Shader* p = glPtr->getShader("points");
+  Shader* s = glPtr->getShader("simple");
+  Shader* p = glPtr->getShader("points");
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {

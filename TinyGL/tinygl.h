@@ -22,7 +22,7 @@ public:
 	friend class Singleton<TinyGL>;
   
   bool addMesh(std::string name, Mesh* m);
-  bool addShader(std::string name, ggraf::Shader* s);
+  bool addShader(std::string name, Shader* s);
 
   void freeResources();
   void draw();
@@ -32,14 +32,14 @@ public:
     m_meshMap[name]->draw();
   }
 
-  ggraf::Shader* getShader(std::string name)
+  Shader* getShader(std::string name)
   {
     return m_shaderMap[name];
   }
 
 protected:
   std::map<std::string, Mesh*> m_meshMap;
-  std::map<std::string, ggraf::Shader*> m_shaderMap;
+  std::map<std::string, Shader*> m_shaderMap;
 
 private:
 };
