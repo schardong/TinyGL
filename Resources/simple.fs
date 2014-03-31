@@ -25,5 +25,5 @@ void main()
 
   vec4 diffuseColor = intensity * light_color * in_gData.color;
   vec4 specularColor = pow(intensity, 15) * light_color * vec4(1.0);
-  out_vColor = in_gData.normal;
+  out_vColor = vec4(intensity);
 }
