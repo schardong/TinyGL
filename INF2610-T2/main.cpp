@@ -228,15 +228,14 @@ void reshape(int w, int h)
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
 
-  Shader* s;
-
-  if (perVertex)
-    s = TinyGL::getInstance()->getShader("ads_vertex");
-  else
-    s = TinyGL::getInstance()->getShader("ads_frag");
-
+  Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
+
+  s = TinyGL::getInstance()->getShader("ads_frag");
+  s->bind();
+  s->setUniformMatrix("projMatrix", projMatrix);
+
   Shader::unbind();
 }
 
@@ -281,13 +280,12 @@ void keyPress(unsigned char c, int x, int y)
     viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
     float tmp[] = {g_eye[0], g_eye[1], g_eye[2]};
 
-    Shader* s;
-
-    if (perVertex)
-      s = TinyGL::getInstance()->getShader("ads_vertex");
-    else
-      s = TinyGL::getInstance()->getShader("ads_frag");
-
+    Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
+    s->bind();
+    s->setUniformMatrix("viewMatrix", viewMatrix);
+    s->setUniformfv("u_eyeCoord", tmp, 3);
+    
+    s = TinyGL::getInstance()->getShader("ads_frag");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
     s->setUniformfv("u_eyeCoord", tmp, 3);
@@ -334,22 +332,20 @@ void specialKeyPress(int c, int x, int y)
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
+    break;
   case GLUT_KEY_F3:
     perVertex = !perVertex;
-    cout << perVertex << endl;
     break;
   }
 
   if (lightChanged) {
     float tmp[] = { g_light[0], g_light[1], g_light[2] };
 
-    Shader* s;
+    Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
+    s->bind();
+    s->setUniformfv("u_lightCoord", tmp, 3);
 
-    if (perVertex)
-      s = TinyGL::getInstance()->getShader("ads_vertex");
-    else
-      s = TinyGL::getInstance()->getShader("ads_frag");
-    
+    s = TinyGL::getInstance()->getShader("ads_frag");
     s->bind();
     s->setUniformfv("u_lightCoord", tmp, 3);
   }
