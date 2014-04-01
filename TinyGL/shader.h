@@ -61,6 +61,7 @@ public:
   void bind();
   static void unbind();
 
+  void validate();
   void bindFragDataLoc(std::string name, int layLoc);
 };
 #endif // SHADER_H

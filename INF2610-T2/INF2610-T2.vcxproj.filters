@@ -19,15 +19,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Resources\simple.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\Resources\simple.gs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\Resources\simple.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>

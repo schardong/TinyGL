@@ -46,7 +46,7 @@ Shader::Shader(std::string vertName,
 
   GLint linked;
   glGetProgramiv(m_nProgId, GL_LINK_STATUS, &linked);
-
+  
   if (!linked) {
     GLint len;
     glGetProgramiv(m_nProgId, GL_INFO_LOG_LENGTH, &len);
@@ -216,6 +216,11 @@ void Shader::bind()
 void Shader::unbind()
 {
   glUseProgram(0);
+}
+
+void Shader::validate()
+{
+  glValidateProgram(m_nProgId);
 }
 
 void Shader::bindFragDataLoc(std::string name, int layLoc)

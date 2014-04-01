@@ -50,17 +50,7 @@ glm::vec3 g_light;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void drawSphere(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
-}
-
-void drawGrid(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
-}
-
-void drawTorus(size_t num_points)
+void drawMesh(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
@@ -121,12 +111,12 @@ void init()
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 1.f, 100.f);
 
   ground = new Grid(10, 10);
-  ground->setDrawCb(drawGrid);
+  ground->setDrawCb(drawMesh);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
 
   light = new Sphere(30, 30);
-  light->setDrawCb(drawSphere);
+  light->setDrawCb(drawMesh);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("light01", light);
   
@@ -134,7 +124,7 @@ void init()
 
   for (int i = 0; i < NUM_SPHERES; i++) {
     spheres[i] = new Sphere(32, 32);
-    spheres[i]->setDrawCb(drawSphere);
+    spheres[i]->setDrawCb(drawMesh);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
