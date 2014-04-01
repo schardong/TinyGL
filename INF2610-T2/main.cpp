@@ -49,6 +49,7 @@ glm::vec3 g_light;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
+bool perVertex = true;
 
 void drawMesh(size_t num_points)
 {
@@ -136,16 +137,27 @@ void init()
     }
   }
 
-  Shader* g_simple = new Shader("../Resources/simple.vs", "../Resources/simple.fs", "../Resources/simple.gs");
-  g_simple->bind();
-  g_simple->bindFragDataLoc("out_vColor", 0);
-  g_simple->setUniformMatrix("viewMatrix", viewMatrix);
-  g_simple->setUniformMatrix("projMatrix", projMatrix);
+  Shader* g_adsVertex = new Shader("../Resources/ads_vertex.vs", "../Resources/ads_vertex.fs");
+  g_adsVertex->bind();
+  g_adsVertex->bindFragDataLoc("out_vColor", 0);
+  g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
+  g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
+
+  Shader* g_adsFrag = new Shader("../Resources/ads_frag.vs", "../Resources/ads_frag.fs");
+  g_adsFrag->bind();
+  g_adsFrag->bindFragDataLoc("out_vColor", 0);
+  g_adsFrag->setUniformMatrix("viewMatrix", viewMatrix);
+  g_adsFrag->setUniformMatrix("projMatrix", projMatrix);
 
   float tmp[] = { g_light[0], g_light[1], g_light[2] };
-  g_simple->setUniformfv("u_lightCoord", tmp, 3);
+  g_adsVertex->bind();
+  g_adsVertex->setUniformfv("u_lightCoord", tmp, 3);
+
+  g_adsFrag->bind();
+  g_adsFrag->setUniformfv("u_lightCoord", tmp, 3);
   
-  TinyGL::getInstance()->addShader("simple", g_simple);
+  TinyGL::getInstance()->addShader("ads_vertex", g_adsVertex);
+  TinyGL::getInstance()->addShader("ads_frag", g_adsFrag);
 
   ground->m_modelMatrix = glm::translate(glm::vec3(-10, 0, -10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
@@ -176,7 +188,12 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  Shader* s = glPtr->getShader("simple");
+  Shader* s;
+  
+  if (perVertex)
+    s = glPtr->getShader("ads_vertex");
+  else
+    s = glPtr->getShader("ads_frag");
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {
@@ -211,7 +228,13 @@ void reshape(int w, int h)
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
 
-  Shader* s = TinyGL::getInstance()->getShader("simple");
+  Shader* s;
+
+  if (perVertex)
+    s = TinyGL::getInstance()->getShader("ads_vertex");
+  else
+    s = TinyGL::getInstance()->getShader("ads_frag");
+
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
   Shader::unbind();
@@ -258,7 +281,13 @@ void keyPress(unsigned char c, int x, int y)
     viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
     float tmp[] = {g_eye[0], g_eye[1], g_eye[2]};
 
-    Shader* s = TinyGL::getInstance()->getShader("simple");
+    Shader* s;
+
+    if (perVertex)
+      s = TinyGL::getInstance()->getShader("ads_vertex");
+    else
+      s = TinyGL::getInstance()->getShader("ads_frag");
+
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
     s->setUniformfv("u_eyeCoord", tmp, 3);
@@ -271,45 +300,56 @@ void specialKeyPress(int c, int x, int y)
 
   switch (c) {
   case GLUT_KEY_LEFT:
-    g_light.x -= 1;
+    g_light.x -= 0.1;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_RIGHT:
-    g_light.x += 1;
+    g_light.x += 0.1;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_UP:
-    g_light.z -= 1; light->m_modelMatrix = glm::translate(g_light);
+    g_light.z -= 0.1;
+    light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_DOWN:
-    g_light.z += 1;
+    g_light.z += 0.1;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_F1:
-    g_light.y += 1;
+    g_light.y += 0.1;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_F2:
-    g_light.y -= 1;
+    g_light.y -= 0.1;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
+  case GLUT_KEY_F3:
+    perVertex = !perVertex;
+    cout << perVertex << endl;
+    break;
   }
 
   if (lightChanged) {
-    Shader* s = TinyGL::getInstance()->getShader("simple");
     float tmp[] = { g_light[0], g_light[1], g_light[2] };
 
+    Shader* s;
+
+    if (perVertex)
+      s = TinyGL::getInstance()->getShader("ads_vertex");
+    else
+      s = TinyGL::getInstance()->getShader("ads_frag");
+    
     s->bind();
     s->setUniformfv("u_lightCoord", tmp, 3);
   }

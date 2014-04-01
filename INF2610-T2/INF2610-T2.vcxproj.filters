@@ -19,4 +19,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\ads_frag.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resources\ads_frag.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resources\ads_vertex.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Resources\ads_vertex.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

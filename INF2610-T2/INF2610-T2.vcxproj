@@ -74,6 +74,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\ads_frag.fs" />
+    <None Include="..\Resources\ads_frag.vs" />
+    <None Include="..\Resources\ads_vertex.fs" />
+    <None Include="..\Resources\ads_vertex.vs" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
