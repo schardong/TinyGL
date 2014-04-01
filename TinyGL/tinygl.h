@@ -9,12 +9,16 @@
 #include <map>
 
 /**
-  TinyGL - A simple manager class that holds the meshes and shaders to be used
-  in an OpenGL application. To free the resources just call the method
-  "freeResources" declared bellow. TO draw the meshes, the class calls each
-  mesh's draw callback, so one must be defined or some error will happen. Since
-  this class doesn't  check for errors it will call an invalid method an unpleasant
-  things may happen.
+ * class TinyGL
+ * A simple manager class that holds the meshes and shaders to be used
+ * in an OpenGL application. To free the resources just call the method
+ * "freeResources" declared bellow. To draw the meshes, the class calls each
+ * mesh's draw callback, so one must be defined or some error will happen. Since
+ * this class doesn't  check for errors it will call an invalid method an unpleasant
+ * things may happen.
+ * The meshes and shaders are stored as maps on this class. They may be added and
+ * retrived by their names. These resources are all destroyed when the freeResources
+ * method is called, so make copies if you wish to keep them after calling this method.
  */
 class TinyGL : public Singleton<TinyGL>
 {
