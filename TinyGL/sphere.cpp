@@ -2,6 +2,8 @@
 #include "config.h"
 #include <math.h>
 
+#include <iostream>
+
 Sphere::Sphere(int nx, int ny)
 {
   float h_step = static_cast<float>(2 * M_PI) / nx;
@@ -9,7 +11,10 @@ Sphere::Sphere(int nx, int ny)
 
   std::vector<GLfloat> vertices;
 
-  int idx = 0;
+  /*vertices.push_back(0);
+  vertices.push_back(0);
+  vertices.push_back(1);*/
+
   for (float phi = 0; phi <= M_PI; phi += v_step) {
     for (float theta = 0; theta <= 2 * M_PI; theta += h_step) {
       vertices.push_back(cos(theta) * sin(phi));
@@ -17,6 +22,21 @@ Sphere::Sphere(int nx, int ny)
       vertices.push_back(sin(theta) * sin(phi));
     }
   }
+
+
+  /*for (int i = 1; i < nx; i++) {
+    for (int j = 0; j < ny; j++) {
+      float theta = ((float)j / (float)ny) * 2 * M_PI;
+      float phi = ((float)i / (float)nx)  * M_PI;
+      vertices.push_back(cos(theta) * sin(phi));
+      vertices.push_back(cos(phi));
+      vertices.push_back(sin(theta) * sin(phi));
+    }
+  }*/
+
+  /*vertices.push_back(0);
+  vertices.push_back(0);
+  vertices.push_back(-1);*/
 
   std::vector<GLfloat> normals = vertices;
 
@@ -31,6 +51,13 @@ Sphere::Sphere(int nx, int ny)
       indices.push_back(i * nx + (j + 1));
     }
   }
+
+  /*for (int i = 0; i < vertices.size(); i += 3) {
+    std::cout << vertices[i] << ", " << vertices[i + 1] << ", " << vertices[i + 2] << std::endl;
+  }
+  for (int i = 0; i < indices.size(); i += 3) {
+    std::cout << indices[i] << ", " << indices[i + 1] << ", " << indices[i + 2] << std::endl;
+  }*/
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);

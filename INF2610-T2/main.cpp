@@ -18,8 +18,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static const int W_SPHERES = 10;
-static const int H_SPHERES = 10;
+static const int W_SPHERES = 1;
+static const int H_SPHERES = 1;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
@@ -98,7 +98,8 @@ void initGLEW()
 
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glPointSize(2);
 
   initGLEWCalled = true;
 }
@@ -116,15 +117,15 @@ void init()
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(30, 30);
+  light = new Sphere(40, 40);
   light->setDrawCb(drawMesh);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("light01", light);
-  
+  cout << "--------------------light--------------------" << endl;
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(32, 32);
+    spheres[i] = new Sphere(8, 8);
     spheres[i]->setDrawCb(drawMesh);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
@@ -243,6 +244,7 @@ void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
   //printf("%d\n", c);
+  glm::vec3 back;
   switch (c) {
   case 'w':
     g_eye += glm::vec3(0, 0, -1);
@@ -274,6 +276,30 @@ void keyPress(unsigned char c, int x, int y)
     g_center += glm::vec3(0, -1, 0);
     cameraChanged = true;
     break;
+  case 'i':
+    back = g_eye - g_center;
+    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case 'k':
+    back = g_eye - g_center;
+    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case 'j':
+    back = g_eye - g_center;
+    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case 'l':
+    back = g_eye - g_center;
+    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
   }
 
   if (cameraChanged) {
@@ -298,37 +324,37 @@ void specialKeyPress(int c, int x, int y)
 
   switch (c) {
   case GLUT_KEY_LEFT:
-    g_light.x -= 0.1;
+    g_light.x -= 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_RIGHT:
-    g_light.x += 0.1;
+    g_light.x += 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_UP:
-    g_light.z -= 0.1;
+    g_light.z -= 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_DOWN:
-    g_light.z += 0.1;
+    g_light.z += 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_F1:
-    g_light.y += 0.1;
+    g_light.y += 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
     break;
   case GLUT_KEY_F2:
-    g_light.y -= 0.1;
+    g_light.y -= 0.1f;
     light->m_modelMatrix = glm::translate(g_light);
     light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
     lightChanged = true;
