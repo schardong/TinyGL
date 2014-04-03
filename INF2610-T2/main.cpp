@@ -53,7 +53,8 @@ bool perVertex = true;
 
 void drawMesh(size_t num_points)
 {
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_INT, NULL);
+  //glDrawArrays(GL_POINTS, 0, num_points/6);
 }
 
 int main(int argc, char** argv)
@@ -98,34 +99,34 @@ void initGLEW()
 
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glPointSize(2);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glPointSize(3);
 
   initGLEWCalled = true;
 }
 
 void init()
 {
-  g_eye = glm::vec3(0, 7, 15);
+  g_eye = glm::vec3(0, 2, 2);
   g_center = glm::vec3(0, 0, 0);
   g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 1.f, 100.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
-  ground = new Grid(10, 10);
+  ground = new Grid(60, 60);
   ground->setDrawCb(drawMesh);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(40, 40);
+  light = new Sphere(3, 3);
   light->setDrawCb(drawMesh);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("light01", light);
-  cout << "--------------------light--------------------" << endl;
+  cout << "--------------------light end--------------------" << endl;
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(8, 8);
+    spheres[i] = new Sphere(45, 45);
     spheres[i]->setDrawCb(drawMesh);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
@@ -133,7 +134,7 @@ void init()
 
   for (int i = 0; i < W_SPHERES; i++) {
     for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 2 - 10, 0.5, j * 2 - 10)) * glm::scale(glm::vec3(0.5));
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 2, 0.5, j * 2)) * glm::scale(glm::vec3(0.5));
       spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
     }
   }
@@ -160,7 +161,7 @@ void init()
   TinyGL::getInstance()->addShader("ads_vertex", g_adsVertex);
   TinyGL::getInstance()->addShader("ads_frag", g_adsFrag);
 
-  ground->m_modelMatrix = glm::translate(glm::vec3(-10, 0, -10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
+  ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   light->m_modelMatrix = glm::translate(g_light);
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
@@ -204,7 +205,7 @@ void draw()
     glPtr->draw("sphere" + to_string(i));
   }
 
-  s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
+  /*s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
   s->setUniform4fv("u_materialColor", ground->getMaterialColor());
   glPtr->draw("ground");
@@ -212,7 +213,7 @@ void draw()
   s->setUniformMatrix("modelMatrix", light->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", light->m_normalMatrix);
   s->setUniform4fv("u_materialColor", light->getMaterialColor());
-  glPtr->draw("light01");
+  glPtr->draw("light01");*/
   
   glBindVertexArray(0);
   Shader::unbind();
@@ -227,7 +228,7 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 3.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
 
   Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
   s->bind();
@@ -247,33 +248,33 @@ void keyPress(unsigned char c, int x, int y)
   glm::vec3 back;
   switch (c) {
   case 'w':
-    g_eye += glm::vec3(0, 0, -1);
-    g_center += glm::vec3(0, 0, -1);
+    g_eye += glm::vec3(0, 0, -0.3f);
+    g_center += glm::vec3(0, 0, -0.3f);
     cameraChanged = true;
     break;
   case 's':
-    g_eye += glm::vec3(0, 0, 1);
-    g_center += glm::vec3(0, 0, 1);
+    g_eye += glm::vec3(0, 0, 0.3f);
+    g_center += glm::vec3(0, 0, 0.3f);
     cameraChanged = true;
     break;
   case 'a':
-    g_eye += glm::vec3(-1, 0, 0);
-    g_center += glm::vec3(-1, 0, 0);
+    g_eye += glm::vec3(-0.3f, 0, 0);
+    g_center += glm::vec3(-0.3f, 0, 0);
     cameraChanged = true;
     break;
   case 'd':
-    g_eye += glm::vec3(1, 0, 0);
-    g_center += glm::vec3(1, 0, 0);
+    g_eye += glm::vec3(0.3f, 0, 0);
+    g_center += glm::vec3(0.3f, 0, 0);
     cameraChanged = true;
     break;
   case 'r':
-    g_eye += glm::vec3(0, 1, 0);
-    g_center += glm::vec3(0, 1, 0);
+    g_eye += glm::vec3(0, 0.3f, 0);
+    g_center += glm::vec3(0, 0.3f, 0);
     cameraChanged = true;
     break;
   case 'f':
-    g_eye += glm::vec3(0, -1, 0);
-    g_center += glm::vec3(0, -1, 0);
+    g_eye += glm::vec3(0, -0.3f, 0);
+    g_center += glm::vec3(0, -0.3f, 0);
     cameraChanged = true;
     break;
   case 'i':
