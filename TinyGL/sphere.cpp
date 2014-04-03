@@ -16,7 +16,7 @@ Sphere::Sphere(int nx, int ny)
   vertices.push_back(0);
 
   for (float phi = v_step; phi < M_PI; phi += v_step) {
-    for (float theta = 0; theta < 2 * M_PI; theta += h_step) {
+    for (float theta = h_step; theta < 2 * M_PI; theta += h_step) {
       vertices.push_back(cos(theta) * sin(phi));
       vertices.push_back(cos(phi));
       vertices.push_back(sin(theta) * sin(phi));
@@ -42,28 +42,29 @@ Sphere::Sphere(int nx, int ny)
     }
   }*/
 
-  //TOP
-  for (int i = 1; i <= nx; i++) {
+  //TRIANGLES-TOP
+  for (int i = 1; i < nx; i++) {
     indices.push_back(0);
     indices.push_back(i);
+    indices.push_back(i+1);
   }
-  indices.push_back(1);
+  indices.push_back(0);
   indices.push_back(nx);
+  indices.push_back(1);
 
-  for (int i = 0; i < nx; i++) {
-    for (int j = 0; j < ny; j++) {
-      indices.push_back(i * nx + j);
-      indices.push_back((i + 1) * nx + j);
-    }
+  //TRIANGLES-BOTTOM
+  for (int i = 1; i < nx; i++) {
+    indices.push_back(0);
+    indices.push_back(i);
+    indices.push_back(i + 1);
   }
+  indices.push_back(0);
+  indices.push_back(nx);
+  indices.push_back(1);
 
-  //BOTTOM
-  for (int i = nx+1; i > 1; i--) {
-    indices.push_back(vertices.size() / 3 - 1);
-    indices.push_back(vertices.size() / 3 - i);
+  for (int i = 0; i < indices.size(); i++) {
+    std::cout << indices[i] << " ";
   }
-  indices.push_back(vertices.size() / 3 - 1);
-  indices.push_back(vertices.size() / 3 - nx - 1);
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
