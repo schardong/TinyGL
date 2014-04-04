@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyGL", "TinyGL\TinyGL.vcxproj", "{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T1", "INF2610-T1\INF2610-T1.vcxproj", "{7E04D27A-12BF-4E93-8BEE-DD048C030E5E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E} = {22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T2", "INF2610-T2\INF2610-T2.vcxproj", "{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}"
 	ProjectSection(ProjectDependencies) = postProject
