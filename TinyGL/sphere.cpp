@@ -53,18 +53,19 @@ Sphere::Sphere(int nx, int ny)
   indices.push_back(1);
 
   //TRIANGLES-BOTTOM
-  for (int i = nx * (ny - 2) + 1; i < nx * (ny - 1); i++) {
+  for (int i = nx * (ny - 2) + 2; i <= nx * (ny - 1); i++) {
     indices.push_back(vertices.size() / 3 - 1);
     indices.push_back(i - 1);
     indices.push_back(i);
   }
-  /*indices.push_back(0);
-  indices.push_back(nx);
-  indices.push_back(1);*/
+  indices.push_back(vertices.size() / 3 - 1);
+  indices.push_back(nx * (ny - 1));
+  indices.push_back(nx * (ny - 2) + 1);
+  
 
-  for (int i = 0; i < indices.size(); i++) {
+  /*for (int i = 0; i < indices.size(); i++) {
     std::cout << indices[i] << " ";
-  }
+  }*/
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);

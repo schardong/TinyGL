@@ -249,7 +249,7 @@ void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
   //printf("%d\n", c);
-  glm::vec3 back;
+  glm::vec3 back = g_eye - g_center;
   switch (c) {
   case 'w':
     g_eye += glm::vec3(0, 0, -0.3f);
@@ -282,25 +282,25 @@ void keyPress(unsigned char c, int x, int y)
     cameraChanged = true;
     break;
   case 'i':
-    back = g_eye - g_center;
+    //back = g_eye - g_center;
     back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
     break;
   case 'k':
-    back = g_eye - g_center;
+    //back = g_eye - g_center;
     back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
     break;
   case 'j':
-    back = g_eye - g_center;
+    //back = g_eye - g_center;
     back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
     break;
   case 'l':
-    back = g_eye - g_center;
+    //back = g_eye - g_center;
     back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
