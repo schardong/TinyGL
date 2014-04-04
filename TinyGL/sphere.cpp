@@ -10,13 +10,13 @@ Sphere::Sphere(int nx, int ny)
   float v_step = static_cast<float>(M_PI) / ny;
 
   std::vector<GLfloat> vertices;
-
+  
   vertices.push_back(0);
   vertices.push_back(1);
   vertices.push_back(0);
 
   for (float phi = v_step; phi < M_PI; phi += v_step) {
-    for (float theta = h_step; theta < 2 * M_PI; theta += h_step) {
+    for (float theta = 0; theta < 2 * M_PI; theta += h_step) {
       vertices.push_back(cos(theta) * sin(phi));
       vertices.push_back(cos(phi));
       vertices.push_back(sin(theta) * sin(phi));
@@ -30,6 +30,7 @@ Sphere::Sphere(int nx, int ny)
   std::vector<GLfloat> normals = vertices;
 
   std::vector<GLuint> indices;
+  std::cout << "num_vertices = " << vertices.size()/3 << std::endl; 
   //TRIANGLES
   /*for (int i = 0; i < nx; i++) {
     for (int j = 0; j < ny; j++) {
@@ -52,6 +53,18 @@ Sphere::Sphere(int nx, int ny)
   indices.push_back(nx);
   indices.push_back(1);
 
+  //TRIANGLES-MIDDLE
+  for (int i = 2; i < vertices.size() / 3 - nx -1; i++) {
+    indices.push_back(i - 1);
+    indices.push_back(i + nx);
+    indices.push_back(i);
+
+    indices.push_back(i + nx);
+    indices.push_back(i + nx + 1);
+    indices.push_back(i);
+
+  }
+
   //TRIANGLES-BOTTOM
   for (int i = nx * (ny - 2) + 2; i <= nx * (ny - 1); i++) {
     indices.push_back(vertices.size() / 3 - 1);
@@ -62,9 +75,19 @@ Sphere::Sphere(int nx, int ny)
   indices.push_back(nx * (ny - 1));
   indices.push_back(nx * (ny - 2) + 1);
   
+ /* std::cout << "\n---------vertices---------\n";
+  for (int i = 0; i < vertices.size(); i += 3) {
+    std::cout << vertices[i] << ", " << vertices[i + 1] << ", " << vertices[i + 2] << std::endl;
+  }
 
-  /*for (int i = 0; i < indices.size(); i++) {
+  std::cout << "\n---------indices---------\n";
+  for (int i = 0; i < indices.size(); i++) {
     std::cout << indices[i] << " ";
+  }
+
+  std::cout << "\n---------indexed vertices---------\n";
+  for (int i = 0; i < indices.size(); i++) {
+    std::cout << vertices[indices[i]] << ", " << vertices[indices[i] + 1] << ", " << vertices[indices[i] + 2] << std::endl;
   }*/
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), GL_STATIC_DRAW);
