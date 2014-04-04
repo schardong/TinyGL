@@ -55,6 +55,10 @@ Sphere::Sphere(int nx, int ny)
 
   //TRIANGLES-MIDDLE
   for (int i = 2; i < vertices.size() / 3 - nx -1; i++) {
+    if (i % nx == 0) {
+      i++;
+      continue;
+    }
     indices.push_back(i - 1);
     indices.push_back(i + nx);
     indices.push_back(i);

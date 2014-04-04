@@ -18,8 +18,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static const int W_SPHERES = 1;
-static const int H_SPHERES = 1;
+static const int W_SPHERES = 10;
+static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
@@ -51,8 +51,8 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 bool perVertex = true;
 
-int g_points = 1;
-bool g_showIndex = false;
+int g_points = 0;
+bool g_showIndex = true;
 
 void drawSphere(size_t num_points)
 {
@@ -127,7 +127,7 @@ void init()
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(4, 4);
+  light = new Sphere(7, 7);
   light->setDrawCb(drawSphere);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("light01", light);
@@ -214,10 +214,10 @@ void draw()
     glPtr->draw("sphere" + to_string(i));
   }
 
-  /*s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
+  s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
   s->setUniform4fv("u_materialColor", ground->getMaterialColor());
-  glPtr->draw("ground");*/
+  glPtr->draw("ground");
 
   s->setUniformMatrix("modelMatrix", light->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", light->m_normalMatrix);
