@@ -34,10 +34,10 @@ INSTALLS += header
 
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -g0 -O2
-    TARGET = tinygld
+    TARGET = tinygl
 }
 
 CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -g3 -pg -O0
-    TARGET = tinygl
+    TARGET = tinygld
 }
