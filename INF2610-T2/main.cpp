@@ -85,7 +85,7 @@ void initGLUT(int argc, char** argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
   glutInitWindowSize(800, 600);
 
-  g_window = glutCreateWindow("INF2610-T1");
+  g_window = glutCreateWindow("INF2610-T2");
   glutReshapeFunc(reshape);
   glutDisplayFunc(update);
   glutKeyboardFunc(keyPress);
@@ -148,13 +148,13 @@ void init()
     }
   }
 
-  Shader* g_adsVertex = new Shader("../Resources/ads_vertex.vs", "../Resources/ads_vertex.fs");
+  Shader* g_adsVertex = new Shader("ads_vertex.vs", "ads_vertex.fs");
   g_adsVertex->bind();
   g_adsVertex->bindFragDataLoc("out_vColor", 0);
   g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
   g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
 
-  Shader* g_adsFrag = new Shader("../Resources/ads_frag.vs", "../Resources/ads_frag.fs");
+  Shader* g_adsFrag = new Shader("ads_frag.vs", "ads_frag.fs");
   g_adsFrag->bind();
   g_adsFrag->bindFragDataLoc("out_vColor", 0);
   g_adsFrag->setUniformMatrix("viewMatrix", viewMatrix);
