@@ -5,7 +5,10 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-SOURCES += main.cpp
+HEADERS += color.h
+
+SOURCES += main.cpp \
+           color.c
 
 OTHER_FILES += \
     ../Resources/ads_vertex.vs \
