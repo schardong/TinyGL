@@ -12,7 +12,8 @@ SOURCES += \
     bufferobject.cpp \
     tinygl.cpp \
     sphere.cpp \
-    grid.cpp
+    grid.cpp \
+    axis.cpp
 
 HEADERS += \
     singleton.h \
@@ -23,7 +24,8 @@ HEADERS += \
     bufferobject.h \
     tinygl.h \
     sphere.h \
-    grid.h
+    grid.h \
+    axis.h
 
 INCLUDEPATH += ../include
 
