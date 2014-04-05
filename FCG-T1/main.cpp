@@ -199,7 +199,7 @@ void init()
 
     xyz.push_back(glm::vec3(x, y, z));
 
-    printf ("%.5f\t%.5f  %.5f  %.5f\n", 380 + i, x*255, y*255, z*255);
+    printf ("%d    %.5f  %.5f  %.5f\n", 380 + i, x, y, z);
   }
 
   ciexyz = new CIExyzMesh(xyz);

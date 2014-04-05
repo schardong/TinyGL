@@ -2,19 +2,21 @@
 
 CIExyzMesh::CIExyzMesh(std::vector<glm::vec3> xyz)
 {
-  std::vector<GLfloat> vertices(xyz.size() * 3);
+  std::vector<GLfloat> vertices((xyz.size() + 1) * 3); //+1 for the white point.
 
-  for(size_t i = 0; i < vertices.size(); i += 3) {
+  for(size_t i = 0; i < vertices.size() - 3; i += 3) {
     vertices[i] = xyz[i/3].x;
     vertices[i + 1] = xyz[i/3].y;
     vertices[i + 2] = xyz[i/3].z;
   }
 
+  vertices[vertices.size()-3] = vertices[vertices.size()-2] = vertices[vertices.size()-1] = 1.f;
+
   std::vector<GLfloat> colors(xyz.size() * 3);
   for(size_t i = 0; i < colors.size(); i += 3) {
-    colors[i] = vertices[i] * 255;
-    colors[i + 1] = vertices[i + 1] * 255;
-    colors[i + 2] = vertices[i + 2] * 255;
+    colors[i] = vertices[i];
+    colors[i + 1] = vertices[i + 1];
+    colors[i + 2] = vertices[i + 2];
   }
 
   std::vector<GLushort> indices;
