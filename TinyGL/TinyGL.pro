@@ -10,7 +10,9 @@ SOURCES += \
     mesh.cpp \
     logger.cpp \
     bufferobject.cpp \
-    tinygl.cpp
+    tinygl.cpp \
+    sphere.cpp \
+    grid.cpp
 
 HEADERS += \
     singleton.h \
@@ -19,7 +21,9 @@ HEADERS += \
     logger.h \
     config.h \
     bufferobject.h \
-    tinygl.h
+    tinygl.h \
+    sphere.h \
+    grid.h
 
 INCLUDEPATH += ../include
 
