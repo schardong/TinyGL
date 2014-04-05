@@ -50,6 +50,11 @@ public:
   {
     return m_materialColor;
   }
+
+  void setNumPoints(size_t rhs)
+  {
+    m_numPoints = rhs;
+  }
   
 protected:
   std::vector<BufferObject*> m_buffers;
