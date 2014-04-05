@@ -6,6 +6,7 @@
 #include "grid.h"
 #include "sphere.h"
 #include "axis.h"
+#include "ciexyzmesh.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -38,7 +39,7 @@ void exit_cb();
 
 int g_window = -1;
 
-Mesh* ciexy;
+CIExyzMesh* ciexyz;
 Grid* ground;
 Axis* axis;
 
@@ -116,103 +117,106 @@ void initGLEW()
   initGLEWCalled = true;
 }
 
-void createMeshCIExy(float* x, float* y, int n)
-{
-  std::vector<GLfloat> vertices;
-  for(int i = 0; i < n; i += 3) {
-    vertices.push_back(x[i]);
-    vertices.push_back(y[i]);
-    vertices.push_back(0.f);
-  }
+//void createMeshCIExy(float* x, float* y, int n)
+//{
+//  std::vector<GLfloat> vertices;
+//  for(int i = 0; i < n; i += 3) {
+//    vertices.push_back(x[i]);
+//    vertices.push_back(y[i]);
+//    vertices.push_back(0.f);
+//  }
 
-  ciexy = new Mesh();
-  ciexy->bind();
+//  ciexy = new Mesh();
+//  ciexy->bind();
 
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
-  vbuff->sendData(&vertices[0]);
-  ciexy->attachBuffer(vbuff);
+//  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
+//  vbuff->sendData(&vertices[0]);
+//  ciexy->attachBuffer(vbuff);
 
-  vbuff->bind();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(0);
+//  vbuff->bind();
+//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+//  glEnableVertexAttribArray(0);
 
-  ciexy->setMaterialColor(glm::vec4(0));
-  ciexy->setDrawCb(drawPoints);
-  ciexy->setNumPoints(vertices.size() / 3);
+//  ciexy->setMaterialColor(glm::vec4(0));
+//  ciexy->setDrawCb(drawPoints);
+//  ciexy->setNumPoints(vertices.size() / 3);
 
-  vertices.clear();
-  TinyGL::getInstance()->addMesh("CIExy", ciexy);
-}
+//  vertices.clear();
+//  TinyGL::getInstance()->addMesh("CIExy", ciexy);
+//}
 
-void createMeshCIExyz(float* x, float* y, float* z, int n)
-{
-  std::vector<GLfloat> vertices;
-  for(int i = 0; i < n; i += 3) {
-    vertices.push_back(x[i]);
-    vertices.push_back(y[i]);
-    vertices.push_back(z[i]);
-  }
+//void createMeshCIExyz(float* x, float* y, float* z, int n)
+//{
+//  std::vector<GLfloat> vertices;
+//  for(int i = 0; i < n; i += 3) {
+//    vertices.push_back(x[i]);
+//    vertices.push_back(y[i]);
+//    vertices.push_back(z[i]);
+//  }
 
-  ciexy = new Mesh();
-  ciexy->bind();
+//  ciexy = new Mesh();
+//  ciexy->bind();
 
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
-  vbuff->sendData(&vertices[0]);
-  ciexy->attachBuffer(vbuff);
+//  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
+//  vbuff->sendData(&vertices[0]);
+//  ciexy->attachBuffer(vbuff);
 
-  vbuff->bind();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(0);
+//  vbuff->bind();
+//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+//  glEnableVertexAttribArray(0);
 
-  ciexy->setMaterialColor(glm::vec4(0));
-  ciexy->setDrawCb(drawPoints);
-  ciexy->setNumPoints(vertices.size() / 3);
+//  ciexy->setMaterialColor(glm::vec4(0));
+//  ciexy->setDrawCb(drawPoints);
+//  ciexy->setNumPoints(vertices.size() / 3);
 
-  vertices.clear();
-  TinyGL::getInstance()->addMesh("CIExy", ciexy);
-}
+//  vertices.clear();
+//  TinyGL::getInstance()->addMesh("CIExy", ciexy);
+//}
 
 void init()
 {
-  float lambda[400];
-  for(int i = 0; i < 400; i++) {
-    lambda[i] = i + 380;
-  }
-
-  printf("lambda to CIExyz.\n");
-  float xbar[400], ybar[400], zbar[400];
-  for(int i = 0; i < 400; i++) {
-    corGetCIExyz(lambda[i], &xbar[i], &ybar[i], &zbar[i]);
-    float x = xbar[i] / (xbar[i] + ybar[i] + zbar[i]);
-    float y = ybar[i] / (xbar[i] + ybar[i] + zbar[i]);
-    float z = zbar[i] / (xbar[i] + ybar[i] + zbar[i]);
-
-    xbar[i] = x; ybar[i] = y; zbar[i] = z;
-
-    printf ("%.5f\t%.5f  %.5f  %.5f\tsum = %.5f\n", lambda[i], xbar[i], ybar[i], zbar[i], xbar[i] + ybar[i] + zbar[i]);
-  }
-
-//  printf("lambda to CIExy.\n");
-//  for(int i = 0; i < 400; i++) {
-//    corGetCIExyfromLambda(lambda[i], &xbar[i], &ybar[i]);
-//    printf ("%.5f\t%.5f  %.5f\n", lambda[i], xbar[i], ybar[i]);
-//  }
-
-  createMeshCIExyz(xbar, ybar, zbar, 400);
-
-  printf("CIExyz to CIErgb.\n");
-  float r[400], g[400], b[400];
-  for(int i = 0; i < 400; i++) {
-    corCIEXYZtoCIERGB(xbar[i], ybar[i], zbar[i], &r[i], &g[i], &b[i]);
-    printf ("%.5f\t%.5f  %.5f  %.5f\n", lambda[i], r[i], g[i], b[i]);
-  }
-
-
   g_eye = glm::vec3(0, 2, 2);
   g_center = glm::vec3(0, 0, 0);
   g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
+
+  printf("lambda to CIExyz.\n");
+  std::vector<glm::vec3> xyz;
+  float xbar, ybar, zbar;
+
+  for(int i = 0; i < 400; i++) {
+    corGetCIExyz(380 + i, &xbar, &ybar, &zbar);
+    float x, y, z;
+
+    if((xbar + ybar + zbar) == 0) {
+      x = y = z = 0.f;
+    } else {
+      x = xbar / (xbar + ybar + zbar);
+      y = ybar / (xbar + ybar + zbar);
+      z = zbar / (xbar + ybar + zbar);
+    }
+
+    xyz.push_back(glm::vec3(x, y, z));
+
+    printf ("%.5f\t%.5f  %.5f  %.5f\n", 380 + i, x*255, y*255, z*255);
+  }
+
+  ciexyz = new CIExyzMesh(xyz);
+  ciexyz->setDrawCb(drawPoints);
+  ciexyz->setMaterialColor(glm::vec4(0));
+  TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
+  ciexyz->m_modelMatrix = glm::mat4(1.f);
+  ciexyz->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciexyz->m_modelMatrix));
+
+//  createMeshCIExyz(xbar, ybar, zbar, 400);
+
+//  printf("CIExyz to CIErgb.\n");
+//  float r[400], g[400], b[400];
+//  for(int i = 0; i < 400; i++) {
+//    corCIEXYZtoCIERGB(xbar[i], ybar[i], zbar[i], &r[i], &g[i], &b[i]);
+//    printf ("%.5f\t%.5f  %.5f  %.5f\n", lambda[i], r[i], g[i], b[i]);
+//  }
 
   axis = new Axis(glm::vec2(-1, 2), glm::vec2(-1, 2), glm::vec2(-1, 2));
   axis->setDrawCb(drawAxis);
@@ -276,7 +280,7 @@ void draw()
 //  glPtr->draw("ground");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
-  glPtr->draw("CIExy");
+  glPtr->draw("CIExyz");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
   glPtr->draw("axis");

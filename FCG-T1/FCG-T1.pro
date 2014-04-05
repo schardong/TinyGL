@@ -5,10 +5,12 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-HEADERS += color.h
+HEADERS += color.h \
+    ciexyzmesh.h
 
 SOURCES += main.cpp \
-           color.c
+           color.c \
+    ciexyzmesh.cpp
 
 OTHER_FILES += \
     ../Resources/fcgt1.vs \
