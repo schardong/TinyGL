@@ -11,10 +11,8 @@ SOURCES += main.cpp \
            color.c
 
 OTHER_FILES += \
-    ../Resources/ads_vertex.vs \
-    ../Resources/ads_vertex.fs \
-    ../Resources/ads_frag.vs \
-    ../Resources/ads_frag.fs \
+    ../Resources/fcgt1.vs \
+    ../Resources/fcgt1.fs
 
 INCLUDEPATH += ../include
 DEPENDPATH += ../include

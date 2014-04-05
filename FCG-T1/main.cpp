@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "grid.h"
 #include "sphere.h"
+#include "axis.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -39,7 +40,7 @@ int g_window = -1;
 
 Mesh* ciexy;
 Grid* ground;
-Mesh* axis;
+Axis* axis;
 
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
@@ -115,50 +116,7 @@ void initGLEW()
   initGLEWCalled = true;
 }
 
-void createAxis()
-{
-  std::vector<GLfloat> vertices;
-  vertices.push_back(-5.f);
-  vertices.push_back(0.f);
-  vertices.push_back(0.f);
-  vertices.push_back(10.f);
-  vertices.push_back(0.f);
-  vertices.push_back(0.f);
-
-  vertices.push_back(0.f);
-  vertices.push_back(-5.f);
-  vertices.push_back(0.f);
-  vertices.push_back(0.f);
-  vertices.push_back(10.f);
-  vertices.push_back(0.f);
-
-  vertices.push_back(0.f);
-  vertices.push_back(0.f);
-  vertices.push_back(-5.f);
-  vertices.push_back(0.f);
-  vertices.push_back(0.f);
-  vertices.push_back(10.f);
-
-  axis = new Mesh();
-  axis->bind();
-
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
-  vbuff->sendData(&vertices[0]);
-  axis->attachBuffer(vbuff);
-
-  vbuff->bind();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(0);
-
-  axis->setMaterialColor(glm::vec4(0));
-  axis->setDrawCb(drawAxis);
-  axis->setNumPoints(vertices.size() / 3);
-
-  vertices.clear();
-  TinyGL::getInstance()->addMesh("axis", axis);
-}
-
-Mesh* createMeshCIExy(float* x, float* y, int n)
+void createMeshCIExy(float* x, float* y, int n)
 {
   std::vector<GLfloat> vertices;
   for(int i = 0; i < n; i += 3) {
@@ -186,7 +144,7 @@ Mesh* createMeshCIExy(float* x, float* y, int n)
   TinyGL::getInstance()->addMesh("CIExy", ciexy);
 }
 
-Mesh* createMeshCIExyz(float* x, float* y, float* z, int n)
+void createMeshCIExyz(float* x, float* y, float* z, int n)
 {
   std::vector<GLfloat> vertices;
   for(int i = 0; i < n; i += 3) {
@@ -216,8 +174,6 @@ Mesh* createMeshCIExyz(float* x, float* y, float* z, int n)
 
 void init()
 {
-  createAxis();
-
   float lambda[400];
   for(int i = 0; i < 400; i++) {
     lambda[i] = i + 380;
@@ -258,27 +214,27 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
+  axis = new Axis(glm::vec2(-1, 2), glm::vec2(-1, 2), glm::vec2(-1, 2));
+  axis->setDrawCb(drawAxis);
+  axis->setMaterialColor(glm::vec4(0.f));
+  TinyGL::getInstance()->addMesh("axis", axis);
+  axis->m_modelMatrix = glm::mat4(1.f);
+  axis->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * axis->m_modelMatrix));
+
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   TinyGL::getInstance()->addMesh("ground", ground);
-
-  Shader* g_adsVertex = new Shader("ads_vertex.vs", "ads_vertex.fs");
-  g_adsVertex->bind();
-  g_adsVertex->bindFragDataLoc("out_vColor", 0);
-  g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
-  g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
-
-  float tmp[] = { g_light[0], g_light[1], g_light[2] };
-  g_adsVertex->bind();
-  g_adsVertex->setUniformfv("u_lightCoord", tmp, 3);
-
-  TinyGL::getInstance()->addShader("ads_vertex", g_adsVertex);
-
   ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-  g_adsVertex->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
-  g_adsVertex->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
+
+  Shader* g_shader = new Shader("fcgt1.vs", "fcgt1.fs");
+  g_shader->bind();
+  g_shader->bindFragDataLoc("out_vColor", 0);
+  g_shader->setUniformMatrix("viewMatrix", viewMatrix);
+  g_shader->setUniformMatrix("projMatrix", projMatrix);
+
+  TinyGL::getInstance()->addShader("fcgt1", g_shader);
 
   initCalled = true;
 }
@@ -304,7 +260,7 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  Shader* s = glPtr->getShader("ads_vertex");
+  Shader* s = glPtr->getShader("fcgt1");
 
   s->bind();
 //  for (int i = 0; i < NUM_SPHERES; i++) {
@@ -320,13 +276,9 @@ void draw()
 //  glPtr->draw("ground");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
-  s->setUniformMatrix("normalMatrix", glm::mat4(1.f));
-  s->setUniform4fv("u_materialColor", glm::vec4(0.f));
   glPtr->draw("CIExy");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
-  s->setUniformMatrix("normalMatrix", glm::mat4(1.f));
-  s->setUniform4fv("u_materialColor", glm::vec4(0.f));
   glPtr->draw("axis");
 
 //  s->setUniformMatrix("modelMatrix", light->m_modelMatrix);
@@ -349,7 +301,7 @@ void reshape(int w, int h)
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
 
-  Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
+  Shader* s = TinyGL::getInstance()->getShader("fcgt1");
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
 
@@ -438,7 +390,7 @@ void keyPress(unsigned char c, int x, int y)
   if(cameraChanged) {
     viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
 
-    Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
+    Shader* s = TinyGL::getInstance()->getShader("fcgt1");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
   }
