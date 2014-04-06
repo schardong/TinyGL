@@ -40,18 +40,19 @@ void exit_cb();
 int g_window = -1;
 
 CIExyzMesh* ciexyz;
+CIExyzMesh* ciergb;
 Axis* axis;
 
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
-glm::vec3 g_light;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
 
 bool g_wireRender = false;
+bool g_xyzRender = true;
 
 void drawLinesIdx(size_t num_points)
 {
@@ -113,21 +114,19 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(0, 1.4, 1.5);
+  g_eye = glm::vec3(0.5, 1.4, 1.5);
   g_center = glm::vec3(0, 0, 0);
-  g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
   std::vector<glm::vec3> xyz;
   std::vector<glm::vec3> rgb;
+  glm::mat3 m = glm::inverse(glm::mat3(0.490, 0.310, 0.200,  0.177, 0.813, 0.011, 0.000, 0.010, 0.990));
   float xbar, ybar, zbar;
 
   for(float i = 0; i < 400; i += 2) {
     corGetCIExyz(380.f + i, &xbar, &ybar, &zbar);
-//    corGetCIExyfromLambda(380.f + i, &xbar, &ybar);
     float x, y, z;
-    float r, g, b;
 
     if((xbar + ybar + zbar) == 0) {
       x = y = z = 0.f;
@@ -137,17 +136,42 @@ void init()
       z = zbar / (xbar + ybar + zbar);
     }
 
-    corCIEXYZtoCIERGB(x, y, z, &r, &g, &b);
-    xyz.push_back(glm::vec3(x, y, z));
-    rgb.push_back(glm::vec3(r, g, b));
+    glm::vec3 tmp = glm::vec3(x, y, z);
+    xyz.push_back(tmp);
+    rgb.push_back(m * tmp);
   }
 
-  ciexyz = new CIExyzMesh(xyz, rgb);
+  printf("[");
+  for(int i = 0; i < xyz.size(); i++) {
+    printf("%f, ", xyz[i].x);
+  }
+  printf("]\n\n");
+
+  printf("[");
+  for(int i = 0; i < xyz.size(); i++) {
+    printf("%f, ", xyz[i].y);
+  }
+  printf("]\n\n");
+
+  printf("[");
+  for(int i = 0; i < xyz.size(); i++) {
+    printf("%f, ", xyz[i].z);
+  }
+  printf("]\n\n");
+
+  ciexyz = new CIExyzMesh(xyz);
   ciexyz->setDrawCb(drawLinesIdx);
   ciexyz->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
   ciexyz->m_modelMatrix = glm::mat4(1.f);
   ciexyz->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciexyz->m_modelMatrix));
+
+  ciergb = new CIExyzMesh(rgb);
+  ciergb->setDrawCb(drawLinesIdx);
+  ciergb->setMaterialColor(glm::vec4(0));
+  TinyGL::getInstance()->addMesh("CIErgb", ciergb);
+  ciergb->m_modelMatrix = glm::mat4(1.f);
+  ciergb->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciergb->m_modelMatrix));
 
   axis = new Axis(glm::vec2(-1, 2), glm::vec2(-1, 2), glm::vec2(-1, 2));
   axis->setDrawCb(drawAxis);
@@ -191,9 +215,13 @@ void draw()
   Shader* s = glPtr->getShader("fcgt1");
 
   s->bind();
-
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
-  glPtr->draw("CIExyz");
+
+  if(g_xyzRender) {
+    glPtr->draw("CIExyz");
+  } else {
+    glPtr->draw("CIErgb");
+  }
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
   glPtr->draw("axis");
@@ -223,7 +251,7 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
-  printf("%d\n", c);
+  printf("keyPress = %d\n", c);
 
   switch (c) {
 //  case 'w':
@@ -279,7 +307,7 @@ void keyPress(unsigned char c, int x, int y)
 void specialKeyPress(int c, int x, int y)
 {
   bool cameraChanged = false;
-  printf("%d\n", c);
+  printf("specialKeyPress = %d\n", c);
 
   glm::vec3 back = g_eye - g_center;
 
@@ -303,6 +331,9 @@ void specialKeyPress(int c, int x, int y)
     back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
+    break;
+  case GLUT_KEY_F1:
+    g_xyzRender = !g_xyzRender;
     break;
   }
 

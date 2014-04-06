@@ -582,7 +582,7 @@ int corCIEXYZtoCIERGB(float X,float Y, float Z, float* R, float* G, float* B){
 }
 
 int corCIERGBtoCIEXYZ(float r_bar, float g_bar, float b_bar, float* x_bar, float* y_bar, float* z_bar) {
-	double m[3*3] = { 0.490, 0.310, 0.200,  0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }; 
+  double m[3*3] = { 0.490, 0.310, 0.200,  0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
 	*x_bar = (float) (m[0]*r_bar+m[1]*g_bar+m[2]*b_bar);
 	*y_bar = (float) (m[3]*r_bar+m[4]*g_bar+m[5]*b_bar);
 	*z_bar = (float) (m[6]*r_bar+m[7]*g_bar+m[8]*b_bar);
