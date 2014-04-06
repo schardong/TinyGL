@@ -15,6 +15,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T2", "INF2610-T2\IN
 		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E} = {22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FCG-T1", "FCG-T1\FCG-T1.vcxproj", "{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E} = {22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -33,6 +38,10 @@ Global
 		{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}.Debug|Win32.Build.0 = Debug|Win32
 		{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}.Release|Win32.ActiveCfg = Release|Win32
 		{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}.Release|Win32.Build.0 = Release|Win32
+		{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}.Debug|Win32.Build.0 = Debug|Win32
+		{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}.Release|Win32.ActiveCfg = Release|Win32
+		{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
