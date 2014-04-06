@@ -40,7 +40,6 @@ void exit_cb();
 int g_window = -1;
 
 CIExyzMesh* ciexyz;
-Grid* ground;
 Axis* axis;
 
 glm::mat4 viewMatrix;
@@ -53,16 +52,6 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 
 bool g_wireRender = false;
-
-void drawGrid(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
-}
-
-void drawPoints(size_t num_points)
-{
-  glDrawArrays(GL_POINTS, 0, num_points);
-}
 
 void drawLinesIdx(size_t num_points)
 {
@@ -124,7 +113,7 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(0, 2, 2);
+  g_eye = glm::vec3(0, 1.4, 1.5);
   g_center = glm::vec3(0, 0, 0);
   g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -134,8 +123,9 @@ void init()
   std::vector<glm::vec3> rgb;
   float xbar, ybar, zbar;
 
-  for(float i = 0; i < 400; i += 1) {
+  for(float i = 0; i < 400; i += 2) {
     corGetCIExyz(380.f + i, &xbar, &ybar, &zbar);
+//    corGetCIExyfromLambda(380.f + i, &xbar, &ybar);
     float x, y, z;
     float r, g, b;
 
@@ -147,26 +137,17 @@ void init()
       z = zbar / (xbar + ybar + zbar);
     }
 
-    corCIEXYZtoCIERGB(xbar, ybar, zbar, &r, &g, &b);
+    corCIEXYZtoCIERGB(x, y, z, &r, &g, &b);
     xyz.push_back(glm::vec3(x, y, z));
     rgb.push_back(glm::vec3(r, g, b));
   }
 
-  ciexyz = new CIExyzMesh(rgb);
+  ciexyz = new CIExyzMesh(xyz, rgb);
   ciexyz->setDrawCb(drawLinesIdx);
   ciexyz->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
   ciexyz->m_modelMatrix = glm::mat4(1.f);
   ciexyz->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciexyz->m_modelMatrix));
-
-//  createMeshCIExyz(xbar, ybar, zbar, 400);
-
-//  printf("CIExyz to CIErgb.\n");
-//  float r[400], g[400], b[400];
-//  for(int i = 0; i < 400; i++) {
-//    corCIEXYZtoCIERGB(xbar[i], ybar[i], zbar[i], &r[i], &g[i], &b[i]);
-//    printf ("%.5f\t%.5f  %.5f  %.5f\n", lambda[i], r[i], g[i], b[i]);
-//  }
 
   axis = new Axis(glm::vec2(-1, 2), glm::vec2(-1, 2), glm::vec2(-1, 2));
   axis->setDrawCb(drawAxis);
@@ -175,14 +156,7 @@ void init()
   axis->m_modelMatrix = glm::mat4(1.f);
   axis->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * axis->m_modelMatrix));
 
-  ground = new Grid(10, 10);
-  ground->setDrawCb(drawGrid);
-  ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
-  TinyGL::getInstance()->addMesh("ground", ground);
-  ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
-  ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-
-  Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
+  Shader* g_shader = new Shader("fcgt1.vs", "fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);
@@ -217,28 +191,12 @@ void draw()
   Shader* s = glPtr->getShader("fcgt1");
 
   s->bind();
-//  for (int i = 0; i < NUM_SPHERES; i++) {
-//    s->setUniformMatrix("modelMatrix", spheres[i]->m_modelMatrix);
-//    s->setUniformMatrix("normalMatrix", spheres[i]->m_normalMatrix);
-//    s->setUniform4fv("u_materialColor", spheres[i]->getMaterialColor());
-//    glPtr->draw("sphere" + to_string(i));
-//  }
-
-//  s->setUniformMatrix("modelMatrix", ground->m_modelMatrix);
-//  s->setUniformMatrix("normalMatrix", ground->m_normalMatrix);
-//  s->setUniform4fv("u_materialColor", ground->getMaterialColor());
-//  glPtr->draw("ground");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
   glPtr->draw("CIExyz");
 
   s->setUniformMatrix("modelMatrix", glm::mat4(1.f));
   glPtr->draw("axis");
-
-//  s->setUniformMatrix("modelMatrix", light->m_modelMatrix);
-//  s->setUniformMatrix("normalMatrix", light->m_normalMatrix);
-//  s->setUniform4fv("u_materialColor", light->getMaterialColor());
-//  glPtr->draw("light01");
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -266,69 +224,37 @@ void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
   printf("%d\n", c);
-  glm::vec3 back = g_eye - g_center;
+
   switch (c) {
-  case 'w':
-    g_eye += glm::vec3(0, 0, -0.3f);
-    g_center += glm::vec3(0, 0, -0.3f);
-    cameraChanged = true;
-    break;
-  case 's':
-    g_eye += glm::vec3(0, 0, 0.3f);
-    g_center += glm::vec3(0, 0, 0.3f);
-    cameraChanged = true;
-    break;
-  case 'a':
-    g_eye += glm::vec3(-0.3f, 0, 0);
-    g_center += glm::vec3(-0.3f, 0, 0);
-    cameraChanged = true;
-    break;
-  case 'd':
-    g_eye += glm::vec3(0.3f, 0, 0);
-    g_center += glm::vec3(0.3f, 0, 0);
-    cameraChanged = true;
-    break;
-  case 'r':
-    g_eye += glm::vec3(0, 0.3f, 0);
-    g_center += glm::vec3(0, 0.3f, 0);
-    cameraChanged = true;
-    break;
-  case 'f':
-    g_eye += glm::vec3(0, -0.3f, 0);
-    g_center += glm::vec3(0, -0.3f, 0);
-    cameraChanged = true;
-    break;
-  case 'i':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'k':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'j':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'l':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-//  case 'o':
-//    g_points++;
-//    cout << g_points << endl;
+//  case 'w':
+//    g_eye += glm::vec3(0, 0, -0.3f);
+//    g_center += glm::vec3(0, 0, -0.3f);
+//    cameraChanged = true;
 //    break;
-//  case 'p':
-//    g_points--;
-//    cout << g_points << endl;
+//  case 's':
+//    g_eye += glm::vec3(0, 0, 0.3f);
+//    g_center += glm::vec3(0, 0, 0.3f);
+//    cameraChanged = true;
+//    break;
+//  case 'a':
+//    g_eye += glm::vec3(-0.3f, 0, 0);
+//    g_center += glm::vec3(-0.3f, 0, 0);
+//    cameraChanged = true;
+//    break;
+//  case 'd':
+//    g_eye += glm::vec3(0.3f, 0, 0);
+//    g_center += glm::vec3(0.3f, 0, 0);
+//    cameraChanged = true;
+//    break;
+//  case 'r':
+//    g_eye += glm::vec3(0, 0.3f, 0);
+//    g_center += glm::vec3(0, 0.3f, 0);
+//    cameraChanged = true;
+//    break;
+//  case 'f':
+//    g_eye += glm::vec3(0, -0.3f, 0);
+//    g_center += glm::vec3(0, -0.3f, 0);
+//    cameraChanged = true;
 //    break;
   case ' ':
     g_wireRender = !g_wireRender;
@@ -352,62 +278,41 @@ void keyPress(unsigned char c, int x, int y)
 
 void specialKeyPress(int c, int x, int y)
 {
-  bool lightChanged = false;
-
+  bool cameraChanged = false;
   printf("%d\n", c);
+
+  glm::vec3 back = g_eye - g_center;
+
   switch (c) {
-//  case GLUT_KEY_LEFT:
-//    g_light.x -= 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_RIGHT:
-//    g_light.x += 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_UP:
-//    g_light.z -= 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_DOWN:
-//    g_light.z += 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_F1:
-//    g_light.y += 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_F2:
-//    g_light.y -= 0.1f;
-//    light->m_modelMatrix = glm::translate(g_light);
-//    light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-//    lightChanged = true;
-//    break;
-//  case GLUT_KEY_F3:
-//    perVertex = !perVertex;
-//    break;
+  case GLUT_KEY_LEFT:
+    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case GLUT_KEY_RIGHT:
+    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case GLUT_KEY_UP:
+    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
+  case GLUT_KEY_DOWN:
+    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
+    g_eye = back + g_center;
+    cameraChanged = true;
+    break;
   }
 
-//  if (lightChanged) {
-//    float tmp[] = { g_light[0], g_light[1], g_light[2] };
+  if(cameraChanged) {
+    viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
 
-//    Shader* s = TinyGL::getInstance()->getShader("ads_vertex");
-//    s->bind();
-//    s->setUniformfv("u_lightCoord", tmp, 3);
-
-//    s = TinyGL::getInstance()->getShader("ads_frag");
-//    s->bind();
-//    s->setUniformfv("u_lightCoord", tmp, 3);
-//  }
+    Shader* s = TinyGL::getInstance()->getShader("fcgt1");
+    s->bind();
+    s->setUniformMatrix("viewMatrix", viewMatrix);
+  }
 }
 
 void exit_cb()
