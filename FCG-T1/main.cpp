@@ -142,24 +142,24 @@ void init()
   }
 
   printf("[");
-  for(int i = 0; i < xyz.size(); i++) {
+  for(size_t i = 0; i < xyz.size(); i++) {
     printf("%f, ", xyz[i].x);
   }
   printf("]\n\n");
 
   printf("[");
-  for(int i = 0; i < xyz.size(); i++) {
+  for(size_t i = 0; i < xyz.size(); i++) {
     printf("%f, ", xyz[i].y);
   }
   printf("]\n\n");
 
   printf("[");
-  for(int i = 0; i < xyz.size(); i++) {
+  for(size_t i = 0; i < xyz.size(); i++) {
     printf("%f, ", xyz[i].z);
   }
   printf("]\n\n");
 
-  ciexyz = new CIExyzMesh(xyz);
+  ciexyz = new CIExyzMesh(xyz, rgb);
   ciexyz->setDrawCb(drawLinesIdx);
   ciexyz->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
@@ -251,7 +251,7 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
-  printf("keyPress = %d\n", c);
+//  printf("keyPress = %d\n", c);
 
   switch (c) {
 //  case 'w':
@@ -307,7 +307,7 @@ void keyPress(unsigned char c, int x, int y)
 void specialKeyPress(int c, int x, int y)
 {
   bool cameraChanged = false;
-  printf("specialKeyPress = %d\n", c);
+//  printf("specialKeyPress = %d\n", c);
 
   glm::vec3 back = g_eye - g_center;
 
@@ -334,6 +334,11 @@ void specialKeyPress(int c, int x, int y)
     break;
   case GLUT_KEY_F1:
     g_xyzRender = !g_xyzRender;
+    if(g_xyzRender)
+      g_eye = glm::vec3(0.5, 1.4, 1.5);
+    else
+      g_eye = glm::vec3(1.0, 1.4, 2.8);
+    cameraChanged = true;
     break;
   }
 
