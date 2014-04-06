@@ -7,22 +7,29 @@ CIExyzMesh::CIExyzMesh(std::vector<glm::vec3> xyz)
   float sum_x = 0;
   float sum_y = 0;
   float sum_z = 0;
+
+  size_t max_x = 0;
   for(size_t i = 0; i < vertices.size() - 3; i += 3) {
     vertices[i] = xyz[i/3].x;
     vertices[i + 1] = xyz[i/3].y;
     vertices[i + 2] = xyz[i/3].z;
+
     sum_x += vertices[i];
     sum_y += vertices[i + 1];
     sum_z += vertices[i + 2];
+
+    if (xyz[i / 3].x > xyz[max_x].x) max_x = i / 3;
   }
 
+  //The white point is calculated as the centroid of the CIEXYZ points.
+  //(is this the correct approach?
   vertices[vertices.size() - 3] = sum_x / xyz.size();
   vertices[vertices.size() - 2] = sum_y / xyz.size();
   vertices[vertices.size() - 1] = sum_z / xyz.size();
-
-  //printf("-------------%f %f %f %d-----------\n", sum_x, sum_y, sum_z, xyz.size());
-  //printf("-------------%f %f %f-----------\n", 1-vertices[vertices.size() - 3], 1-vertices[vertices.size() - 2], 1-vertices[vertices.size() - 1]);
-
+  
+  //Since the color of the points is set as theirs XYZ coordinates, we
+  //normalize the white point color here, else it would be a grayish 
+  //color instead of white.
   sum_x = 1 - vertices[vertices.size() - 3];
   sum_y = 1 - vertices[vertices.size() - 2];
   sum_z = 1 - vertices[vertices.size() - 1];
@@ -38,19 +45,35 @@ CIExyzMesh::CIExyzMesh(std::vector<glm::vec3> xyz)
   colors[colors.size() - 2] += sum_y;
   colors[colors.size() - 1] += sum_z;
 
-  std::vector<GLushort> indices;
-  for (int i = 0; i < vertices.size() / 3 - 1; i++) {
-    indices.push_back(i);
-    indices.push_back(i + 1);
-    indices.push_back((vertices.size() / 3));
-  }
-
-  /*for (int i = 0; i < vertices.size() / 3 - 2; i++) {
-    indices.push_back(i);
-    indices.push_back(i + 1);
-    indices.push_back((vertices.size() / 3));
+  /*for (int i = 0; i < vertices.size(); i += 3) {
+    printf("%d = (%f, %f, %f)\n", i / 3, vertices[i], vertices[i + 1], vertices[i + 2]);
   }*/
 
+  std::vector<GLushort> indices;
+  //Connect all of the points with the (0,0,0) point (black).
+  for (int i = 0; i < vertices.size() / 3 - 2; i++) {
+    indices.push_back(i);
+    indices.push_back(i + 1);
+    indices.push_back(0);
+  }
+
+  //Connect all the points with the (1,1,1) point (white).
+  for (int i = 1; i < vertices.size() / 3 - 2; i++) {
+    indices.push_back(i);
+    indices.push_back(i + 1);
+    indices.push_back((vertices.size() / 3 - 1));
+  }
+
+  //Connect the 380nm and 780nm points to form the purple line (white point).
+  indices.push_back(1);
+  indices.push_back(max_x);
+  indices.push_back((vertices.size() / 3 - 1));
+
+  //Connect the 380nm and 780nm points to form the purple line (black point).
+  indices.push_back(1);
+  indices.push_back(max_x);
+  indices.push_back(0);
+  
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
@@ -72,9 +95,7 @@ CIExyzMesh::CIExyzMesh(std::vector<glm::vec3> xyz)
   cbuff->bind();
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
-
-  //m_numPoints = vertices.size() / 3;
-  printf("INDICES SIZE = %d\n", indices.size());
+  
   m_numPoints = indices.size();
 
   vertices.clear();
