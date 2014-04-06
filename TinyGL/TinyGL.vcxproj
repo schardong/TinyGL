@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="axis.cpp" />
     <ClCompile Include="bufferobject.cpp" />
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="logger.cpp" />
@@ -87,6 +88,7 @@
     <ClCompile Include="tinygl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="axis.h" />
     <ClInclude Include="bufferobject.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="grid.h" />

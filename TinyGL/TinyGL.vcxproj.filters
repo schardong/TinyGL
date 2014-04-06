@@ -36,6 +36,9 @@
     <ClCompile Include="sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="axis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinygl.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="axis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
