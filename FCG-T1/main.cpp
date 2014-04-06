@@ -130,13 +130,14 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
-  printf("lambda to CIExyz.\n");
   std::vector<glm::vec3> xyz;
+  std::vector<glm::vec3> rgb;
   float xbar, ybar, zbar;
 
   for(float i = 0; i < 400; i += 1) {
     corGetCIExyz(380.f + i, &xbar, &ybar, &zbar);
     float x, y, z;
+    float r, g, b;
 
     if((xbar + ybar + zbar) == 0) {
       x = y = z = 0.f;
@@ -146,10 +147,12 @@ void init()
       z = zbar / (xbar + ybar + zbar);
     }
 
+    corCIEXYZtoCIERGB(xbar, ybar, zbar, &r, &g, &b);
     xyz.push_back(glm::vec3(x, y, z));
+    rgb.push_back(glm::vec3(r, g, b));
   }
 
-  ciexyz = new CIExyzMesh(xyz);
+  ciexyz = new CIExyzMesh(rgb);
   ciexyz->setDrawCb(drawLinesIdx);
   ciexyz->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
