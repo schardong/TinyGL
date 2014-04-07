@@ -934,7 +934,7 @@ static float getFunctionValue(float x, float xmin, int npoints, float delta_x, f
 		sum_w += Lw*y_bar;
 	}
 	*X = sum_x/sum_w;
-    *Y = sum_y/sum_w;      
+  *Y = sum_y/sum_w;      
 	*Z = sum_z/sum_w;
 	return 1;
 }

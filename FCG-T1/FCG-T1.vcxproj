@@ -14,10 +14,12 @@
     <ClCompile Include="ciexyzmesh.cpp" />
     <ClCompile Include="color.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mtwist.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ciexyzmesh.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="mtwist.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt1.fs" />
@@ -59,6 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -75,6 +78,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

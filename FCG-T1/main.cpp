@@ -22,6 +22,7 @@
 
 extern "C" {
 #include "color.h"
+#include "mtwist.h"
 }
 
 using namespace std;
@@ -53,6 +54,11 @@ bool initGLEWCalled = false;
 
 bool g_wireRender = false;
 bool g_xyzRender = true;
+
+void drawPointsArrays(size_t num_points)
+{
+  glDrawArrays(GL_POINTS, 0, num_points);
+}
 
 void drawLinesIdx(size_t num_points)
 {
@@ -107,41 +113,74 @@ void initGLEW()
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glPointSize(3);
+  glPointSize(2);
 
   initGLEWCalled = true;
 }
 
 void init()
 {
-  g_eye = glm::vec3(0.5, 1.4, 1.5);
+  const int STEP = 1;
+  g_eye = glm::vec3(1.5, 1.4, 1.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
   std::vector<glm::vec3> xyz;
   std::vector<glm::vec3> rgb;
-  glm::mat3 m = glm::inverse(glm::mat3(0.490, 0.310, 0.200,  0.177, 0.813, 0.011, 0.000, 0.010, 0.990));
-  float xbar, ybar, zbar;
+  
+  float* beta = new float[400 / STEP];
 
-  for(float i = 0; i < 400; i += 2) {
-    corGetCIExyz(380.f + i, &xbar, &ybar, &zbar);
+  for (size_t i = 0; i < 400 / STEP; i++) {
+    memset(beta, 0, sizeof(float)* 400 / STEP);
+    beta[i] = 100.f;
+
     float x, y, z;
+    corGetCIExyfromLambda(i + 380.f, &x, &y);
+    
+    //corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta, &x, &y, &z, F11);
 
-    if((xbar + ybar + zbar) == 0) {
+    glm::vec3 tmp(x, y, z);
+    xyz.push_back(tmp);
+
+    corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
+
+    rgb.push_back(tmp);
+  }
+
+  delete[] beta;
+
+
+  /*for(float i = 0; i < 400; i += STEP) {
+    float xbar, ybar, zbar;
+    float x, y, z, A;
+    float lambda = 380.f + i;
+
+    corGetCIExyz(lambda, &xbar, &ybar, &zbar);
+    A = corGetD65(lambda);
+    
+    float xyz_sum = (xbar + ybar + zbar);
+
+    if (xyz_sum == 0) {
       x = y = z = 0.f;
     } else {
-      x = xbar / (xbar + ybar + zbar);
-      y = ybar / (xbar + ybar + zbar);
-      z = zbar / (xbar + ybar + zbar);
+      x = xbar / xyz_sum;
+      y = ybar / xyz_sum;
+      z = zbar / xyz_sum;
     }
 
     glm::vec3 tmp = glm::vec3(x, y, z);
     xyz.push_back(tmp);
     rgb.push_back(m * tmp);
-  }
+  }*/
 
-  printf("[");
+  /*printf("[");
+  for (size_t i = 0; i < A.size(); i++) {
+    printf("%f, ", A[i]);
+  }
+  printf("]\n\n");*/
+
+  /*printf("[");
   for(size_t i = 0; i < xyz.size(); i++) {
     printf("%f, ", xyz[i].x);
   }
@@ -157,9 +196,9 @@ void init()
   for(size_t i = 0; i < xyz.size(); i++) {
     printf("%f, ", xyz[i].z);
   }
-  printf("]\n\n");
+  printf("]\n\n");*/
 
-  ciexyz = new CIExyzMesh(xyz, rgb);
+  ciexyz = new CIExyzMesh(xyz);
   ciexyz->setDrawCb(drawLinesIdx);
   ciexyz->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyz", ciexyz);
@@ -173,7 +212,7 @@ void init()
   ciergb->m_modelMatrix = glm::mat4(1.f);
   ciergb->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciergb->m_modelMatrix));
 
-  axis = new Axis(glm::vec2(-1, 2), glm::vec2(-1, 2), glm::vec2(-1, 2));
+  axis = new Axis(glm::vec2(-1, 1), glm::vec2(-1, 1), glm::vec2(-1, 1));
   axis->setDrawCb(drawAxis);
   axis->setMaterialColor(glm::vec4(0.f));
   TinyGL::getInstance()->addMesh("axis", axis);
@@ -254,36 +293,36 @@ void keyPress(unsigned char c, int x, int y)
 //  printf("keyPress = %d\n", c);
 
   switch (c) {
-//  case 'w':
-//    g_eye += glm::vec3(0, 0, -0.3f);
-//    g_center += glm::vec3(0, 0, -0.3f);
-//    cameraChanged = true;
-//    break;
-//  case 's':
-//    g_eye += glm::vec3(0, 0, 0.3f);
-//    g_center += glm::vec3(0, 0, 0.3f);
-//    cameraChanged = true;
-//    break;
-//  case 'a':
-//    g_eye += glm::vec3(-0.3f, 0, 0);
-//    g_center += glm::vec3(-0.3f, 0, 0);
-//    cameraChanged = true;
-//    break;
-//  case 'd':
-//    g_eye += glm::vec3(0.3f, 0, 0);
-//    g_center += glm::vec3(0.3f, 0, 0);
-//    cameraChanged = true;
-//    break;
-//  case 'r':
-//    g_eye += glm::vec3(0, 0.3f, 0);
-//    g_center += glm::vec3(0, 0.3f, 0);
-//    cameraChanged = true;
-//    break;
-//  case 'f':
-//    g_eye += glm::vec3(0, -0.3f, 0);
-//    g_center += glm::vec3(0, -0.3f, 0);
-//    cameraChanged = true;
-//    break;
+  case 'w':
+    g_eye += glm::vec3(0, 0, -0.3f);
+    g_center += glm::vec3(0, 0, -0.3f);
+    cameraChanged = true;
+    break;
+  case 's':
+    g_eye += glm::vec3(0, 0, 0.3f);
+    g_center += glm::vec3(0, 0, 0.3f);
+    cameraChanged = true;
+    break;
+  case 'a':
+    g_eye += glm::vec3(-0.3f, 0, 0);
+    g_center += glm::vec3(-0.3f, 0, 0);
+    cameraChanged = true;
+    break;
+  case 'd':
+    g_eye += glm::vec3(0.3f, 0, 0);
+    g_center += glm::vec3(0.3f, 0, 0);
+    cameraChanged = true;
+    break;
+  case 'r':
+    g_eye += glm::vec3(0, 0.3f, 0);
+    g_center += glm::vec3(0, 0.3f, 0);
+    cameraChanged = true;
+    break;
+  case 'f':
+    g_eye += glm::vec3(0, -0.3f, 0);
+    g_center += glm::vec3(0, -0.3f, 0);
+    cameraChanged = true;
+    break;
   case ' ':
     g_wireRender = !g_wireRender;
     break;
