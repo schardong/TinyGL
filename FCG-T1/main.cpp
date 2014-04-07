@@ -180,7 +180,7 @@ void init()
   axis->m_modelMatrix = glm::mat4(1.f);
   axis->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * axis->m_modelMatrix));
 
-  Shader* g_shader = new Shader("fcgt1.vs", "fcgt1.fs");
+  Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);

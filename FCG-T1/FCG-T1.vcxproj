@@ -10,8 +10,21 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ciexyzmesh.cpp" />
+    <ClCompile Include="color.c" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ciexyzmesh.h" />
+    <ClInclude Include="color.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\fcgt1.fs" />
+    <None Include="..\Resources\fcgt1.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}</ProjectGuid>
+    <ProjectGuid>{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}</ProjectGuid>
     <RootNamespace>INF2610T2</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,15 +84,6 @@
       <AdditionalDependencies>TinyGL.lib;glew32.lib;freeglut.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Resources\ads_frag.fs" />
-    <None Include="..\Resources\ads_frag.vs" />
-    <None Include="..\Resources\ads_vertex.fs" />
-    <None Include="..\Resources\ads_vertex.vs" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

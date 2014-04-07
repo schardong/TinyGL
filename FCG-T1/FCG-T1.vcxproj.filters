@@ -15,21 +15,29 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ciexyzmesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="color.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\ads_frag.fs">
+    <ClInclude Include="ciexyzmesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\fcgt1.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\ads_frag.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\Resources\ads_vertex.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\Resources\ads_vertex.vs">
+    <None Include="..\Resources\fcgt1.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
