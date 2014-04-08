@@ -136,7 +136,7 @@ void init()
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 10000.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
 
   std::vector<glm::vec3> xyz;
   std::vector<glm::vec3> xyz_mesh;
@@ -148,6 +148,7 @@ void init()
   Axis* axis;
 
   float* beta = new float[10000 * 400 / STEP];
+  glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
   FILE* fp = fopen("beta_reflectance.dat", "rb");
   fread(beta, sizeof(float), 10000 * 400 / STEP, fp);
@@ -159,8 +160,19 @@ void init()
     glm::vec3 tmp(x, y, z);
     xyz.push_back(tmp);
 
-    corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
-    rgb.push_back(tmp);
+    rgb.push_back(glm::inverse(m) * tmp);
+  }
+
+  for (size_t i = 380; i < 780; i++) {
+    float x, y, z;
+    memset(beta, 0, sizeof(float)* 400 / STEP);
+    beta[i - 380] = 10.f;
+    corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta, &x, &y, &z, D65);
+
+    glm::vec3 tmp(x, y, z);
+    xyz.push_back(tmp);
+
+    rgb.push_back(m * tmp);
   }
 
   /*FILE* fp = fopen("beta_reflectance.dat", "wb+");
@@ -195,8 +207,9 @@ void init()
     glm::vec3 tmp = glm::vec3(x, y, z);
     xyz_mesh.push_back(tmp);
 
-    corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
-    rgb_mesh.push_back(tmp);
+    //corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
+
+    rgb_mesh.push_back(m * tmp);
   }
 
   cieclouds[XYZ] = new CIEPointCloud(xyz);
@@ -300,7 +313,7 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 10000.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.f);
 
   Shader* s = TinyGL::getInstance()->getShader("fcgt1");
   s->bind();
@@ -316,42 +329,17 @@ void keyPress(unsigned char c, int x, int y)
 
   switch (c) {
   case 'w':
-    g_eye += glm::vec3(0, 0, -0.3f);
-    g_center += glm::vec3(0, 0, -0.3f);
-    cameraChanged = true;
+    g_wireRender = !g_wireRender;
     break;
-  case 's':
-    g_eye += glm::vec3(0, 0, 0.3f);
-    g_center += glm::vec3(0, 0, 0.3f);
-    cameraChanged = true;
-    break;
-  case 'a':
-    g_eye += glm::vec3(-0.3f, 0, 0);
-    g_center += glm::vec3(-0.3f, 0, 0);
-    cameraChanged = true;
-    break;
-  case 'd':
-    g_eye += glm::vec3(0.3f, 0, 0);
-    g_center += glm::vec3(0.3f, 0, 0);
-    cameraChanged = true;
-    break;
-  case 'r':
-    g_eye += glm::vec3(0, 0.3f, 0);
-    g_center += glm::vec3(0, 0.3f, 0);
-    cameraChanged = true;
-    break;
-  case 'f':
-    g_eye += glm::vec3(0, -0.3f, 0);
-    g_center += glm::vec3(0, -0.3f, 0);
-    cameraChanged = true;
+  case 'm':
+    g_meshRender = !g_meshRender;
     break;
   }
 
-  if(g_wireRender) {
+  if(g_wireRender)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  } else {
+  else
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  }
 
   if(cameraChanged) {
     viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -395,12 +383,6 @@ void specialKeyPress(int c, int x, int y)
     break;
   case GLUT_KEY_F2:
     g_cloudRender = RGB;
-    break;
-  case GLUT_KEY_F10:
-    g_wireRender = !g_wireRender;
-    break;
-  case GLUT_KEY_F11:
-    g_meshRender = !g_meshRender;
     break;
   }
 
