@@ -130,9 +130,20 @@ int createBetaCurve(float* beta, size_t n)
   return 1;
 }
 
+void createAndWriteBeta(size_t num_samples, size_t delta)
+{
+  FILE* fp = fopen("beta_reflectance_1M.dat", "wb+");
+  float* beta = new float[num_samples * (400 / delta)];
+  for (int i = 0; i < num_samples; i++)
+    createBetaCurve(beta + i * (400 / delta), 400 / delta);
+  fwrite(beta, sizeof(float), num_samples * (400 / delta), fp);
+  fclose(fp);
+  delete[] beta;
+}
+
 void init()
 {
-  const int STEP = 1;
+  const int STEP = 20;
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -147,23 +158,30 @@ void init()
   std::vector<CIExyzMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  float* beta = new float[10000 * 400 / STEP];
+  createAndWriteBeta(500000, 1);
+  float* beta = new float[10000 * 400];
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
   FILE* fp = fopen("beta_reflectance.dat", "rb");
-  fread(beta, sizeof(float), 10000 * 400 / STEP, fp);
+  fread(beta, sizeof(float), 10000 * 400, fp);
 
   for (size_t i = 0; i < 10000; i++) {
     float x, y, z;
-    corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta + i * 400 / STEP, &x, &y, &z, D65);
+    float sum;
+    corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta + i * 400, &x, &y, &z, D55);
 
+    sum = x + y + z;
+    
     glm::vec3 tmp(x, y, z);
     xyz.push_back(tmp);
 
-    rgb.push_back(glm::inverse(m) * tmp);
+    corCIEXYZtosRGB(x, y, z, &tmp.x, &tmp.y, &tmp.z, D55);
+
+    rgb.push_back(/*m **/ tmp);
   }
 
-  for (size_t i = 380; i < 780; i++) {
+
+  /*for (size_t i = 380; i < 780; i++) {
     float x, y, z;
     memset(beta, 0, sizeof(float)* 400 / STEP);
     beta[i - 380] = 10.f;
@@ -171,9 +189,8 @@ void init()
 
     glm::vec3 tmp(x, y, z);
     xyz.push_back(tmp);
-
     rgb.push_back(m * tmp);
-  }
+  }*/
 
   /*FILE* fp = fopen("beta_reflectance.dat", "wb+");
   if (fp == NULL) Logger::getInstance()->error("Error while opening the beta_reflectance file for writting.");
@@ -207,9 +224,8 @@ void init()
     glm::vec3 tmp = glm::vec3(x, y, z);
     xyz_mesh.push_back(tmp);
 
-    //corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
-
-    rgb_mesh.push_back(m * tmp);
+    corCIEXYZtosRGB(x, y, z, &tmp.x, &tmp.y, &tmp.z, D55);
+    rgb_mesh.push_back(tmp);
   }
 
   cieclouds[XYZ] = new CIEPointCloud(xyz);
