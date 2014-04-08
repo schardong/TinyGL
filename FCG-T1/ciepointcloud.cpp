@@ -5,7 +5,7 @@ CIEPointCloud::CIEPointCloud(std::vector<glm::vec3> points)
 {
   std::vector<GLfloat> vertices(points.size() * 3);
 
-  for (int i = 0; i < vertices.size(); i += 3) {
+  for (size_t i = 0; i < vertices.size(); i += 3) {
     vertices[i] = points[i / 3].x;
     vertices[i + 1] = points[i / 3].y;
     vertices[i + 2] = points[i / 3].z;
