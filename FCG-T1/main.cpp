@@ -124,7 +124,7 @@ int createBetaCurve(float* beta, size_t n)
     return 0;
 
   for (size_t i = 0; i < n; i++) {
-    mts_bestseed(&mt_default_state);
+    mts_goodseed(&mt_default_state);
     beta[i] = (float)mt_drand();
   }
   return 1;
@@ -132,11 +132,18 @@ int createBetaCurve(float* beta, size_t n)
 
 void createAndWriteBeta(size_t num_samples, size_t delta)
 {
-  FILE* fp = fopen("beta_reflectance_1M.dat", "wb+");
-  float* beta = new float[num_samples * (400 / delta)];
-  for (int i = 0; i < num_samples; i++)
-    createBetaCurve(beta + i * (400 / delta), 400 / delta);
-  fwrite(beta, sizeof(float), num_samples * (400 / delta), fp);
+  std::string filename = "beta_reflectance_" + std::to_string(num_samples) + "_" + std::to_string(delta) + ".dat";
+  FILE* fp = fopen(filename.c_str(), "wb+");
+
+  float* beta = new float[400 / delta];
+
+  for (int i = 0; i < num_samples; i++) {
+    createBetaCurve(beta, 400 / delta);
+    if (i % 100 == 0)
+      Logger::getInstance()->log(std::to_string(i) + " beta spectrum");
+    fwrite(beta, sizeof(float), 400 / delta, fp);
+  }
+
   fclose(fp);
   delete[] beta;
 }
@@ -158,11 +165,11 @@ void init()
   std::vector<CIExyzMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  createAndWriteBeta(500000, 1);
+  createAndWriteBeta(15000, 1);
   float* beta = new float[10000 * 400];
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
-  FILE* fp = fopen("beta_reflectance.dat", "rb");
+  FILE* fp = fopen("beta_reflectance_10k_rand.dat", "rb");
   fread(beta, sizeof(float), 10000 * 400, fp);
 
   for (size_t i = 0; i < 10000; i++) {
