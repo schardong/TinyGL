@@ -150,7 +150,7 @@ void createAndWriteBeta(size_t num_samples, size_t delta)
 
 void init()
 {
-  const int STEP = 20;
+  const int STEP = 10;
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -165,14 +165,14 @@ void init()
   std::vector<CIExyzMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  createAndWriteBeta(15000, 1);
-  float* beta = new float[10000 * 400];
+  //createAndWriteBeta(15000, 1);
+  float* beta = new float[15000 * 400];
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
-  FILE* fp = fopen("beta_reflectance_10k_rand.dat", "rb");
-  fread(beta, sizeof(float), 10000 * 400, fp);
+  FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
+  fread(beta, sizeof(float), 15000 * 400, fp);
 
-  for (size_t i = 0; i < 10000; i++) {
+  for (size_t i = 0; i < 15000; i++) {
     float x, y, z;
     float sum;
     corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta + i * 400, &x, &y, &z, D55);
