@@ -183,9 +183,7 @@ void init()
   fread(beta, sizeof(float), 100000 * 400, fp);
 
   for (size_t i = 0; i < 100000; i++) {
-    
     glm::vec3 tmp = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
-   
     xyz.push_back(tmp);
     rgb.push_back(m * tmp);
   }
@@ -198,14 +196,30 @@ void init()
   const float Y_STEP = 0.1f;
   float lw[3];
   getReferenceWhite(lw, D65);
+  beta = new float[400 * 400];
+
+  for (int i = 0; i < 400; i++) {
+    beta[i * 400 + i] = 1.f;
+  }
     
   for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
     float lws[3];
     lws[0] = Y * lw[0];
     lws[1] = Y * lw[1];
     lws[2] = Y * lw[2];
+    glm::vec3 ciexyz;
 
-    for (float lambda = 380.f; lambda < 780.f; lambda += 1.f) {
+    for (int i = 0; i < 400; i++) {
+      ciexyz = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
+      ciexyz.x *= lws[0];
+      ciexyz.y *= lws[1];
+      ciexyz.z *= lws[2];
+      xyz_mesh.push_back(ciexyz);
+      rgb_mesh.push_back(m * ciexyz);
+    }
+    
+
+    /*for (float lambda = 380.f; lambda < 780.f; lambda += 1.f) {
       float x, y, z;
       float sum = 0.f;
       corGetCIExyz(lambda, &x, &y, &z);
@@ -222,11 +236,12 @@ void init()
       glm::vec3 tmp(x, y, z);
       xyz_mesh.push_back(tmp);
       rgb_mesh.push_back(m * tmp);
-    }
+    }*/
   }
   xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
   rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
 
+  delete[] beta;
   delete[] illum;
 
   /*for (size_t i = 380; i < 780; i++) {
