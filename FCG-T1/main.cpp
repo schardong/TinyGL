@@ -137,7 +137,7 @@ void createAndWriteBeta(size_t num_samples, size_t delta)
 
   float* beta = new float[400 / delta];
 
-  for (int i = 0; i < num_samples; i++) {
+  for (size_t i = 0; i < num_samples; i++) {
     createBetaCurve(beta, 400 / delta);
     if (i % 100 == 0)
       Logger::getInstance()->log(std::to_string(i) + " beta spectrum");
@@ -150,7 +150,7 @@ void createAndWriteBeta(size_t num_samples, size_t delta)
 
 void init()
 {
-  const int STEP = 10;
+  const int STEP = 5;
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -165,7 +165,6 @@ void init()
   std::vector<CIExyzMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  //createAndWriteBeta(15000, 1);
   float* beta = new float[15000 * 400];
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
@@ -187,6 +186,22 @@ void init()
     rgb.push_back(/*m **/ tmp);
   }
 
+  delete[] beta;
+
+  //variar o Y de 0 até 1
+  //calcular a curva beta  de forma a montar a superfície do plano
+  //feito isso, interpolar os pontos gerados e formar uma malha de triangulos.
+  /*const float Y_STEP = 0.1f;
+  for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
+    for (float lambda = 380.f; lambda < 780.f; lambda += 1.f) {
+      float x, y, X, Z;
+      corGetCIExyfromLambda(lambda, &x, &y);
+      corCIExyYtoXYZ(x, y, Y, &X, &Z);
+      glm::vec3 tmp(X, Y, Z);
+      xyz.push_back(glm::vec3(X, Y, Z));
+      rgb.push_back(m * tmp);
+    }
+  }*/
 
   /*for (size_t i = 380; i < 780; i++) {
     float x, y, z;
@@ -198,17 +213,8 @@ void init()
     xyz.push_back(tmp);
     rgb.push_back(m * tmp);
   }*/
-
-  /*FILE* fp = fopen("beta_reflectance.dat", "wb+");
-  if (fp == NULL) Logger::getInstance()->error("Error while opening the beta_reflectance file for writting.");
-  else {
-  for (int i = 0; i < 10000; i++) {
-  fwrite(beta[i], sizeof(float), 400 / STEP, fp);
-  }
-  }
-  fclose(fp);*/
-
-  delete[] beta;
+  
+  
 
   for (float i = 0; i < 400; i += STEP) {
     float xbar, ybar, zbar;
@@ -231,7 +237,7 @@ void init()
     glm::vec3 tmp = glm::vec3(x, y, z);
     xyz_mesh.push_back(tmp);
 
-    corCIEXYZtosRGB(x, y, z, &tmp.x, &tmp.y, &tmp.z, D55);
+    corCIEXYZtoCIERGB(x, y, z, &tmp.x, &tmp.y, &tmp.z);
     rgb_mesh.push_back(tmp);
   }
 
@@ -246,7 +252,7 @@ void init()
   cieclouds[RGB]->setDrawCb(drawPointsArrays);
   cieclouds[RGB]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIErgbCloud", cieclouds[RGB]);
-  cieclouds[RGB]->m_modelMatrix = glm::mat4(1.f);
+  cieclouds[RGB]->m_modelMatrix = glm::mat4(m);
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
 
   ciemesh[XYZ] = new CIExyzMesh(xyz_mesh);
@@ -260,7 +266,7 @@ void init()
   ciemesh[RGB]->setDrawCb(drawLinesIdx);
   ciemesh[RGB]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[RGB]);
-  ciemesh[RGB]->m_modelMatrix = glm::mat4(1.f);
+  ciemesh[RGB]->m_modelMatrix = glm::mat4(m);
   ciemesh[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[RGB]->m_modelMatrix));
 
   axis = new Axis(glm::vec2(-1, 1), glm::vec2(-1, 1), glm::vec2(-1, 1));
