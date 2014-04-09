@@ -29,4 +29,9 @@ glm::vec3 createCIEXYZ(float* beta, float* illuminant, std::vector<glm::vec3> xy
   return ciexyz;
 }
 
+glm::vec3 createCIEXYZHull(float* beta, float illuminant, std::vector<glm::vec3> xyzbar, size_t step, glm::vec3 ref_white, float Y)
+{
+  return glm::vec3();
+}
+
 #endif

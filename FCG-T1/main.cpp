@@ -151,7 +151,7 @@ void createAndWriteBeta(size_t num_samples, size_t delta)
 
 void init()
 {
-  const int STEP = 1;
+  const int STEP = 50;
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -203,7 +203,7 @@ void init()
     beta[i * 400 + i] = 100.f;
   }
     
-  for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
+  /*for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
     float lws[3];
     lws[0] = Y * lw[0];
     lws[1] = Y * lw[1];
@@ -213,79 +213,45 @@ void init()
     for (int i = 0; i < 400; i++) {
       ciexyz = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
       ciexyz.x *= lws[0];
-      ciexyz.y *= lws[1];
-      ciexyz.z *= lws[2];
+      ciexyz.y *= lws[0];
+      ciexyz.z *= lws[0];
       xyz_mesh.push_back(ciexyz);
       rgb_mesh.push_back(m * ciexyz);
     }
-    
+  }*/
 
-    /*for (float lambda = 380.f; lambda < 780.f; lambda += 1.f) {
-      float x, y, z;
-      float sum = 0.f;
-      corGetCIExyz(lambda, &x, &y, &z);
-            
-      sum = (x + y + z);
-      if (sum == 0)
-        x = y = z = 0.f;
-      else {
-        x = lws[0] * x / sum;
-        y = lws[1] * y / sum;
-        z = lws[2] * z / sum;
-      }
-     
-      glm::vec3 tmp(x, y, z);
-      xyz_mesh.push_back(tmp);
-      rgb_mesh.push_back(m * tmp);
-    }*/
+  /*float x = xyz.x/(xyz.x+xyz.y+xyz.z);
+		float y = xyz.y/(xyz.x+xyz.y+xyz.z);
+
+		//TODO: Check this multiplication by 10.0
+		//m_values->at(i).y = (xyz.y>0.1f)?xyz.y:10.0; 
+		m_values->at(i).y = 10.0 * xyz.y;
+		m_values->at(i).x = (x/y)*(m_values->at(i).y);
+		m_values->at(i).z = ((1.0-x-y)/y)*(m_values->at(i).y);*/
+
+  for (int i = 0; i < 400; i++) {
+    float x, y, z;
+    corGetCIExyz(380.f + i, &x, &y, &z);
+
+    float sum = (x + y + z);
+    x = x / sum;
+    y = y / sum;
+
+    glm::vec3 tmp;
+    tmp.y = 100/y;
+    tmp.x = (x / y) * (tmp.y);
+    tmp.z = ((1 - x - y) / y) * tmp.y;
+    xyz_mesh.push_back(tmp);
+    rgb_mesh.push_back(m*tmp);
+
   }
+
   xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
   rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
 
   delete[] beta;
-  delete[] illum;
-
-  /*for (size_t i = 380; i < 780; i++) {
-    float x, y, z;
-    memset(beta, 0, sizeof(float)* 400 / STEP);
-    beta[i - 380] = 10.f;
-    corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta, &x, &y, &z, D65);
-
-    glm::vec3 tmp(x, y, z);
-    xyz.push_back(tmp);
-    rgb.push_back(m * tmp);
-  }*/
+  delete[] illum;  
   
-  
-
-  /*for (float i = 0; i < 400; i += STEP) {
-    float xbar, ybar, zbar;
-    float x, y, z;
-    float lambda = 380.f + i;
-
-    corGetCIExyz(lambda, &xbar, &ybar, &zbar);
-
-    xbar /= ybar;
-    ybar /= ybar;
-    zbar /= ybar;
-
-    float sum = (xbar + ybar + zbar);
-
-   
-    if (sum == 0) {
-      x = y = z = 0.f;
-    }
-    else {
-      x = xbar / sum;
-      y = ybar / sum;
-      z = zbar / sum;
-    }
-
-    glm::vec3 tmp = glm::vec3(x, y, z);
-    xyz_mesh.push_back(tmp);
-    rgb_mesh.push_back(m * tmp);
-  }*/
-
   cieclouds[XYZ] = new CIEPointCloud(xyz);
   cieclouds[XYZ]->setDrawCb(drawPointsArrays);
   cieclouds[XYZ]->setMaterialColor(glm::vec4(0));
