@@ -6,7 +6,7 @@
 #include "grid.h"
 #include "sphere.h"
 #include "axis.h"
-#include "ciexyzmesh.h"
+#include "ciemesh.h"
 #include "ciepointcloud.h"
 
 #include <GL/glew.h>
@@ -162,10 +162,10 @@ void init()
   std::vector<glm::vec3> rgb_mesh;
 
   std::vector<CIEPointCloud*> cieclouds(n_colorspaces);
-  std::vector<CIExyzMesh*> ciemesh(n_colorspaces);
+  std::vector<CIEMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  float* beta = new float[15000 * 400];
+  float* beta = new float[100000 * 400];
   float* A_illum = new float[400];
   float* xbar = new float[400];
   float* ybar = new float[400];
@@ -178,10 +178,10 @@ void init()
 
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
-  FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
-  fread(beta, sizeof(float), 15000 * 400, fp);
+  FILE* fp = fopen("beta_reflectance_100000_1.dat", "rb");
+  fread(beta, sizeof(float), 100000 * 400, fp);
 
-  for (size_t i = 0; i < 15000; i++) {
+  for (size_t i = 0; i < 100000; i++) {
     float x, y, z, n;
     x = y = z = n = 0.f;
     
@@ -303,14 +303,14 @@ void init()
   cieclouds[RGB]->m_modelMatrix = glm::mat4(glm::inverse(m));
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
 
-  ciemesh[XYZ] = new CIExyzMesh(xyz_mesh);
+  ciemesh[XYZ] = new CIEMesh(xyz_mesh);
   ciemesh[XYZ]->setDrawCb(drawLinesIdx);
   ciemesh[XYZ]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
   ciemesh[XYZ]->m_modelMatrix = glm::mat4(1.f);
   ciemesh[XYZ]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[XYZ]->m_modelMatrix));
 
-  ciemesh[RGB] = new CIExyzMesh(rgb_mesh);
+  ciemesh[RGB] = new CIEMesh(rgb_mesh);
   ciemesh[RGB]->setDrawCb(drawLinesIdx);
   ciemesh[RGB]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[RGB]);

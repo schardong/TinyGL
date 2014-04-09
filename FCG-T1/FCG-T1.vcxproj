@@ -12,14 +12,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ciepointcloud.cpp" />
-    <ClCompile Include="ciexyzmesh.cpp" />
+    <ClCompile Include="ciemesh.cpp" />
     <ClCompile Include="color.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mtwist.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ciepointcloud.h" />
-    <ClInclude Include="ciexyzmesh.h" />
+    <ClInclude Include="ciemesh.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="mtwist.h" />
   </ItemGroup>
