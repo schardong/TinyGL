@@ -967,6 +967,17 @@ int corCIEab_tosRGBwithMaxL(float a, float b, float* R, float* G, float* B, floa
 	return ok;	
 }
 
+int getReferenceWhite(float* lw, int reference_light)
+{
+  if (lw == 0 || reference_light >= n_illuminants) return 0;
+
+  lw[0] = reference_white[reference_light][0];
+  lw[1] = reference_white[reference_light][1];
+  lw[2] = reference_white[reference_light][2];
+
+  return 1;
+}
+
 #undef RAD2DEG
 #undef DEG2RAD
 

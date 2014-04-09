@@ -83,5 +83,7 @@ int corCIELabtosRGB(float L, float a, float b, float* R, float* G, float* B, int
 /* finds the sRGB value of a color with CIELab, (a,b) value with the maximum lightness L */
 int corCIEab_tosRGBwithMaxL(float a, float b, float* R, float* G, float* B, float* L,int reference_light);
 
+/* stores the reference white CIEXYZ values on the lw array. */
+int getReferenceWhite(float* lw, int reference_light);
 
 #endif
