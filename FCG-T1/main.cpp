@@ -8,6 +8,7 @@
 #include "axis.h"
 #include "ciemesh.h"
 #include "ciepointcloud.h"
+#include "colorspace.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -166,14 +167,14 @@ void init()
   Axis* axis;
 
   float* beta = new float[100000 * 400];
-  float* A_illum = new float[400];
-  float* xbar = new float[400];
-  float* ybar = new float[400];
-  float* zbar = new float[400];
+  float* illum = new float[400];
+  std::vector<glm::vec3> xyzbar;
 
   for (int i = 0; i < 400; i++)  {
-    A_illum[i] = corGetD65(380.f + i);
-    corGetCIExyz(380.f + i, &xbar[i], &ybar[i], &zbar[i]);
+    float x, y, z;
+    illum[i] = corGetD65(380.f + i);
+    corGetCIExyz(380.f + i, &x, &y, &z);
+    xyzbar.push_back(glm::vec3(x, y, z));
   }
 
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
@@ -182,31 +183,13 @@ void init()
   fread(beta, sizeof(float), 100000 * 400, fp);
 
   for (size_t i = 0; i < 100000; i++) {
-    float x, y, z, n;
-    x = y = z = n = 0.f;
     
-    for (size_t j = 0; j < 400; j += STEP) {
-      int idx = i * 400 + j;
-      float lb = beta[idx] * A_illum[j];
-      x += xbar[j] * lb;
-      y += ybar[j] * lb;
-      z += zbar[j] * lb;
-      n += ybar[j] * A_illum[j];
-    }
-
-    x /= n;
-    y /= n;
-    z /= n;
-        
-    glm::vec3 tmp(x, y, z);
+    glm::vec3 tmp = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
+   
     xyz.push_back(tmp);
     rgb.push_back(m * tmp);
   }
 
-  delete[] xbar;
-  delete[] ybar;
-  delete[] zbar;
-  delete[] A_illum;
   delete[] beta;
 
   //variar o Y de 0 até 1
@@ -215,10 +198,6 @@ void init()
   const float Y_STEP = 0.1f;
   float lw[3];
   getReferenceWhite(lw, D65);
-  float white_spectrum[400];
-  for (int i = 0; i < 400; i++) {
-    white_spectrum[i] = corGetD65(380.f + i);
-  }
     
   for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
     float lws[3];
@@ -247,6 +226,8 @@ void init()
   }
   xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
   rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
+
+  delete[] illum;
 
   /*for (size_t i = 380; i < 780; i++) {
     float x, y, z;

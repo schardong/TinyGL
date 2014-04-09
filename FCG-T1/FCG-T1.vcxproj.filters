@@ -44,6 +44,9 @@
     <ClInclude Include="ciemesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="colorspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt1.fs">

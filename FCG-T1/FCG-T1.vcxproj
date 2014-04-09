@@ -21,6 +21,7 @@
     <ClInclude Include="ciepointcloud.h" />
     <ClInclude Include="ciemesh.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="colorspace.h" />
     <ClInclude Include="mtwist.h" />
   </ItemGroup>
   <ItemGroup>
