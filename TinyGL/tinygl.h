@@ -41,11 +41,14 @@ public:
     return m_shaderMap[name];
   }
 
-protected:
-  std::map<std::string, Mesh*> m_meshMap;
-  std::map<std::string, Shader*> m_shaderMap;
+  Mesh* getMesh(std::string name)
+  {
+    return m_meshMap[name];
+  }
 
 private:
+  std::map<std::string, Mesh*> m_meshMap;
+  std::map<std::string, Shader*> m_shaderMap;
 };
 
 #endif // TINY_GL_H
