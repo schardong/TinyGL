@@ -175,9 +175,7 @@ void init()
     float x, y, z;
     float sum;
     corCIEXYZfromSurfaceReflectance(380.f, 400 / STEP, STEP, beta + i * 400, &x, &y, &z, D55);
-
-    sum = x + y + z;
-    
+        
     glm::vec3 tmp(x, y, z);
     xyz.push_back(tmp);
 
@@ -191,17 +189,27 @@ void init()
   //variar o Y de 0 até 1
   //calcular a curva beta  de forma a montar a superfície do plano
   //feito isso, interpolar os pontos gerados e formar uma malha de triangulos.
-  /*const float Y_STEP = 0.1f;
+  const float Y_STEP = 0.01f;
   for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
     for (float lambda = 380.f; lambda < 780.f; lambda += 1.f) {
-      float x, y, X, Z;
-      corGetCIExyfromLambda(lambda, &x, &y);
-      corCIExyYtoXYZ(x, y, Y, &X, &Z);
-      glm::vec3 tmp(X, Y, Z);
-      xyz.push_back(glm::vec3(X, Y, Z));
-      rgb.push_back(m * tmp);
+      float x, y, z;
+      float sum = 0.f;
+      corGetCIExyz(lambda, &x, &y, &z);
+      sum = (x + y + z);
+      if (sum == 0)
+        x = y = z = 0.f;
+      else {
+        x = Y * x / sum;
+        y = Y * y / sum;
+        z = Y * z / sum;
+      }
+     
+      glm::vec3 tmp(x, y, z);
+      xyz.push_back(tmp);
+      corCIEXYZtosRGB(x, y, z, &tmp.x, &tmp.y, &tmp.z, D55);
+      rgb.push_back(/*m **/ tmp);
     }
-  }*/
+  }
 
   /*for (size_t i = 380; i < 780; i++) {
     float x, y, z;
