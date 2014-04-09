@@ -166,7 +166,7 @@ void init()
   std::vector<CIEMesh*> ciemesh(n_colorspaces);
   Axis* axis;
 
-  float* beta = new float[100000 * 400];
+  float* beta = new float[15000 * 400];
   float* illum = new float[400];
   std::vector<glm::vec3> xyzbar;
 
@@ -179,10 +179,10 @@ void init()
 
   glm::mat3 m = glm::inverse(glm::mat3({ 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 }));
 
-  FILE* fp = fopen("beta_reflectance_100000_1.dat", "rb");
-  fread(beta, sizeof(float), 100000 * 400, fp);
+  FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
+  fread(beta, sizeof(float), 15000 * 400, fp);
 
-  for (size_t i = 0; i < 100000; i++) {
+  for (size_t i = 0; i < 15000; i++) {
     glm::vec3 tmp = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
     xyz.push_back(tmp);
     rgb.push_back(m * tmp);
@@ -197,9 +197,10 @@ void init()
   float lw[3];
   getReferenceWhite(lw, D65);
   beta = new float[400 * 400];
+  memset(beta, 0, sizeof(float)* 400 * 400);
 
   for (int i = 0; i < 400; i++) {
-    beta[i * 400 + i] = 1.f;
+    beta[i * 400 + i] = 100.f;
   }
     
   for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
