@@ -119,39 +119,9 @@ void initGLEW()
   initGLEWCalled = true;
 }
 
-int createBetaCurve(float* beta, size_t n)
-{
-  if (beta == NULL || n == 0)
-    return 0;
-
-  for (size_t i = 0; i < n; i++) {
-    mts_goodseed(&mt_default_state);
-    beta[i] = (float)mt_drand();
-  }
-  return 1;
-}
-
-void createAndWriteBeta(size_t num_samples, size_t delta)
-{
-  std::string filename = "beta_reflectance_" + std::to_string(num_samples) + "_" + std::to_string(delta) + ".dat";
-  FILE* fp = fopen(filename.c_str(), "wb+");
-
-  float* beta = new float[400 / delta];
-
-  for (size_t i = 0; i < num_samples; i++) {
-    createBetaCurve(beta, 400 / delta);
-    if (i % 100 == 0)
-      Logger::getInstance()->log(std::to_string(i) + " beta spectrum");
-    fwrite(beta, sizeof(float), 400 / delta, fp);
-  }
-
-  fclose(fp);
-  delete[] beta;
-}
-
 void init()
 {
-  const int STEP = 50;
+  const int STEP = 1;
   g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -193,63 +163,26 @@ void init()
   //variar o Y de 0 até 1
   //calcular a curva beta  de forma a montar a superfície do plano
   //feito isso, interpolar os pontos gerados e formar uma malha de triangulos.
-  const float Y_STEP = 0.1f;
-  float lw[3];
-  getReferenceWhite(lw, D65);
-  beta = new float[400 * 400];
-  memset(beta, 0, sizeof(float)* 400 * 400);
+  const float Y_STEP = 0.1f;   
 
-  for (int i = 0; i < 400; i++) {
-    beta[i * 400 + i] = 100.f;
-  }
-    
-  /*for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
-    float lws[3];
-    lws[0] = Y * lw[0];
-    lws[1] = Y * lw[1];
-    lws[2] = Y * lw[2];
-    glm::vec3 ciexyz;
+  /*float sum = tmp.x + tmp.y + tmp.z;
+  tmp = tmp * (1 / sum) * 0.3f;*/
+  for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
+    float sum = 0.f;
+    glm::vec3 ciexyz = createCIEXYZPureSource(illum, xyzbar, STEP);
+    sum = ciexyz.x + ciexyz.y + ciexyz.z;
 
-    for (int i = 0; i < 400; i++) {
-      ciexyz = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
-      ciexyz.x *= lws[0];
-      ciexyz.y *= lws[0];
-      ciexyz.z *= lws[0];
-      xyz_mesh.push_back(ciexyz);
-      rgb_mesh.push_back(m * ciexyz);
-    }
-  }*/
+    ciexyz.x /= sum;
+    ciexyz.y /= sum;
+    ciexyz.z /= sum;
 
-  /*float x = xyz.x/(xyz.x+xyz.y+xyz.z);
-		float y = xyz.y/(xyz.x+xyz.y+xyz.z);
-
-		//TODO: Check this multiplication by 10.0
-		//m_values->at(i).y = (xyz.y>0.1f)?xyz.y:10.0; 
-		m_values->at(i).y = 10.0 * xyz.y;
-		m_values->at(i).x = (x/y)*(m_values->at(i).y);
-		m_values->at(i).z = ((1.0-x-y)/y)*(m_values->at(i).y);*/
-
-  for (int i = 0; i < 400; i++) {
-    float x, y, z;
-    corGetCIExyz(380.f + i, &x, &y, &z);
-
-    float sum = (x + y + z);
-    x = x / sum;
-    y = y / sum;
-
-    glm::vec3 tmp;
-    tmp.y = 100/y;
-    tmp.x = (x / y) * (tmp.y);
-    tmp.z = ((1 - x - y) / y) * tmp.y;
-    xyz_mesh.push_back(tmp);
-    rgb_mesh.push_back(m*tmp);
-
+    xyz_mesh.push_back(ciexyz);
+    rgb_mesh.push_back(m * ciexyz);
   }
 
-  xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
-  rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
+  //xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
+  //rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
 
-  delete[] beta;
   delete[] illum;  
   
   cieclouds[XYZ] = new CIEPointCloud(xyz);
@@ -267,7 +200,7 @@ void init()
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
 
   ciemesh[XYZ] = new CIEMesh(xyz_mesh);
-  ciemesh[XYZ]->setDrawCb(drawLinesIdx);
+  ciemesh[XYZ]->setDrawCb(drawPointsArrays);
   ciemesh[XYZ]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
   ciemesh[XYZ]->m_modelMatrix = glm::mat4(1.f);
@@ -326,7 +259,7 @@ void draw()
   switch (g_cloudRender) {
   case XYZ:
     s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzCloud")->m_modelMatrix);
-    glPtr->draw("CIExyzCloud");
+    //glPtr->draw("CIExyzCloud");
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzMesh")->m_modelMatrix);
       glPtr->draw("CIExyzMesh");
@@ -334,7 +267,7 @@ void draw()
     break;
   case RGB:
     s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbCloud")->m_modelMatrix);
-    glPtr->draw("CIErgbCloud");
+    //glPtr->draw("CIErgbCloud");
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbMesh")->m_modelMatrix); 
       glPtr->draw("CIErgbMesh");
