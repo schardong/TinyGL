@@ -8,6 +8,7 @@
 extern "C" {
 #include "mtwist.h"
 #include "color.h"
+#include "math.h"
 }
 
 glm::vec3 createCIEXYZ(float* beta, float* illuminant, std::vector<glm::vec3> xyzbar, size_t step)
@@ -89,6 +90,43 @@ void createAndWriteBeta(size_t num_samples, size_t delta)
 
   fclose(fp);
   delete[] beta;
+}
+
+glm::vec3 rgbToCIERGB(glm::vec3 rgb)
+{
+  glm::vec3 tmp;
+
+  if (rgb.r <= 0.0031308)
+    tmp.r = 12.92 * rgb.r;
+  else
+    tmp.r = 1.055 * pow(rgb.r, 1.f / 2.4f) - 0.055;
+
+  if (rgb.g <= 0.0031308)
+    tmp.g = 12.92 * rgb.g;
+  else
+    tmp.g = 1.055 * pow(rgb.g, 1.f / 2.4f) - 0.055;
+
+  if (rgb.b <= 0.0031308)
+    tmp.b = 12.92 * rgb.b;
+  else
+    tmp.b = 1.055 * pow(rgb.b, 1.f / 2.4f) - 0.055;
+
+  return tmp;
+}
+
+glm::vec3 CIEXYZtoCIEsRGB(glm::vec3 ciexyz, glm::vec3 white)
+{
+  glm::mat3 m = { 0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920, 0.9503041 };
+
+  glm::vec3 xyz = ciexyz;
+  xyz.x /= white.x;
+  xyz.y /= white.y;
+  xyz.z /= white.z;
+
+  glm::vec3 rgb;
+  rgb = m * xyz;
+
+  return rgb;
 }
 
 #endif
