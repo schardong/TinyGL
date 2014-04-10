@@ -4,13 +4,10 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 {
   std::vector<GLfloat> vertices(xyz.size() * 3);
   
-  size_t max_x = 0;
   for(size_t i = 0; i < vertices.size(); i += 3) {
     vertices[i] = xyz[i/3].x;
     vertices[i + 1] = xyz[i/3].y;
     vertices[i + 2] = xyz[i/3].z;
-
-    if (xyz[i / 3].x > xyz[max_x].x) max_x = i / 3;
   }
   
   std::vector<GLfloat> colors(vertices.size());
@@ -33,9 +30,9 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 
   //Connect the middle points. Form the triangles from the i row with the
   //i + 1 row.
-  for (size_t i = tmp_addr; i < slices * tmp_addr; i++) {
+  for (size_t i = tmp_addr; i < slices * tmp_addr - 1; i++) {
     indices.push_back(i);
-    indices.push_back(i +tmp_addr);
+    indices.push_back(i + tmp_addr);
     indices.push_back(i+1);
 
     indices.push_back(i + tmp_addr);
@@ -43,27 +40,29 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
     indices.push_back(i + 1);
   }
 
-  //Connect all of the points with the (0,0,0) point (black).
-  /*for (size_t i = 0; i < vertices.size() / 3 - 2 ; i++) {
+  //Connect all the points with the white point (which is suposed to be the
+  //last point on the set).
+  tmp_addr *= (slices - 1);
+  size_t max_x = 0;
+  for (size_t i = tmp_addr; i < xyz.size() - 2; i++) {
     indices.push_back(i);
+    indices.push_back(xyz.size() - 1);
     indices.push_back(i + 1);
-    indices.push_back(0);
-  }*/
+    if (xyz[i].x > xyz[max_x].x)
+      max_x = i;
+  }
 
-  //Connect all the points with the (1,1,1) point (white).
-  /*for (size_t i = 1; i < vertices.size() / 3 - 1; i++) {
-    indices.push_back(i);
-    indices.push_back(i + 1);
-    indices.push_back((vertices.size() / 3 - 1));
-  }*/
+  //Connect the black, blue and red point. This creates the purple line and
+  //The triangle that is under the spectrum.
+  indices.push_back(tmp_addr+1);
+  indices.push_back(0);
+  indices.push_back(max_x);
 
-  ////Connect the 380nm and 780nm points to form the purple line (white point).
-  //indices.push_back(1);
-  //indices.push_back(max_x);
-  //indices.push_back((vertices.size() / 3));
-
-  ////Connect the 380nm and 780nm points to form the purple line (black point).
-  
+  //Connect the white, blue and red point. This closes the spectrum by creating
+  //the triangle at it's front.
+  indices.push_back(tmp_addr+1);
+  indices.push_back(max_x);
+  indices.push_back(xyz.size() - 1);
   
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);

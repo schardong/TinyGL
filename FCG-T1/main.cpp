@@ -123,7 +123,7 @@ void initGLEW()
 void init()
 {
   const int STEP = 1;
-  g_eye = glm::vec3(3.5, 3.5, 3.5);
+  g_eye = glm::vec3(2.5, 2.5, 2.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -170,7 +170,7 @@ void init()
 
   //variar o Y de 0 até 1
   //feito isso, interpolar os pontos gerados e formar uma malha de triangulos.
-  const float Y_STEP = 0.2f;   
+  const float Y_STEP = 0.1f;   
   float lwv[3];
   getReferenceWhite(lwv, D65);
   glm::vec3 lw(lwv[0], lwv[1], lwv[2]);
