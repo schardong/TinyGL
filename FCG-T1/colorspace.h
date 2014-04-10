@@ -47,9 +47,8 @@ glm::vec3 createCIEXYZPureSource(float* illuminant, std::vector<glm::vec3> xyzba
     ciexyz.x += illuminant[i] * xyzbar[i].x;
     ciexyz.y += illuminant[i] * xyzbar[i].y;
     ciexyz.z += illuminant[i] * xyzbar[i].z;
+    n += illuminant[i] * xyzbar[i].y;
   }
-
-  n = ciexyz.x + ciexyz.y + ciexyz.z;
 
   if (n != 0) {
     ciexyz.x /= n;

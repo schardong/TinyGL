@@ -122,7 +122,7 @@ void initGLEW()
 void init()
 {
   const int STEP = 1;
-  g_eye = glm::vec3(2.5, 2.5, 2.5);
+  g_eye = glm::vec3(3.5, 3.5, 3.5);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -161,27 +161,37 @@ void init()
   delete[] beta;
 
   //variar o Y de 0 até 1
-  //calcular a curva beta  de forma a montar a superfície do plano
   //feito isso, interpolar os pontos gerados e formar uma malha de triangulos.
-  const float Y_STEP = 0.1f;   
+  const float Y_STEP = 0.2f;   
+  float lwv[3];
+  getReferenceWhite(lwv, D65);
+  glm::vec3 lw(lwv[0], lwv[1], lwv[2]);
+  float limit = glm::length(lw) * glm::length(lw);
 
-  /*float sum = tmp.x + tmp.y + tmp.z;
-  tmp = tmp * (1 / sum) * 0.3f;*/
-  for (float Y = Y_STEP; Y < 1.f; Y += Y_STEP) {
-    float sum = 0.f;
-    glm::vec3 ciexyz = createCIEXYZPureSource(illum, xyzbar, STEP);
-    sum = ciexyz.x + ciexyz.y + ciexyz.z;
+  for (float Y = Y_STEP; Y < limit; Y += Y_STEP) {
 
-    ciexyz.x /= sum;
-    ciexyz.y /= sum;
-    ciexyz.z /= sum;
+    for (int i = 0; i < 400; i++) {
+      float x, y, z, sum;
+      corGetCIExyz(380.f + i, &x, &y, &z);
+      sum = x + y + z;
 
-    xyz_mesh.push_back(ciexyz);
-    rgb_mesh.push_back(m * ciexyz);
+      if (sum == 0)
+        x = y = z = 0.f;
+      else {
+        x /= sum;
+        y /= sum;
+        z /= sum;
+      }
+
+      glm::vec3 ciexyz(x, y, z);
+      xyz_mesh.push_back(ciexyz * Y);
+      rgb_mesh.push_back(m * ciexyz * Y);
+    }
+
   }
 
-  //xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
-  //rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
+  xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
+  rgb_mesh.push_back(m * glm::vec3(lw[0], lw[1], lw[2]));
 
   delete[] illum;  
   
@@ -200,7 +210,7 @@ void init()
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
 
   ciemesh[XYZ] = new CIEMesh(xyz_mesh);
-  ciemesh[XYZ]->setDrawCb(drawPointsArrays);
+  ciemesh[XYZ]->setDrawCb(drawLinesIdx);
   ciemesh[XYZ]->setMaterialColor(glm::vec4(0));
   TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
   ciemesh[XYZ]->m_modelMatrix = glm::mat4(1.f);
@@ -259,7 +269,7 @@ void draw()
   switch (g_cloudRender) {
   case XYZ:
     s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzCloud")->m_modelMatrix);
-    //glPtr->draw("CIExyzCloud");
+    glPtr->draw("CIExyzCloud");
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzMesh")->m_modelMatrix);
       glPtr->draw("CIExyzMesh");
@@ -267,7 +277,7 @@ void draw()
     break;
   case RGB:
     s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbCloud")->m_modelMatrix);
-    //glPtr->draw("CIErgbCloud");
+    glPtr->draw("CIErgbCloud");
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbMesh")->m_modelMatrix); 
       glPtr->draw("CIErgbMesh");

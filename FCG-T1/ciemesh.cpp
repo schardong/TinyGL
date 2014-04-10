@@ -2,38 +2,17 @@
 
 CIEMesh::CIEMesh(std::vector<glm::vec3> xyz)
 {
-  std::vector<GLfloat> vertices((xyz.size() + 1) * 3); //+1*3 for the white point.
-
-  float sum_x = 0;
-  float sum_y = 0;
-  float sum_z = 0;
-
+  std::vector<GLfloat> vertices(xyz.size() * 3);
+  
   size_t max_x = 0;
-  for(size_t i = 0; i < vertices.size() - 3; i += 3) {
+  for(size_t i = 0; i < vertices.size(); i += 3) {
     vertices[i] = xyz[i/3].x;
     vertices[i + 1] = xyz[i/3].y;
     vertices[i + 2] = xyz[i/3].z;
 
-    sum_x += vertices[i];
-    sum_y += vertices[i + 1];
-    sum_z += vertices[i + 2];
-
     if (xyz[i / 3].x > xyz[max_x].x) max_x = i / 3;
   }
-
-  //The white point is calculated as the centroid of the CIEXYZ points.
-  //(is this the correct approach?
-  vertices[vertices.size() - 3] = sum_x / xyz.size();
-  vertices[vertices.size() - 2] = sum_y / xyz.size();
-  vertices[vertices.size() - 1] = sum_z / xyz.size();
   
-  //Since the color of the points is set as theirs XYZ coordinates, we
-  //normalize the white point color here, else it would be a grayish 
-  //color instead of white.
-  sum_x = 1 - vertices[vertices.size() - 3];
-  sum_y = 1 - vertices[vertices.size() - 2];
-  sum_z = 1 - vertices[vertices.size() - 1];
-
   std::vector<GLfloat> colors(vertices.size());
   for(size_t i = 0; i < colors.size(); i += 3) {
     colors[i] = vertices[i];
@@ -41,20 +20,16 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz)
     colors[i + 2] = vertices[i + 2];
   }
 
-  colors[colors.size() - 3] += sum_x;
-  colors[colors.size() - 2] += sum_y;
-  colors[colors.size() - 1] += sum_z;
-
   std::vector<GLushort> indices;
   //Connect all of the points with the (0,0,0) point (black).
-  for (size_t i = 0; i < vertices.size() / 3 - 2; i++) {
+  for (size_t i = 0; i < vertices.size() / 3 - 1; i++) {
     indices.push_back(i);
     indices.push_back(i + 1);
     indices.push_back(0);
   }
 
   //Connect all the points with the (1,1,1) point (white).
-  for (size_t i = 1; i < vertices.size() / 3 - 2; i++) {
+  for (size_t i = 1; i < vertices.size() / 3 - 1; i++) {
     indices.push_back(i);
     indices.push_back(i + 1);
     indices.push_back((vertices.size() / 3 - 1));
