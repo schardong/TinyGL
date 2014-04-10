@@ -34,7 +34,7 @@ Axis::Axis(glm::vec2 xlimits, glm::vec2 ylimits, glm::vec2 zlimits)
   std::vector<GLfloat> colors(18);
 
   memset(&colors[0], 0, sizeof(GLfloat) * 18);
-  colors[0] = colors[3] = colors[7] = colors[10] = colors[14] = colors[17] = 0.7f;
+  colors[0] = colors[3] = colors[7] = colors[10] = colors[14] = colors[17] = 1.f;
 
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);

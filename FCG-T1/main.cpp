@@ -220,7 +220,7 @@ void init()
   cieclouds[RGB] = new CIEPointCloud(rgb_cloud);
   cieclouds[RGB]->setDrawCb(drawPointsArrays);
   cieclouds[RGB]->setMaterialColor(glm::vec4(0));
-  cieclouds[RGB]->m_modelMatrix = glm::mat4(modelRGB);
+  cieclouds[RGB]->m_modelMatrix = glm::mat4(1.f);
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIErgbCloud", cieclouds[RGB]);
 
@@ -239,9 +239,9 @@ void init()
   TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
 
   ciemesh[RGB] = new CIEMesh(rgb_mesh, (size_t)ceil(limit / Y_STEP));
-  ciemesh[RGB]->setDrawCb(drawPointsArrays);
+  ciemesh[RGB]->setDrawCb(drawLinesIdx);
   ciemesh[RGB]->setMaterialColor(glm::vec4(0));
-  ciemesh[RGB]->m_modelMatrix = glm::mat4(modelRGB);
+  ciemesh[RGB]->m_modelMatrix = glm::mat4(1.f);
   ciemesh[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[RGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[RGB]);
 
@@ -354,9 +354,6 @@ void reshape(int w, int h)
 
 void keyPress(unsigned char c, int x, int y)
 {
-  bool cameraChanged = false;
-//  printf("keyPress = %d\n", c);
-
   switch (c) {
   case 'w':
     g_wireRender = !g_wireRender;
@@ -373,20 +370,11 @@ void keyPress(unsigned char c, int x, int y)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   else
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  if(cameraChanged) {
-    viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-
-    Shader* s = TinyGL::getInstance()->getShader("fcgt1");
-    s->bind();
-    s->setUniformMatrix("viewMatrix", viewMatrix);
-  }
 }
 
 void specialKeyPress(int c, int x, int y)
 {
   bool cameraChanged = false;
-//  printf("specialKeyPress = %d\n", c);
 
   glm::vec3 back = g_eye - g_center;
 
