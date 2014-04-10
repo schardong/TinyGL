@@ -1,6 +1,6 @@
 #include "ciemesh.h"
 
-CIEMesh::CIEMesh(std::vector<glm::vec3> xyz)
+CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 {
   std::vector<GLfloat> vertices(xyz.size() * 3);
   
@@ -21,29 +21,49 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz)
   }
 
   std::vector<GLushort> indices;
-  //Connect all of the points with the (0,0,0) point (black).
-  for (size_t i = 0; i < vertices.size() / 3 - 1; i++) {
+
+  //Connect the (0,0,0) point with the first row of points. These points
+  //are at the X + Y + Z = slices plane.
+  size_t tmp_addr = (xyz.size() - 1) / slices;
+  for (size_t i = 1; i < tmp_addr; i++) {
     indices.push_back(i);
     indices.push_back(i + 1);
     indices.push_back(0);
   }
 
+  //Connect the middle points. Form the triangles from the i row with the
+  //i + 1 row.
+  for (size_t i = tmp_addr; i < slices * tmp_addr; i++) {
+    indices.push_back(i);
+    indices.push_back(i +tmp_addr);
+    indices.push_back(i+1);
+
+    indices.push_back(i + tmp_addr);
+    indices.push_back(i + tmp_addr + 1);
+    indices.push_back(i + 1);
+  }
+
+  //Connect all of the points with the (0,0,0) point (black).
+  /*for (size_t i = 0; i < vertices.size() / 3 - 2 ; i++) {
+    indices.push_back(i);
+    indices.push_back(i + 1);
+    indices.push_back(0);
+  }*/
+
   //Connect all the points with the (1,1,1) point (white).
-  for (size_t i = 1; i < vertices.size() / 3 - 1; i++) {
+  /*for (size_t i = 1; i < vertices.size() / 3 - 1; i++) {
     indices.push_back(i);
     indices.push_back(i + 1);
     indices.push_back((vertices.size() / 3 - 1));
-  }
+  }*/
 
-  //Connect the 380nm and 780nm points to form the purple line (white point).
-  indices.push_back(1);
-  indices.push_back(max_x);
-  indices.push_back((vertices.size() / 3 - 1));
+  ////Connect the 380nm and 780nm points to form the purple line (white point).
+  //indices.push_back(1);
+  //indices.push_back(max_x);
+  //indices.push_back((vertices.size() / 3));
 
-  //Connect the 380nm and 780nm points to form the purple line (black point).
-  indices.push_back(1);
-  indices.push_back(max_x);
-  indices.push_back(0);
+  ////Connect the 380nm and 780nm points to form the purple line (black point).
+  
   
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);

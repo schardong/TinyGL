@@ -6,7 +6,7 @@
 class CIEMesh : public Mesh
 {
 public:
-  CIEMesh(std::vector<glm::vec3> xyz);
+  CIEMesh(std::vector<glm::vec3> xyz, size_t slices);
   virtual ~CIEMesh();
 };
 

@@ -54,7 +54,8 @@ bool initGLEWCalled = false;
 
 bool g_wireRender = false;
 bool g_meshRender = false;
-int g_cloudRender = XYZ;
+bool g_pointRender = false;
+int g_spaceRender = XYZ;
 
 void drawPointsArrays(size_t num_points)
 {
@@ -158,7 +159,7 @@ void init()
 
     glm::vec3 tmp2;
     corCIEXYZtoCIERGB(tmp.x, tmp.z, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b);
-    rgb_cloud.push_back(tmp);
+    rgb_cloud.push_back(tmp2);
 
     corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
     lab_cloud.push_back(tmp2);
@@ -173,7 +174,7 @@ void init()
   float lwv[3];
   getReferenceWhite(lwv, D65);
   glm::vec3 lw(lwv[0], lwv[1], lwv[2]);
-  float limit = glm::length(lw) * glm::length(lw);
+  float limit = glm::length(lw);// *glm::length(lw);
 
   for (float Y = Y_STEP; Y < limit; Y += Y_STEP) {
 
@@ -198,7 +199,7 @@ void init()
       rgb_mesh.push_back(ciergb * Y);
 
       corCIEXYZtoLab(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
-      lab_mesh.push_back(ciergb);
+      lab_mesh.push_back(ciergb * Y);
     }
 
   }
@@ -207,62 +208,62 @@ void init()
   float lw_rgb[3];
   corCIEXYZtoCIERGB(lw[0], lw[1], lw[2], &lw_rgb[0], &lw_rgb[1], &lw_rgb[2]);
   rgb_mesh.push_back(glm::vec3(lw_rgb[0], lw_rgb[1], lw_rgb[2]));
+  glm::mat3 modelRGB = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
     
   cieclouds[XYZ] = new CIEPointCloud(xyz_cloud);
   cieclouds[XYZ]->setDrawCb(drawPointsArrays);
   cieclouds[XYZ]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIExyzCloud", cieclouds[XYZ]);
   cieclouds[XYZ]->m_modelMatrix = glm::mat4(1.f);
   cieclouds[XYZ]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[XYZ]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIExyzCloud", cieclouds[XYZ]);
 
   cieclouds[RGB] = new CIEPointCloud(rgb_cloud);
   cieclouds[RGB]->setDrawCb(drawPointsArrays);
   cieclouds[RGB]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIErgbCloud", cieclouds[RGB]);
-  cieclouds[RGB]->m_modelMatrix = glm::mat4(1.f);
+  cieclouds[RGB]->m_modelMatrix = glm::mat4(modelRGB);
   cieclouds[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[RGB]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIErgbCloud", cieclouds[RGB]);
 
   cieclouds[Lab] = new CIEPointCloud(lab_cloud);
   cieclouds[Lab]->setDrawCb(drawPointsArrays);
   cieclouds[Lab]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIELabCloud", cieclouds[Lab]);
-  cieclouds[Lab]->m_modelMatrix = glm::mat4(1.f);
+  cieclouds[Lab]->m_modelMatrix = glm::scale(glm::vec3(0.01f));
   cieclouds[Lab]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[Lab]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIELabCloud", cieclouds[Lab]);
 
-  ciemesh[XYZ] = new CIEMesh(xyz_mesh);
+  ciemesh[XYZ] = new CIEMesh(xyz_mesh, limit / Y_STEP);
   ciemesh[XYZ]->setDrawCb(drawLinesIdx);
   ciemesh[XYZ]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
   ciemesh[XYZ]->m_modelMatrix = glm::mat4(1.f);
   ciemesh[XYZ]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[XYZ]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIExyzMesh", ciemesh[XYZ]);
 
-  ciemesh[RGB] = new CIEMesh(rgb_mesh);
-  ciemesh[RGB]->setDrawCb(drawLinesIdx);
+  ciemesh[RGB] = new CIEMesh(rgb_mesh, (size_t)ceil(limit / Y_STEP));
+  ciemesh[RGB]->setDrawCb(drawPointsArrays);
   ciemesh[RGB]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[RGB]);
-  ciemesh[RGB]->m_modelMatrix = glm::mat4(1.f);
+  ciemesh[RGB]->m_modelMatrix = glm::mat4(modelRGB);
   ciemesh[RGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[RGB]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[RGB]);
 
-  ciemesh[Lab] = new CIEMesh(lab_mesh);
-  ciemesh[Lab]->setDrawCb(drawLinesIdx);
+  ciemesh[Lab] = new CIEMesh(lab_mesh, (size_t)ceil(limit / Y_STEP));
+  ciemesh[Lab]->setDrawCb(drawPointsArrays);
   ciemesh[Lab]->setMaterialColor(glm::vec4(0));
-  TinyGL::getInstance()->addMesh("CIELabMesh", ciemesh[Lab]);
-  ciemesh[Lab]->m_modelMatrix = glm::mat4(1.f);
+  ciemesh[Lab]->m_modelMatrix = glm::scale(glm::vec3(0.01f));
   ciemesh[Lab]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[Lab]->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("CIELabMesh", ciemesh[Lab]);
 
   axis = new Axis(glm::vec2(-1, 1), glm::vec2(-1, 1), glm::vec2(-1, 1));
   axis->setDrawCb(drawAxis);
   axis->setMaterialColor(glm::vec4(0.f));
-  TinyGL::getInstance()->addMesh("axis", axis);
   axis->m_modelMatrix = glm::mat4(1.f);
   axis->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * axis->m_modelMatrix));
+  TinyGL::getInstance()->addMesh("axis", axis);
 
   Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);
   g_shader->setUniformMatrix("projMatrix", projMatrix);
-
   TinyGL::getInstance()->addShader("fcgt1", g_shader);
 
   initCalled = true;
@@ -293,26 +294,32 @@ void draw()
 
   s->bind();
   
-  switch (g_cloudRender) {
+  switch (g_spaceRender) {
   case XYZ:
-    s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzCloud")->m_modelMatrix);
-    glPtr->draw("CIExyzCloud");
+    if (g_pointRender) {
+      s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzCloud")->m_modelMatrix);
+      glPtr->draw("CIExyzCloud");
+    }
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIExyzMesh")->m_modelMatrix);
       glPtr->draw("CIExyzMesh");
     }
     break;
   case RGB:
-    s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbCloud")->m_modelMatrix);
-    glPtr->draw("CIErgbCloud");
+    if (g_pointRender) {
+      s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbCloud")->m_modelMatrix);
+      glPtr->draw("CIErgbCloud");
+    }
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIErgbMesh")->m_modelMatrix); 
       glPtr->draw("CIErgbMesh");
     }
     break;
   case Lab:
-    s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIELabCloud")->m_modelMatrix);
-    glPtr->draw("CIELabCloud");
+    if (g_pointRender) {
+      s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIELabCloud")->m_modelMatrix);
+      glPtr->draw("CIELabCloud");
+    }
     if (g_meshRender) {
       s->setUniformMatrix("modelMatrix", glPtr->getMesh("CIELabMesh")->m_modelMatrix);
       glPtr->draw("CIELabMesh");
@@ -356,6 +363,9 @@ void keyPress(unsigned char c, int x, int y)
     break;
   case 'm':
     g_meshRender = !g_meshRender;
+    break;
+  case 'p':
+    g_pointRender = !g_pointRender;
     break;
   }
 
@@ -402,13 +412,13 @@ void specialKeyPress(int c, int x, int y)
     cameraChanged = true;
     break;
   case GLUT_KEY_F1:
-    g_cloudRender = XYZ;
+    g_spaceRender = XYZ;
     break;
   case GLUT_KEY_F2:
-    g_cloudRender = RGB;
+    g_spaceRender = RGB;
     break;
   case GLUT_KEY_F3:
-    g_cloudRender = Lab;
+    g_spaceRender = Lab;
     break;
   }
 
