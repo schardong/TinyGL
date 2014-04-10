@@ -196,19 +196,19 @@ void init()
         z /= sum;
       }
 
-      glm::vec3 ciexyz(x, y, z);
-      xyz_mesh.push_back(ciexyz * Y);
+      glm::vec3 ciexyz = glm::vec3(x, y, z) * Y;
+      xyz_mesh.push_back(ciexyz);
 
       glm::vec3 ciergb;
       corCIEXYZtoCIERGB(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b);
-      rgb_mesh.push_back(ciergb * Y);
+      rgb_mesh.push_back(ciergb);
 
       corCIEXYZtoLab(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
-      lab_mesh.push_back(ciergb * Y);
+      lab_mesh.push_back(ciergb);
 
       //corCIEXYZtosRGB(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
       ciergb = CIEXYZtoCIEsRGB(ciexyz, lw);
-      srgb_mesh.push_back(ciergb * Y);
+      srgb_mesh.push_back(ciergb);
     }
 
   }

@@ -126,7 +126,7 @@ glm::vec3 CIEXYZtoCIEsRGB(glm::vec3 ciexyz, glm::vec3 white)
   glm::vec3 rgb;
   rgb = m * xyz;
 
-  return rgb;
+  return rgbToCIERGB(rgb);
 }
 
 #endif
