@@ -18,7 +18,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static const int W_SPHERES = 1;
+static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
@@ -47,12 +47,12 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 bool perVertex = true;
 
-int g_points = 49;
+int g_points = 0;
 bool g_showIndex = true;
 
 void drawSphere(size_t num_points)
 {
-  //glDrawArrays(GL_POINTS, 0, g_points);
+  glDrawArrays(GL_POINTS, 0, g_points);
   //if (g_showIndex)
     glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
@@ -104,7 +104,7 @@ void initGLEW()
 
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPointSize(5);
 
   initGLEWCalled = true;
@@ -112,7 +112,7 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(0, 2, 2);
+  g_eye = glm::vec3(0, 7, 15);
   g_center = glm::vec3(0, 0, 0);
   g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
@@ -122,7 +122,7 @@ void init()
   Sphere** spheres;
   Sphere* light;
 
-  ground = new Grid(60, 60);
+  ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
@@ -140,7 +140,7 @@ void init()
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(5, 5);
+    spheres[i] = new Sphere(32, 32);
     spheres[i]->setDrawCb(drawSphere);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
   }
@@ -346,8 +346,7 @@ void specialKeyPress(int c, int x, int y)
 {
   bool lightChanged = false;
   Mesh* light_ptr = TinyGL::getInstance()->getMesh("light01");
-
-
+  
   switch (c) {
   case GLUT_KEY_LEFT:
     g_light.x -= 0.1f;
