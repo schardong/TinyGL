@@ -97,19 +97,19 @@ glm::vec3 rgbToCIERGB(glm::vec3 rgb)
   glm::vec3 tmp;
 
   if (rgb.r <= 0.0031308)
-    tmp.r = 12.92 * rgb.r;
+    tmp.r = 12.92f * rgb.r;
   else
-    tmp.r = 1.055 * pow(rgb.r, 1.f / 2.4f) - 0.055;
+    tmp.r = 1.055f * pow(rgb.r, 1.f / 2.4f) - 0.055f;
 
   if (rgb.g <= 0.0031308)
-    tmp.g = 12.92 * rgb.g;
+    tmp.g = 12.92f * rgb.g;
   else
-    tmp.g = 1.055 * pow(rgb.g, 1.f / 2.4f) - 0.055;
+    tmp.g = 1.055f * pow(rgb.g, 1.f / 2.4f) - 0.055f;
 
   if (rgb.b <= 0.0031308)
-    tmp.b = 12.92 * rgb.b;
+    tmp.b = 12.92f * rgb.b;
   else
-    tmp.b = 1.055 * pow(rgb.b, 1.f / 2.4f) - 0.055;
+    tmp.b = 1.055f * pow(rgb.b, 1.f / 2.4f) - 0.055f;
 
   return tmp;
 }

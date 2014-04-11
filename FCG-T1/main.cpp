@@ -123,7 +123,7 @@ void initGLEW()
 void init()
 {
   const int STEP = 1;
-  g_eye = glm::vec3(2.5, 2.5, 2.5);
+  g_eye = glm::vec3(3.0, 3.0, 3.0);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -152,10 +152,10 @@ void init()
     xyzbar.push_back(glm::vec3(x, y, z));
   }
 
-  FILE* fp = fopen("beta_reflectance_100000_1.dat", "rb");
-  fread(beta, sizeof(float), 100000 * 400, fp);
+  FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
+  fread(beta, sizeof(float), 15000 * 400, fp);
 
-  for (size_t i = 0; i < 100000; i++) {
+  for (size_t i = 0; i < 15000; i++) {
     glm::vec3 tmp = createCIEXYZ(beta + i * 400, illum, xyzbar, STEP);
     xyz_cloud.push_back(tmp);
 
@@ -183,7 +183,7 @@ void init()
 
   for (float Y = Y_STEP; Y < limit; Y += Y_STEP) {
 
-    for (int i = 0; i < 400; i++) {
+    for (int i = 0; i < 400; i += STEP) {
       float x, y, z, sum;
       corGetCIExyz(380.f + i, &x, &y, &z);
       sum = x + y + z;

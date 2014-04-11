@@ -30,7 +30,7 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 
   //Connect the middle points. Form the triangles from the i row with the
   //i + 1 row.
-  for (size_t i = tmp_addr; i < slices * tmp_addr - 1; i++) {
+  for (size_t i = 1; i < (slices - 1) * tmp_addr - 1; i++) {
     indices.push_back(i);
     indices.push_back(i + tmp_addr);
     indices.push_back(i+1);
@@ -54,13 +54,13 @@ CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 
   //Connect the black, blue and red point. This creates the purple line and
   //The triangle that is under the spectrum.
-  indices.push_back(tmp_addr+1);
+  indices.push_back(tmp_addr + 1);
   indices.push_back(0);
   indices.push_back(max_x);
 
   //Connect the white, blue and red point. This closes the spectrum by creating
   //the triangle at it's front.
-  indices.push_back(tmp_addr+1);
+  indices.push_back(tmp_addr + 1);
   indices.push_back(max_x);
   indices.push_back(xyz.size() - 1);
   
