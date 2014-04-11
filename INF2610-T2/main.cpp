@@ -45,16 +45,11 @@ glm::vec3 g_light;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
-bool perVertex = true;
-
-int g_points = 0;
-bool g_showIndex = true;
+bool g_perVertex = true;
 
 void drawSphere(size_t num_points)
 {
-  glDrawArrays(GL_POINTS, 0, g_points);
-  //if (g_showIndex)
-    glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
 void drawGrid(size_t num_points)
@@ -202,7 +197,7 @@ void draw()
   TinyGL* glPtr = TinyGL::getInstance();
   Shader* s;
   
-  if (perVertex)
+  if (g_perVertex)
     s = glPtr->getShader("ads_vertex");
   else
     s = glPtr->getShader("ads_frag");
@@ -311,17 +306,6 @@ void keyPress(unsigned char c, int x, int y)
     g_eye = back + g_center;
     cameraChanged = true;
     break;
-  case 'o':
-    g_points++;
-    cout << g_points << endl;
-    break;
-  case 'p':
-    g_points--;
-    cout << g_points << endl;
-    break;
-  case ' ':
-    g_showIndex = !g_showIndex;
-    break;
   }
 
   if (cameraChanged) {
@@ -383,7 +367,7 @@ void specialKeyPress(int c, int x, int y)
     lightChanged = true;
     break;
   case GLUT_KEY_F3:
-    perVertex = !perVertex;
+    g_perVertex = !g_perVertex;
     break;
   }
 
