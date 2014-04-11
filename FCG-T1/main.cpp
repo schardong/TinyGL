@@ -206,8 +206,7 @@ void init()
       corCIEXYZtoLab(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
       lab_mesh.push_back(ciergb);
 
-      //corCIEXYZtosRGB(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
-      ciergb = CIEXYZtoCIEsRGB(ciexyz, lw);
+      corCIEXYZtosRGB(ciexyz.x, ciexyz.y, ciexyz.z, &ciergb.r, &ciergb.g, &ciergb.b, D65);
       srgb_mesh.push_back(ciergb);
     }
 
