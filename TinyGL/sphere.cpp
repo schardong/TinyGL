@@ -4,10 +4,10 @@
 
 #include <iostream>
 
-Sphere::Sphere(int nx, int ny)
+Sphere::Sphere(int slices, int stacks)
 {
-  float h_step = static_cast<float>(2 * M_PI) / nx;
-  float v_step = static_cast<float>(M_PI) / ny;
+  float h_step = static_cast<float>(2 * M_PI) / slices;
+  float v_step = static_cast<float>(M_PI) / stacks;
 
   std::vector<GLfloat> vertices;
   
@@ -32,52 +32,63 @@ Sphere::Sphere(int nx, int ny)
   std::vector<GLuint> indices;
   std::cout << "num_vertices = " << vertices.size()/3 << std::endl; 
   //TRIANGLES
-  /*for (int i = 0; i < nx; i++) {
-    for (int j = 0; j < ny; j++) {
-      indices.push_back(i * nx + j);
-      indices.push_back((i + 1) * nx + j);
-      indices.push_back(i * nx + (j + 1));
-      indices.push_back((i + 1) * nx + j);
-      indices.push_back((i + 1) * nx + (j + 1));
-      indices.push_back(i * nx + (j + 1));
+  /*for (int i = 0; i < slices; i++) {
+    for (int j = 0; j < stacks; j++) {
+      indices.push_back(i * slices + j);
+      indices.push_back((i + 1) * slices + j);
+      indices.push_back(i * slices + (j + 1));
+      indices.push_back((i + 1) * slices + j);
+      indices.push_back((i + 1) * slices + (j + 1));
+      indices.push_back(i * slices + (j + 1));
     }
   }*/
 
   //TRIANGLES-TOP
-  for (int i = 1; i < nx; i++) {
+  for (int i = 1; i < slices; i++) {
     indices.push_back(0);
     indices.push_back(i);
     indices.push_back(i+1);
   }
   indices.push_back(0);
-  indices.push_back(nx);
+  indices.push_back(slices);
   indices.push_back(1);
 
   //TRIANGLES-MIDDLE
-  for (int i = 2; i < vertices.size() / 3 - nx -1; i++) {
-    if (i % nx == 0) {
+  /*for (int i = 2; i < vertices.size() / 3 - slices -1; i++) {
+    if (i % slices == 0) {
       i++;
       continue;
     }
     indices.push_back(i - 1);
-    indices.push_back(i + nx);
+    indices.push_back(i + slices);
     indices.push_back(i);
 
-    indices.push_back(i + nx);
-    indices.push_back(i + nx + 1);
+    indices.push_back(i + slices);
+    indices.push_back(i + slices + 1);
     indices.push_back(i);
 
-  }
+  }*/
 
   //TRIANGLES-BOTTOM
-  for (int i = nx * (ny - 2) + 2; i <= nx * (ny - 1); i++) {
+  /*for (int i = slices * (stacks - 2) + 2; i <= slices * (stacks - 1); i++) {
     indices.push_back(vertices.size() / 3 - 1);
     indices.push_back(i - 1);
     indices.push_back(i);
   }
   indices.push_back(vertices.size() / 3 - 1);
-  indices.push_back(nx * (ny - 1));
-  indices.push_back(nx * (ny - 2) + 1);
+  indices.push_back(slices * (stacks - 1));
+  indices.push_back(slices * (stacks - 2) + 1);*/
+
+
+  for (int i = slices * (stacks - 2) + 1; i < slices * (stacks - 1); i++) {
+    indices.push_back(i);
+    indices.push_back(i + 1);
+    indices.push_back(slices * (stacks - 1) + 1);
+  }
+  indices.push_back(slices * (stacks - 2) + 1);
+  indices.push_back(slices * (stacks - 1));
+  indices.push_back(slices * (stacks - 1) + 1);
+
   
  /* std::cout << "\n---------vertices---------\n";
   for (int i = 0; i < vertices.size(); i += 3) {

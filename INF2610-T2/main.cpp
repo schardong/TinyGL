@@ -18,7 +18,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static const int W_SPHERES = 10;
+static const int W_SPHERES = 1;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
@@ -47,13 +47,13 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 bool perVertex = true;
 
-int g_points = 0;
+int g_points = 49;
 bool g_showIndex = true;
 
 void drawSphere(size_t num_points)
 {
-  glDrawArrays(GL_POINTS, 0, g_points);
-  if (g_showIndex)
+  //glDrawArrays(GL_POINTS, 0, g_points);
+  //if (g_showIndex)
     glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
@@ -129,7 +129,7 @@ void init()
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(7, 7);
+  light = new Sphere(5, 5);
   light->setDrawCb(drawSphere);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   light->m_modelMatrix = glm::translate(g_light);
@@ -140,10 +140,9 @@ void init()
   spheres = new Sphere*[NUM_SPHERES];
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(38, 38);
+    spheres[i] = new Sphere(5, 5);
     spheres[i]->setDrawCb(drawSphere);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
-    TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
   for (int i = 0; i < W_SPHERES; i++) {
@@ -151,6 +150,10 @@ void init()
       spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 2, 0.5, j * 2)) * glm::scale(glm::vec3(0.5));
       spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
     }
+  }
+
+  for (int i = 0; i < NUM_SPHERES; i++) {
+    TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
   Shader* g_adsVertex = new Shader("../Resources/ads_vertex.vs", "../Resources/ads_vertex.fs");
@@ -208,9 +211,9 @@ void draw()
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {
-    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("sphere" + std::to_string(i))->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("sphere" + std::to_string(i))->m_normalMatrix);
-    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere" + std::to_string(i))->getMaterialColor());
+    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->m_modelMatrix);
+    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->m_normalMatrix);
+    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->getMaterialColor());
     glPtr->draw("sphere" + to_string(i));
   }
 

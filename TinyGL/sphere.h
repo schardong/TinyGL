@@ -12,7 +12,7 @@
 class Sphere : public Mesh
 {
 public:
-  Sphere(int nx, int ny);
+  Sphere(int slices, int stacks);
   virtual ~Sphere();
 };
 
