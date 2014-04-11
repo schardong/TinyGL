@@ -1,1 +1,19 @@
-This respository is meant to store my homeworks of the semester, especialy those related to computer graphics and realtime rendering.
+The TinyGL project is meant to store all classes that are common to all projects,
+such as the Mesh and Shader classes. Some basic primitives such as the Sphere
+and Grid primitives are also stored on this project.
+
+There is also the TinyGL class. This class is a manager that stores all of the
+Resources, namely the Meshes and Shaders, and is responsible for freeing them
+at the end of the execution. Any object that is going to be managed by this
+class must inherit from the Mesh or Shader class. More types may be added later,
+such as Texture, Image, etc.
+
+The objects are stored in maps inside the TinyGL class. These objects are referenced
+by their given names. Maybe later a better method of storage and indexing for such
+objects will be implemented, but this one solved my problems for now.
+
+The other projects are homeworks from the Real-time rendering (http://www.tecgraf.puc-rio.br/~celes/inf2610/Home.html)
+and Fundamentals of Computer Graphics (https://www.tecgraf.puc-rio.br/~mgattass/fcg/fcg.html)
+courses at PUC-Rio. They all need the TinyGL library, freeglut (http://freeglut.sourceforge.net/)
+and GLEW (http://glew.sourceforge.net/) APIs. Perhaps I will start using GLFW (http://www.glfw.org/)
+and IUP later. These projects will be stored at another website latter.
