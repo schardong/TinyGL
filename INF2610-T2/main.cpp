@@ -129,16 +129,14 @@ void init()
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(5, 5);
+  light = new Sphere(32, 32);
   light->setDrawCb(drawSphere);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   light->m_modelMatrix = glm::translate(g_light);
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
   TinyGL::getInstance()->addMesh("light01", light);
 
-  cout << "\n--------------------light end--------------------" << endl;
   spheres = new Sphere*[NUM_SPHERES];
-
   for (int i = 0; i < NUM_SPHERES; i++) {
     spheres[i] = new Sphere(32, 32);
     spheres[i]->setDrawCb(drawSphere);
