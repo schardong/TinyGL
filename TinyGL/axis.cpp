@@ -1,5 +1,5 @@
 #include "axis.h"
-#include "config.h"
+#include "tglconfig.h"
 #include <cstring>
 #include <iostream>
 

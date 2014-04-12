@@ -1,6 +1,6 @@
 #include "tinygl.h"
 #include "logger.h"
-#include "config.h"
+#include "tglconfig.h"
 #include <GL/glew.h>
 #include <string>
 

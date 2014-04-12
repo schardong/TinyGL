@@ -20,12 +20,12 @@ HEADERS += \
     shader.h \
     mesh.h \
     logger.h \
-    config.h \
     bufferobject.h \
     tinygl.h \
     sphere.h \
     grid.h \
-    axis.h
+    axis.h \
+    tglconfig.h
 
 INCLUDEPATH += ../include
 

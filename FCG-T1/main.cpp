@@ -1,3 +1,4 @@
+#include "tglconfig.h"
 #include "config.h"
 #include "tinygl.h"
 #include "logger.h"
@@ -224,7 +225,7 @@ void init()
   glm::vec3 tmp = CIEXYZtoCIEsRGB(glm::vec3(lw[0], lw[1], lw[2]), glm::vec3(lw_rgb[0], lw_rgb[1], lw_rgb[2]));
   srgb_mesh.push_back(tmp);
 
-  glm::mat3 modelRGB = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
+  //glm::mat3 modelRGB = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
     
   cieclouds[XYZ] = new CIEPointCloud(xyz_cloud);
   cieclouds[XYZ]->setDrawCb(drawPointsArrays);

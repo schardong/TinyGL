@@ -1,5 +1,5 @@
 #include "mesh.h"
-#include "config.h"
+#include "tglconfig.h"
 #include <GL/glew.h>
 #include <iostream>
 

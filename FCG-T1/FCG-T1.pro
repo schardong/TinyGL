@@ -9,7 +9,8 @@ HEADERS += color.h \
     mtwist.h \
     colorspace.h \
     ciepointcloud.h \
-    ciemesh.h
+    ciemesh.h \
+    config.h
 
 SOURCES += main.cpp \
     color.c \

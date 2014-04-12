@@ -1,5 +1,5 @@
 #include "sphere.h"
-#include "config.h"
+#include "tglconfig.h"
 #include <math.h>
 
 #include <iostream>
