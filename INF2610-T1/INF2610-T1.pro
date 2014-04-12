@@ -5,18 +5,9 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-HEADERS += \
-    sphere.h \
-    grid.h
-
-SOURCES += main.cpp \
-    sphere.cpp \
-    grid.cpp
+SOURCES += main.cpp
 
 OTHER_FILES += \
-    simple.gs \
-    simple.fs \
-    simple.vs \
     ../Resources/simple.vs \
     ../Resources/simple.gs \
     ../Resources/simple.fs
@@ -24,18 +15,20 @@ OTHER_FILES += \
 INCLUDEPATH += ../include
 DEPENDPATH += ../include
 
-LIBS += -L$$OUT_PWD/../TinyGL -ltinygl
+LIBS += -L$$OUT_PWD/../TinyGL
 LIBS += -lglut -lGLEW -lGL
 
-shader.path = $$OUT_PWD
+shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
 
 INSTALLS += shader
 
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -g0 -O2
+    LIBS += -ltinygl
 }
 
 CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -g3 -pg -O0
+    LIBS += -ltinygld
 }

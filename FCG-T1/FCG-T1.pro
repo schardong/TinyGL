@@ -6,11 +6,16 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
 HEADERS += color.h \
-    ciexyzmesh.h
+    mtwist.h \
+    colorspace.h \
+    ciepointcloud.h \
+    ciemesh.h
 
 SOURCES += main.cpp \
-           color.c \
-    ciexyzmesh.cpp
+    color.c \
+    mtwist.c \
+    ciepointcloud.cpp \
+    ciemesh.cpp
 
 OTHER_FILES += \
     ../Resources/fcgt1.vs \
@@ -22,10 +27,13 @@ DEPENDPATH += ../include
 LIBS += -L$$OUT_PWD/../TinyGL
 LIBS += -lglut -lGLEW -lGL
 
-shader.path = $$OUT_PWD
+shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
 
-INSTALLS += shader
+beta.path = $$OUT_PWD
+beta.files = *.dat
+
+INSTALLS += shader beta
 
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -g0 -O2

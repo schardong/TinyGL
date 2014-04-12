@@ -19,7 +19,7 @@ DEPENDPATH += ../include
 LIBS += -L$$OUT_PWD/../TinyGL
 LIBS += -lglut -lGLEW -lGL
 
-shader.path = $$OUT_PWD
+shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
 
 INSTALLS += shader
