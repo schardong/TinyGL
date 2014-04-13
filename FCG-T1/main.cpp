@@ -1,5 +1,4 @@
 #include "tglconfig.h"
-#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -239,7 +238,8 @@ void init()
 
   }
 
-  xyz_mesh.push_back(glm::vec3(lw[0], lw[1], lw[2]));
+  glm::vec3 tmp_lw(lw[0], lw[1], lw[2]);
+  xyz_mesh.push_back(tmp_lw);
 
   float lw_rgb[3];
   corCIEXYZtoCIERGB(lw[0], lw[1], lw[2], &lw_rgb[0], &lw_rgb[1], &lw_rgb[2]);
@@ -248,8 +248,8 @@ void init()
   corCIEXYZtoLab(lw[0], lw[1], lw[2], &lw_rgb[0], &lw_rgb[1], &lw_rgb[2], D65);
   lab_mesh.push_back(glm::vec3(lw_rgb[0], lw_rgb[1], lw_rgb[2]));
 
-  glm::vec3 tmp = CIEXYZtoCIEsRGB(glm::vec3(lw[0], lw[1], lw[2]), glm::vec3(lw_rgb[0], lw_rgb[1], lw_rgb[2]));
-  srgb_mesh.push_back(tmp);
+//  glm::vec3 tmp = CIEXYZtoCIEsRGB(tmp_lw, glm::vec3(lw_rgb[0], lw_rgb[1], lw_rgb[2]));
+  srgb_mesh.push_back(tmp_lw);
 
   //glm::mat3 modelRGB = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
     
@@ -281,7 +281,7 @@ void init()
   cieclouds[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[colorspace::sRGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIEsRGBCloud", cieclouds[colorspace::sRGB]);
 
-  ciemesh[colorspace::CIEXYZ] = new CIEMesh(xyz_mesh, limit / Y_STEP);
+  ciemesh[colorspace::CIEXYZ] = new CIEMesh(xyz_mesh, srgb_mesh,limit / Y_STEP);
   ciemesh[colorspace::CIEXYZ]->setDrawCb(drawLinesIdx);
   ciemesh[colorspace::CIEXYZ]->setMaterialColor(glm::vec4(0));
   ciemesh[colorspace::CIEXYZ]->m_modelMatrix = glm::mat4(1.f);
@@ -295,7 +295,7 @@ void init()
   ciemesh[colorspace::CIERGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[colorspace::CIERGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIErgbMesh", ciemesh[colorspace::CIERGB]);
 
-  ciemesh[colorspace::CIELab] = new CIEMesh(lab_mesh, limit / Y_STEP);
+  ciemesh[colorspace::CIELab] = new CIEMesh(lab_mesh, srgb_mesh, limit / Y_STEP);
   ciemesh[colorspace::CIELab]->setDrawCb(drawLinesIdx);
   ciemesh[colorspace::CIELab]->setMaterialColor(glm::vec4(0));
   ciemesh[colorspace::CIELab]->m_modelMatrix = glm::scale(glm::vec3(0.005f));
