@@ -9,13 +9,15 @@ HEADERS += color.h \
     mtwist.h \
     colorspace.h \
     ciepointcloud.h \
-    ciemesh.h
+    ciemesh.h \
+    srgbmesh.h
 
 SOURCES += main.cpp \
     color.c \
     mtwist.c \
     ciepointcloud.cpp \
-    ciemesh.cpp
+    ciemesh.cpp \
+    srgbmesh.cpp
 
 OTHER_FILES += \
     ../Resources/fcgt1.vs \

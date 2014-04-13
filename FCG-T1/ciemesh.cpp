@@ -1,5 +1,10 @@
 #include "ciemesh.h"
 
+CIEMesh::CIEMesh()
+{
+
+}
+
 CIEMesh::CIEMesh(std::vector<glm::vec3> xyz, size_t slices)
 {
   std::vector<GLfloat> vertices(xyz.size() * 3);
