@@ -313,12 +313,12 @@ void init()
 //  ciemesh[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[colorspace::sRGB]->m_modelMatrix));
 //  TinyGL::getInstance()->addMesh("CIEsRGBMesh", ciemesh[colorspace::sRGB]);
 
-  glm::mat3 m = {0.490, 0.310, 0.200,  0.177, 0.813, 0.011, 0.000, 0.010, 0.990};
+  glm::mat3 m = {0.412, 0.357, 0.180,  0.212, 0.715, 0.072, 0.019, 0.119, 0.950};
 
   ciemesh[colorspace::sRGB] = new SRGBMesh();
   ciemesh[colorspace::sRGB]->setDrawCb(drawByteIdx);
   ciemesh[colorspace::sRGB]->setMaterialColor(glm::vec4(0));
-  ciemesh[colorspace::sRGB]->m_modelMatrix = glm::mat4(1.f);
+  ciemesh[colorspace::sRGB]->m_modelMatrix = glm::mat4(m);
   ciemesh[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[colorspace::sRGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIEsRGBMesh", ciemesh[colorspace::sRGB]);
 
