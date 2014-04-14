@@ -1,6 +1,7 @@
 #include "srgbmesh.h"
 #include "fcgt1config.h"
 #include <cstring>
+#include <glm/gtx/transform.hpp>
 
 extern "C" {
 #include "color.h"
@@ -39,6 +40,7 @@ GLbyte cube_indices[] {
 };
 
 glm::mat3 srgbToXYZ = { 0.412, 0.357, 0.180, 0.212, 0.715, 0.072, 0.019, 0.119, 0.950 };
+glm::mat3 rgbToXYZ = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
 
 SRGBMesh::SRGBMesh()
 {
@@ -78,16 +80,18 @@ void SRGBMesh::convertColorspace()
   switch (m_colorspace) {
   case colorspace::CIEXYZ:
     m_modelMatrix = glm::mat4(srgbToXYZ);
-    buildGeometry();
     break;
   case colorspace::CIERGB:
+    m_modelMatrix = glm::mat4(rgbToXYZ);
     break;
   case colorspace::CIELab:
+    m_modelMatrix = glm::scale(glm::vec3(0.01));
     break;
   case colorspace::sRGB:
-    buildGeometry();
+    m_modelMatrix = glm::mat4(1.f);
     break;
   }
+  buildGeometry();
 }
 
 void SRGBMesh::buildGeometry()
@@ -102,6 +106,14 @@ void SRGBMesh::buildGeometry()
   case colorspace::CIERGB:
     break;
   case colorspace::CIELab:
+    GLfloat lab_vertices[24];
+    for (int i = 0; i < 24; i += 3) {
+      float x, y, z;
+      corsRGBtoCIEXYZ(cube_vertices[i], cube_vertices[i + 1], cube_vertices[i + 2], &x, &y, &z, D65);
+      corCIEXYZtoLab(x, y, z, &lab_vertices[i], &lab_vertices[i + 1], &lab_vertices[i + 2], D65);
+    }
+    m_buffers[0]->bind();
+    m_buffers[0]->sendData(lab_vertices);
     break;
   }
 }

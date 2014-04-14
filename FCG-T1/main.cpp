@@ -406,6 +406,7 @@ void reshape(int w, int h)
 
 void keyPress(unsigned char c, int x, int y)
 {
+  SRGBMesh* m = (SRGBMesh*)TinyGL::getInstance()->getMesh("CIEsRGBMesh");
   switch (c) {
   case 'w':
     g_wireRender = !g_wireRender;
@@ -415,6 +416,18 @@ void keyPress(unsigned char c, int x, int y)
     break;
   case 'p':
     g_pointRender = !g_pointRender;
+    break;
+  case '1':
+    m->setColorspace(colorspace::CIEXYZ);
+    break;
+  case '2':
+    m->setColorspace(colorspace::CIERGB);
+    break;
+  case '3':
+    m->setColorspace(colorspace::sRGB);
+    break;
+  case '4':
+    m->setColorspace(colorspace::CIELab);
     break;
   }
 
