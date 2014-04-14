@@ -53,6 +53,9 @@
     <ClInclude Include="srgbmesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fcgt1config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt1.fs">

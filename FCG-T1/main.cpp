@@ -1,4 +1,5 @@
 #include "tglconfig.h"
+#include "fcgt1config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -40,33 +41,6 @@ void reshape(int w, int h);
 void keyPress(unsigned char c, int x, int y);
 void specialKeyPress(int c, int x, int y);
 void exit_cb();
-
-//This enum sets in which colorspace the spectrum of color will be rendered.
-namespace colorspace
-{
-  enum
-  {
-    CIEXYZ,
-    CIERGB,
-    sRGB,
-    CIELab,
-    n_colorspaces
-  };
-};
-
-//This enum sets which spectrum of color will be rendered in a given colorspace.
-namespace spectrum
-{
-  enum
-  {
-    SPECTRUM,
-    CIEXYZ,
-    CIERGB,
-    sRGB,
-    CIELab,
-    n_spectra
-  };
-};
 
 int g_window = -1;
 
@@ -313,12 +287,10 @@ void init()
 //  ciemesh[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[colorspace::sRGB]->m_modelMatrix));
 //  TinyGL::getInstance()->addMesh("CIEsRGBMesh", ciemesh[colorspace::sRGB]);
 
-  glm::mat3 m = {0.412, 0.357, 0.180,  0.212, 0.715, 0.072, 0.019, 0.119, 0.950};
-
   ciemesh[colorspace::sRGB] = new SRGBMesh();
   ciemesh[colorspace::sRGB]->setDrawCb(drawByteIdx);
   ciemesh[colorspace::sRGB]->setMaterialColor(glm::vec4(0));
-  ciemesh[colorspace::sRGB]->m_modelMatrix = glm::mat4(m);
+  ciemesh[colorspace::sRGB]->m_modelMatrix = glm::mat4(1.f);
   ciemesh[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ciemesh[colorspace::sRGB]->m_modelMatrix));
   TinyGL::getInstance()->addMesh("CIEsRGBMesh", ciemesh[colorspace::sRGB]);
 

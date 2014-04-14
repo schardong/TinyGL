@@ -23,6 +23,7 @@
     <ClInclude Include="ciemesh.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
+    <ClInclude Include="fcgt1config.h" />
     <ClInclude Include="mtwist.h" />
     <ClInclude Include="srgbmesh.h" />
   </ItemGroup>
