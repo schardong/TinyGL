@@ -1,4 +1,4 @@
-#include "config.h"
+#include "tglconfig.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"

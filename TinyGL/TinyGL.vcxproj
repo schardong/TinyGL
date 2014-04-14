@@ -90,13 +90,13 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="bufferobject.h" />
-    <ClInclude Include="config.h" />
     <ClInclude Include="grid.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="tglconfig.h" />
     <ClInclude Include="tinygl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

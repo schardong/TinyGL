@@ -16,6 +16,7 @@
     <ClCompile Include="color.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mtwist.c" />
+    <ClCompile Include="srgbmesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ciepointcloud.h" />
@@ -23,6 +24,7 @@
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
     <ClInclude Include="mtwist.h" />
+    <ClInclude Include="srgbmesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt1.fs" />
