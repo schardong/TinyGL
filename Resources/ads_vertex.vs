@@ -15,8 +15,6 @@ uniform vec3 u_lightCoord;
 uniform vec4 u_materialColor;
 
 vec4 g_ambientColor = vec4(0.1);
-//vec4 g_lightColor = vec4(1.0, 1.0, 1.0, 1.0);
-//float g_lightPower = 55;
 
 void main()
 {
