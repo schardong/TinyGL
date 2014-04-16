@@ -16,6 +16,7 @@ out LightData
 {
   vec3 vertex_camera;
   vec3 lightDir_camera;
+  vec3 normal_camera;
 } out_vLight;
 
 void main()
@@ -26,9 +27,8 @@ void main()
   vec4 pos4 = MV * vec4(in_vPosition, 1);
   vec3 pos3 = pos4.xyz / pos4.w;
 
-
-  out_vLight.vertex_camera = normalize(-pos3);//normalize(normalMatrix * in_vNormal);
-  
+  out_vLight.vertex_camera = normalize(-pos3);
+  out_vLight.normal_camera = normalize(normalMatrix * in_vNormal);
   out_vLight.lightDir_camera = normalize((viewMatrix * vec4(u_lightCoord, 1)).xyz - pos3);
   
   gl_Position = MVP * vec4(in_vPosition, 1.0);

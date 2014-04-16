@@ -28,13 +28,13 @@ void main()
   vec3 pos3 = pos4.xyz / pos4.w;
   
   vec3 lightCamera = normalize((viewMatrix * vec4(u_lightCoord, 1)).xyz - pos3);
-  float diff = max(dot(-normalize(pos3), lightCamera), 0.f);
+  float diff = max(dot(normalize(normalCamera), lightCamera), 0.f);
   vColor = diff * u_materialColor + g_ambientColor;
   
   vec3 reflection = normalize(reflect(-lightCamera, normalCamera));
-  float spec = max(dot(normalCamera, reflection), 0.f);
+  float spec = max(dot(normalize(-pos3), reflection), 0.f);
   if(diff != 0) {
-    spec = pow(spec, 128.f);
+    spec = pow(spec, 64.f);
     vColor.rgb += vec3(spec);
   }
 
