@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2B0C5CBB-DCA5-4CC7-BCED-BB0CA4FB033F}</ProjectGuid>
+    <ProjectGuid>{16E94427-91B7-462A-BD3F-D3F37F522D8E}</ProjectGuid>
     <RootNamespace>INF2610T2</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

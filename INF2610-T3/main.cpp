@@ -76,7 +76,7 @@ void initGLUT(int argc, char** argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
   glutInitWindowSize(800, 600);
 
-  g_window = glutCreateWindow("INF2610-T2");
+  g_window = glutCreateWindow("INF2610-T3");
   glutReshapeFunc(reshape);
   glutDisplayFunc(update);
   glutKeyboardFunc(keyPress);
