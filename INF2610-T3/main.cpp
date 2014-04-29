@@ -45,7 +45,6 @@ glm::vec3 g_light;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
-bool g_perVertex = true;
 
 GLuint g_fboId;
 GLuint g_colorId[4];
@@ -250,7 +249,7 @@ void init()
 
   screenQuad = new Grid(2, 2);
   screenQuad->setDrawCb(drawGrid);
-  screenQuad->setMaterialColor(glm::vec4(1.f, 1.f, 1.f, 1.f));
+  screenQuad->setMaterialColor(glm::vec4(0.f, 1.f, 1.f, 1.f));
   screenQuad->m_modelMatrix = glm::mat4(1.f);
   screenQuad->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * screenQuad->m_modelMatrix));
   TinyGL::getInstance()->addMesh("screenQuad", screenQuad);
@@ -264,15 +263,10 @@ void init()
   Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
   g_sPass->bind();
   g_sPass->bindFragDataLoc("out_vColor", 0);
-  g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
-  g_sPass->setUniformMatrix("projMatrix", projMatrix);
-
-  float tmp[] = { g_light[0], g_light[1], g_light[2] };
-  g_fPass->bind();
-  g_fPass->setUniformfv("u_lightCoord", tmp, 3);
-
+  
   g_sPass->bind();
-  g_sPass->setUniformfv("u_lightCoord", tmp, 3);
+  g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
+  g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
   
   TinyGL::getInstance()->addShader("fPass", g_fPass);
   TinyGL::getInstance()->addShader("sPass", g_sPass);
@@ -298,16 +292,11 @@ void draw()
   if (!initCalled || !initGLEWCalled)
     return;
 
-  //glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  Shader* s;
-  
-  if (g_perVertex)
-    s = glPtr->getShader("fPass");
-  else
-    s = glPtr->getShader("sPass");
+  Shader* s = glPtr->getShader("fPass");
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {
@@ -330,11 +319,13 @@ void draw()
   glBindVertexArray(0);
   Shader::unbind();
 
-  //glutSwapBuffers();
-  //glutPostRedisplay();
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  s = glPtr->getShader("sPass");
+  s->bind();
+  glPtr->draw("screenQuad");
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -430,10 +421,10 @@ void keyPress(unsigned char c, int x, int y)
     s->setUniformMatrix("viewMatrix", viewMatrix);
     s->setUniformfv("u_eyeCoord", tmp, 3);
     
-    s = TinyGL::getInstance()->getShader("sPass");
+    /*s = TinyGL::getInstance()->getShader("sPass");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-    s->setUniformfv("u_eyeCoord", tmp, 3);
+    s->setUniformfv("u_eyeCoord", tmp, 3);*/
   }
 }
 
@@ -480,7 +471,7 @@ void specialKeyPress(int c, int x, int y)
     lightChanged = true;
     break;
   case GLUT_KEY_F3:
-    g_perVertex = !g_perVertex;
+    //g_perVertex = !g_perVertex;
     break;
   }
 
