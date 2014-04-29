@@ -246,11 +246,11 @@ void init()
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
-  Shader* g_adsVertex = new Shader("../Resources/ads_vertex.vs", "../Resources/ads_vertex.fs");
-  g_adsVertex->bind();
-  g_adsVertex->bindFragDataLoc("out_vColor", 0);
-  g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
-  g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
+  Shader* g_fPass = new Shader("../Resources/def_fpass.vs", "../Resources/def_fpass.fs");
+  g_fPass->bind();
+  g_fPass->bindFragDataLoc("out_vColor", 0);
+  g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
+  g_fPass->setUniformMatrix("projMatrix", projMatrix);
 
   Shader* g_adsFrag = new Shader("../Resources/ads_frag.vs", "../Resources/ads_frag.fs");
   g_adsFrag->bind();
@@ -259,13 +259,13 @@ void init()
   g_adsFrag->setUniformMatrix("projMatrix", projMatrix);
 
   float tmp[] = { g_light[0], g_light[1], g_light[2] };
-  g_adsVertex->bind();
-  g_adsVertex->setUniformfv("u_lightCoord", tmp, 3);
+  g_fPass->bind();
+  g_fPass->setUniformfv("u_lightCoord", tmp, 3);
 
   g_adsFrag->bind();
   g_adsFrag->setUniformfv("u_lightCoord", tmp, 3);
   
-  TinyGL::getInstance()->addShader("ads_vertex", g_adsVertex);
+  TinyGL::getInstance()->addShader("fPass", g_fPass);
   TinyGL::getInstance()->addShader("ads_frag", g_adsFrag);
 
   initCalled = true;
