@@ -20,16 +20,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\ads_frag.fs">
+    <None Include="..\Resources\def_fpass.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\ads_frag.vs">
+    <None Include="..\Resources\def_fpass.vs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\ads_vertex.fs">
+    <None Include="..\Resources\def_spass.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\ads_vertex.vs">
+    <None Include="..\Resources\def_spass.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
