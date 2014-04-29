@@ -1,8 +1,8 @@
 #version 330 core
 
 layout (location = 0) out vec4 out_vColor;
-
-/*uniform vec4 u_materialColor;
+uniform vec4 u_materialColor;
+/*
 
 in LightData
 {
@@ -15,7 +15,7 @@ vec4 g_ambientColor = vec4(0.1);*/
 
 void main()
 {
-  out_vColor = vec4(0.3f);
+  out_vColor = u_materialColor;
   
   /*
   float diff = max(dot(in_vLight.normal_camera, in_vLight.lightDir_camera), 0.f);
