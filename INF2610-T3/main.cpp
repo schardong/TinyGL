@@ -47,6 +47,10 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 bool g_perVertex = true;
 
+GLuint g_fboId;
+GLuint g_colorId[4];
+GLuint g_depthId;
+
 void drawSphere(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
@@ -55,6 +59,97 @@ void drawSphere(size_t num_points)
 void drawGrid(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
+}
+
+void createFBO(GLuint w, GLuint h)
+{
+  glGenFramebuffers(1, &g_fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+  
+  glGenTextures(4, g_colorId);
+
+  glBindTexture(GL_TEXTURE_2D, g_colorId[0]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[0], 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, g_colorId[1]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[1], 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, g_colorId[2]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[2], 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, g_colorId[3]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[3], 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glGenRenderbuffers(1, &g_depthId);
+  glBindRenderbuffer(GL_RENDERBUFFER, g_depthId);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_depthId);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  switch (fboStatus) {
+  case GL_FRAMEBUFFER_UNDEFINED:
+    Logger::getInstance()->error("FBO undefined");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+    Logger::getInstance()->error("FBO incomplete attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+    Logger::getInstance()->error("FBO missing attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+    Logger::getInstance()->error("FBO incomplete draw buffe");
+    break;
+  case GL_FRAMEBUFFER_UNSUPPORTED:
+    Logger::getInstance()->error("FBO unsupported");
+    break;
+  case GL_FRAMEBUFFER_COMPLETE:
+    Logger::getInstance()->log("FBO created successfully");
+    break;
+  default:
+    Logger::getInstance()->error("FBO undefined problem");
+  }
+
+  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+  glDrawBuffers(4, drawBuffer);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int main(int argc, char** argv)
@@ -112,6 +207,8 @@ void init()
   g_light = glm::vec3(0, 6, 4);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
+
+  createFBO(800, 600);
 
   Grid* ground;
   Sphere** spheres;
@@ -192,6 +289,7 @@ void draw()
   if (!initCalled || !initGLEWCalled)
     return;
 
+  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
@@ -225,6 +323,7 @@ void draw()
 
   glutSwapBuffers();
   glutPostRedisplay();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void reshape(int w, int h)
