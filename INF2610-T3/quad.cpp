@@ -3,6 +3,13 @@
 Quad::Quad()
 {
   GLfloat vertices[] = {
+    0, 0, 0,
+    1, 0, 0,
+    1, 1, 0,
+    0, 1, 0
+  };
+
+  GLfloat texCoord[] = {
     0, 0,
     1, 0,
     1, 1,
@@ -15,12 +22,12 @@ Quad::Quad()
   };
   
 
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, GL_STATIC_DRAW);
+  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
 
   BufferObject* tbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, GL_STATIC_DRAW);
-  tbuff->sendData(&vertices[0]);
+  tbuff->sendData(&texCoord[0]);
   attachBuffer(tbuff);
 
   bind();
@@ -34,7 +41,7 @@ Quad::Quad()
   glEnableVertexAttribArray(0);
 
   tbuff->bind();
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(1);
 
   glBindVertexArray(0);

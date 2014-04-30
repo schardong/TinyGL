@@ -61,6 +61,11 @@ void drawGrid(size_t num_points)
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
+void drawQuad(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_BYTE, NULL);
+}
+
 void createFBO(GLuint w, GLuint h)
 {
   glGenFramebuffers(1, &g_fboId);
@@ -214,7 +219,7 @@ void init()
   Sphere** spheres;
   Sphere* light;
 
-  Grid* screenQuad;
+  Quad* screenQuad;
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
@@ -248,8 +253,8 @@ void init()
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
-  screenQuad = new Grid(2, 2);
-  screenQuad->setDrawCb(drawGrid);
+  screenQuad = new Quad();
+  screenQuad->setDrawCb(drawQuad);
   screenQuad->setMaterialColor(glm::vec4(0.f, 1.f, 1.f, 1.f));
   screenQuad->m_modelMatrix = glm::mat4(1.f);
   screenQuad->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * screenQuad->m_modelMatrix));
@@ -324,7 +329,9 @@ void draw()
 
   s = glPtr->getShader("sPass");
   s->bind();
+  glBindTexture(GL_TEXTURE_2D, g_colorId[0]);
   glPtr->draw("screenQuad");
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   glutSwapBuffers();
   glutPostRedisplay();
