@@ -47,9 +47,18 @@ glm::vec3 g_light;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
+enum {
+  MATERIAL,
+  NORMAL,
+  VERTEX,
+  num_buffers
+};
+
 GLuint g_fboId;
-GLuint g_colorId[4];
+GLuint g_colorId[num_buffers];
 GLuint g_depthId;
+
+GLuint g_currBuffer = MATERIAL;
 
 void drawSphere(size_t num_points)
 {
@@ -71,9 +80,9 @@ void createFBO(GLuint w, GLuint h)
   glGenFramebuffers(1, &g_fboId);
   glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
   
-  glGenTextures(4, g_colorId);
+  glGenTextures(num_buffers, g_colorId);
 
-  glBindTexture(GL_TEXTURE_2D, g_colorId[0]);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -82,10 +91,10 @@ void createFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[0], 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[MATERIAL], 0);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glBindTexture(GL_TEXTURE_2D, g_colorId[1]);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[NORMAL]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -94,10 +103,10 @@ void createFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[1], 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, g_colorId[NORMAL], 0);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glBindTexture(GL_TEXTURE_2D, g_colorId[2]);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -106,19 +115,7 @@ void createFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[2], 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  glBindTexture(GL_TEXTURE_2D, g_colorId[3]);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_colorId[3], 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, g_colorId[VERTEX], 0);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glGenRenderbuffers(1, &g_depthId);
@@ -296,6 +293,7 @@ void draw()
   if (!initCalled || !initGLEWCalled)
     return;
 
+  //First pass. Filling the geometry buffers.
   glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -325,11 +323,12 @@ void draw()
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+  //Second pass. Shading occurs here.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   s = glPtr->getShader("sPass");
   s->bind();
-  glBindTexture(GL_TEXTURE_2D, g_colorId[0]);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[g_currBuffer]);
   glPtr->draw("screenQuad");
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -415,6 +414,15 @@ void keyPress(unsigned char c, int x, int y)
     back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
+    break;
+  case '1':
+    g_currBuffer = MATERIAL;
+    break;
+  case '2':
+    g_currBuffer = NORMAL;
+    break;
+  case '3':
+    g_currBuffer = VERTEX;
     break;
   }
 
