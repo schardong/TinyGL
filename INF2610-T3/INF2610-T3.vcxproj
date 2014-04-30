@@ -73,12 +73,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="quad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\def_fpass.fs" />
     <None Include="..\Resources\def_fpass.vs" />
     <None Include="..\Resources\def_spass.fs" />
     <None Include="..\Resources\def_spass.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="quad.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

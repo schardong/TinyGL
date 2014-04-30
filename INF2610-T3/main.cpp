@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "grid.h"
 #include "sphere.h"
+#include "quad.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -263,8 +264,6 @@ void init()
   Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
   g_sPass->bind();
   g_sPass->bindFragDataLoc("out_vColor", 0);
-  
-  g_sPass->bind();
   g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
   
