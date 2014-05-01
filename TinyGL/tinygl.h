@@ -48,14 +48,30 @@ public:
     m_meshMap[name]->draw();
   }
 
+  void* getResource(resource_type type, std::string name)
+  {
+    if (name.empty() || type > num_resources) return NULL;
+    switch (type) {
+    case MESH:
+      return m_meshMap[name];
+      break;
+    case SHADER:
+      return m_shaderMap[name];
+      break;
+    case LIGHT:
+      return m_lightMap[name];
+      break;
+    }
+  }
+
   Shader* getShader(std::string name)
   {
-    return m_shaderMap[name];
+    return (Shader*)getResource(SHADER, name);
   }
 
   Mesh* getMesh(std::string name)
   {
-    return m_meshMap[name];
+    return (Mesh*)getResource(MESH, name);;
   }
 
 private:
