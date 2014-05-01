@@ -71,7 +71,7 @@ void drawGrid(size_t num_points)
 
 void drawQuad(size_t num_points)
 {
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_BYTE, NULL);
+  glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
 }
 
 void createFBO(GLuint w, GLuint h)
@@ -213,8 +213,6 @@ void init()
 
   Grid* ground;
   Sphere** spheres;
-  Sphere* light;
-
   Quad* screenQuad;
 
   ground = new Grid(10, 10);
@@ -223,13 +221,6 @@ void init()
   ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   TinyGL::getInstance()->addMesh("ground", ground);
-
-  /*light = new Sphere(32, 32);
-  light->setDrawCb(drawSphere);
-  light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
-  light->m_modelMatrix = glm::translate(g_light);
-  light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-  TinyGL::getInstance()->addMesh("light01", light);*/
 
   spheres = new Sphere*[NUM_SPHERES];
   for (int i = 0; i < NUM_SPHERES; i++) {
@@ -249,8 +240,6 @@ void init()
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
 
-  
-
   screenQuad = new Quad();
   screenQuad->setDrawCb(drawQuad);
   screenQuad->setMaterialColor(glm::vec4(0.f, 1.f, 1.f, 1.f));
@@ -260,13 +249,12 @@ void init()
 
   Shader* g_fPass = new Shader("../Resources/def_fpass.vs", "../Resources/def_fpass.fs");
   g_fPass->bind();
-  g_fPass->bindFragDataLoc("diffColor", 0);
   g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
   g_fPass->setUniformMatrix("projMatrix", projMatrix);
 
   Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
   g_sPass->bind();
-  g_sPass->bindFragDataLoc("out_vColor", 0);
+  g_sPass->bindFragDataLoc("fColor", 0);
   g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
   
@@ -313,11 +301,6 @@ void draw()
   s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("ground")->m_normalMatrix);
   s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("ground")->getMaterialColor());
   glPtr->draw("ground");
-
-  /*s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("light01")->m_modelMatrix);
-  s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("light01")->m_normalMatrix);
-  s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("light01")->getMaterialColor());
-  glPtr->draw("light01");*/
   
   glBindVertexArray(0);
   Shader::unbind();
@@ -349,9 +332,9 @@ void reshape(int w, int h)
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
 
-  s = TinyGL::getInstance()->getShader("sPass");
+  /*s = TinyGL::getInstance()->getShader("sPass");
   s->bind();
-  s->setUniformMatrix("projMatrix", projMatrix);
+  s->setUniformMatrix("projMatrix", projMatrix);*/
 
   Shader::unbind();
 }

@@ -1,9 +1,11 @@
 #version 330 core
 
-layout (location = 0) out vec4 out_vColor;
+layout (location = 0) out vec4 fColor;
 
-uniform vec4 u_materialColor;
-uniform sampler2D u_colorTex;
+uniform sampler2D u_diffuseMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_vertexMap;
+
 /*
 
 in LightData
@@ -15,11 +17,11 @@ in LightData
 
 vec4 g_ambientColor = vec4(0.1);*/
 
-in vec2 in_vTexCoord;
+in vec2 vTexCoord;
 
 void main()
 {
-  out_vColor = texture(u_colorTex, in_vTexCoord);
+  fColor = texture(u_diffuseMap, vTexCoord);
   
   /*
   float diff = max(dot(in_vLight.normal_camera, in_vLight.lightDir_camera), 0.f);

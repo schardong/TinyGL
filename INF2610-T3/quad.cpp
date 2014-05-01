@@ -17,11 +17,9 @@ Quad::Quad()
   };
     
   GLubyte indices[] = {
-    0, 1, 2,
-    0, 2, 3
+    0, 1, 2, 3
   };
   
-
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
   vbuff->sendData(&vertices[0]);
   attachBuffer(vbuff);
@@ -32,7 +30,7 @@ Quad::Quad()
 
   bind();
 
-  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 6, GL_STATIC_DRAW);
+  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 4, GL_STATIC_DRAW);
   ibuff->sendData(&indices[0]);
   attachBuffer(ibuff);
 
