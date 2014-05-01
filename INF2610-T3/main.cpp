@@ -42,7 +42,7 @@ glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
-glm::vec3 g_light;
+GLfloat* g_light;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
@@ -57,7 +57,6 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
-
 GLuint g_currBuffer = MATERIAL;
 
 void drawSphere(size_t num_points)
@@ -206,7 +205,7 @@ void init()
 {
   g_eye = glm::vec3(0, 7, 15);
   g_center = glm::vec3(0, 0, 0);
-  g_light = glm::vec3(0, 6, 4);
+  g_light = new GLfloat[150];
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
@@ -225,12 +224,12 @@ void init()
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   TinyGL::getInstance()->addMesh("ground", ground);
 
-  light = new Sphere(32, 32);
+  /*light = new Sphere(32, 32);
   light->setDrawCb(drawSphere);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   light->m_modelMatrix = glm::translate(g_light);
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-  TinyGL::getInstance()->addMesh("light01", light);
+  TinyGL::getInstance()->addMesh("light01", light);*/
 
   spheres = new Sphere*[NUM_SPHERES];
   for (int i = 0; i < NUM_SPHERES; i++) {
@@ -249,6 +248,8 @@ void init()
   for (int i = 0; i < NUM_SPHERES; i++) {
     TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
   }
+
+  
 
   screenQuad = new Quad();
   screenQuad->setDrawCb(drawQuad);
@@ -313,10 +314,10 @@ void draw()
   s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("ground")->getMaterialColor());
   glPtr->draw("ground");
 
-  s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("light01")->m_modelMatrix);
+  /*s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("light01")->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("light01")->m_normalMatrix);
   s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("light01")->getMaterialColor());
-  glPtr->draw("light01");
+  glPtr->draw("light01");*/
   
   glBindVertexArray(0);
   Shader::unbind();
@@ -448,7 +449,7 @@ void specialKeyPress(int c, int x, int y)
   Mesh* light_ptr = TinyGL::getInstance()->getMesh("light01");
   
   switch (c) {
-  case GLUT_KEY_LEFT:
+  /*case GLUT_KEY_LEFT:
     g_light.x -= 0.1f;
     light_ptr->m_modelMatrix = glm::translate(g_light);
     light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
@@ -483,7 +484,7 @@ void specialKeyPress(int c, int x, int y)
     light_ptr->m_modelMatrix = glm::translate(g_light);
     light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
     lightChanged = true;
-    break;
+    break;*/
   case GLUT_KEY_F3:
     //g_perVertex = !g_perVertex;
     break;
