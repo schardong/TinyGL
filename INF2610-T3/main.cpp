@@ -49,6 +49,7 @@ bool initCalled = false;
 bool initGLEWCalled = false;
 
 GLuint lightTexBuff;
+BufferObject* lightbuff;
 
 enum {
   MATERIAL,
@@ -156,11 +157,6 @@ void createFBO(GLuint w, GLuint h)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void createLightBuffTexture(Light** lightSources)
-{
-
-}
-
 int main(int argc, char** argv)
 {
   Logger::getInstance()->setLogStream(&cout);
@@ -225,7 +221,9 @@ void init()
   lightSources = new Light*[NUM_LIGHTS];
   for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
+    lightSources[i]->setPosition(glm::vec3(0, 1, 1));
     //set the light color and position here.
+    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
   }
 
   GLfloat* lightCoords = new GLfloat[3 * NUM_LIGHTS];
@@ -237,16 +235,10 @@ void init()
     lightCoords[i * 3 + 2] = pos.z;
   }
 
-  BufferObject* lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
+  lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
   lightbuff->sendData(lightCoords);
 
-  glGenTextures(1, &lightTexBuff);
-  glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, lightbuff->getId());
-
   delete lightCoords;
-
-  createLightBuffTexture(lightSources);
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
@@ -303,9 +295,11 @@ void init()
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   g_sPass->setUniform1i("u_vertexMap", 2);
-
+  
   glActiveTexture(GL_TEXTURE3);
+  lightbuff->bind();
   glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, lightbuff->getId());
   g_sPass->setUniform1i("u_lightCoords", 3);
  
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);

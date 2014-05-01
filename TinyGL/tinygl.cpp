@@ -22,8 +22,12 @@ void TinyGL::freeResources()
   for (std::map<std::string, Shader*>::iterator it = m_shaderMap.begin(); it != m_shaderMap.end(); it++)
     delete it->second;
 
+  for (std::map<std::string, Light*>::iterator it = m_lightMap.begin(); it != m_lightMap.end(); it++)
+    delete it->second;
+
   m_meshMap.clear();
   m_shaderMap.clear();
+  m_lightMap.clear();
 }
 
 bool TinyGL::addResource(resource_type type, std::string name, void* resource)
