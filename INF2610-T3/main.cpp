@@ -23,6 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
+static const int NUM_LIGHTS = 50;
 
 using namespace std;
 
@@ -46,6 +47,8 @@ glm::vec3 g_center;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
+
+GLuint lightTexBuff;
 
 enum {
   MATERIAL,
@@ -153,6 +156,11 @@ void createFBO(GLuint w, GLuint h)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void createLightBuffTexture(Light** lightSources)
+{
+
+}
+
 int main(int argc, char** argv)
 {
   Logger::getInstance()->setLogStream(&cout);
@@ -209,11 +217,36 @@ void init()
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
   createFBO(800, 600);
-
   Grid* ground;
   Sphere** spheres;
   Quad* screenQuad;
-  
+  Light** lightSources;
+
+  lightSources = new Light*[NUM_LIGHTS];
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    lightSources[i] = new Light();
+    //set the light color and position here.
+  }
+
+  GLfloat* lightCoords = new GLfloat[3 * NUM_LIGHTS];
+
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    glm::vec3 pos = lightSources[i]->getPosition();
+    lightCoords[i * 3] = pos.x;
+    lightCoords[i * 3 + 1] = pos.y;
+    lightCoords[i * 3 + 2] = pos.z;
+  }
+
+  BufferObject* lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
+  lightbuff->sendData(lightCoords);
+
+  glGenTextures(1, &lightTexBuff);
+  glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, lightbuff->getId());
+
+  delete lightCoords;
+
+  createLightBuffTexture(lightSources);
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
@@ -270,6 +303,10 @@ void init()
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   g_sPass->setUniform1i("u_vertexMap", 2);
+
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
+  g_sPass->setUniform1i("u_lightCoords", 3);
  
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);

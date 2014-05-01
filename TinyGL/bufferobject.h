@@ -21,6 +21,11 @@ public:
   void bind();
   static void unbind();
 
+  GLuint getId()
+  {
+    return m_id;
+  }
+
 protected:
   GLuint m_id;
   GLenum m_target;

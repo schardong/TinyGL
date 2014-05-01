@@ -5,6 +5,8 @@ layout (location = 0) out vec4 fColor;
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
+uniform samplerBuffer u_lightCoords;
+
 uniform mat4 viewMatrix;
 
 vec4 g_ambientColor = vec4(0.1);
