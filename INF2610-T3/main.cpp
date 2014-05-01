@@ -257,19 +257,7 @@ void init()
   g_sPass->bindFragDataLoc("fColor", 0);
   g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
-  g_sPass->setUniform1i("u_diffuseMap", 0);
-
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, g_colorId[NORMAL]);
-  g_sPass->setUniform1i("u_normalMap", 1);
-
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
-  g_sPass->setUniform1i("u_vertexMap", 2);
-  
+ 
   TinyGL::getInstance()->addShader("fPass", g_fPass);
   TinyGL::getInstance()->addShader("sPass", g_sPass);
 
@@ -324,6 +312,18 @@ void draw()
 
   s = glPtr->getShader("sPass");
   s->bind();
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
+  s->setUniform1i("u_diffuseMap", 0);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[NORMAL]);
+  s->setUniform1i("u_normalMap", 1);
+
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
+  s->setUniform1i("u_vertexMap", 2);
 
   glPtr->draw("screenQuad");
 
