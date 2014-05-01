@@ -26,16 +26,33 @@ void TinyGL::freeResources()
   m_shaderMap.clear();
 }
 
-bool TinyGL::addMesh(std::string name, Mesh* m)
+bool TinyGL::addResource(resource_type type, std::string name, void* resource)
 {
-  if (m == NULL || name.empty()) return false;
-  m_meshMap[name] = new Mesh(*m);
+  if (resource == NULL || type > num_resources) return false;
+  switch (type) {
+  case MESH:
+    m_meshMap[name] = new Mesh(*(Mesh*)resource);
+    break;
+  case SHADER:
+    m_shaderMap[name] = new Shader(*(Shader*)resource);
+    break;
+  case LIGHT:
+    m_lightMap[name] = new Light(*(Light*)resource);
+    break;
+  }
   return true;
 }
 
-bool TinyGL::addShader(std::string name, Shader* s)
-{
-  if (s == NULL || name.empty()) return false;
-  m_shaderMap[name] = new Shader(*s);
-  return true;
-}
+//bool TinyGL::addMesh(std::string name, Mesh* m)
+//{
+//  if (m == NULL || name.empty()) return false;
+//  m_meshMap[name] = new Mesh(*m);
+//  return true;
+//}
+//
+//bool TinyGL::addShader(std::string name, Shader* s)
+//{
+//  if (s == NULL || name.empty()) return false;
+//  m_shaderMap[name] = new Shader(*s);
+//  return true;
+//}

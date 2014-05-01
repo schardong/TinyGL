@@ -113,12 +113,12 @@ void init()
   ground = new Grid(10, 10);
   ground->setDrawCb(drawMesh);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
-  TinyGL::getInstance()->addMesh("ground", ground);
+  TinyGL::getInstance()->addResource(MESH, "ground", ground);
 
   light = new Sphere(30, 30);
   light->setDrawCb(drawMesh);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
-  TinyGL::getInstance()->addMesh("light01", light);
+  TinyGL::getInstance()->addResource(MESH, "light01", light);
   
   spheres = new Sphere*[NUM_SPHERES];
 
@@ -126,7 +126,7 @@ void init()
     spheres[i] = new Sphere(32, 32);
     spheres[i]->setDrawCb(drawMesh);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
-    TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
+    TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
   }
 
   for (int i = 0; i < W_SPHERES; i++) {
@@ -145,7 +145,7 @@ void init()
   float tmp[] = { g_light[0], g_light[1], g_light[2] };
   g_simple->setUniformfv("u_lightCoord", tmp, 3);
   
-  TinyGL::getInstance()->addShader("simple", g_simple);
+  TinyGL::getInstance()->addResource(SHADER, "simple", g_simple);
 
   ground->m_modelMatrix = glm::translate(glm::vec3(-10, 0, -10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));

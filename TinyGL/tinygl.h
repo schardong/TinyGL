@@ -4,9 +4,18 @@
 #include "singleton.h"
 #include "mesh.h"
 #include "shader.h"
+#include "light.h"
 
 #include <string>
 #include <map>
+
+enum resource_type
+{
+  MESH,
+  SHADER,
+  LIGHT,
+  num_resources
+};
 
 /**
  * class TinyGL
@@ -25,8 +34,11 @@ class TinyGL : public Singleton<TinyGL>
 public:
 	friend class Singleton<TinyGL>;
   
-  bool addMesh(std::string name, Mesh* m);
+  bool addResource(resource_type type, std::string name, void* resource);
+
+  /*bool addMesh(std::string name, Mesh* m);
   bool addShader(std::string name, Shader* s);
+  bool addLight(std::string name, Light* l);*/
 
   void freeResources();
   void draw();
@@ -49,6 +61,7 @@ public:
 private:
   std::map<std::string, Mesh*> m_meshMap;
   std::map<std::string, Shader*> m_shaderMap;
+  std::map<std::string, Light*> m_lightMap;
 };
 
 #endif // TINY_GL_H

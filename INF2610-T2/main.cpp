@@ -122,14 +122,14 @@ void init()
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-  TinyGL::getInstance()->addMesh("ground", ground);
+  TinyGL::getInstance()->addResource(MESH, "ground", ground);
 
   light = new Sphere(32, 32);
   light->setDrawCb(drawSphere);
   light->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   light->m_modelMatrix = glm::translate(g_light);
   light->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light->m_modelMatrix));
-  TinyGL::getInstance()->addMesh("light01", light);
+  TinyGL::getInstance()->addResource(MESH, "light01", light);
 
   spheres = new Sphere*[NUM_SPHERES];
   for (int i = 0; i < NUM_SPHERES; i++) {
@@ -146,7 +146,7 @@ void init()
   }
 
   for (int i = 0; i < NUM_SPHERES; i++) {
-    TinyGL::getInstance()->addMesh("sphere" + to_string(i), spheres[i]);
+    TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
   }
 
   Shader* g_adsVertex = new Shader("../Resources/ads_vertex.vs", "../Resources/ads_vertex.fs");
@@ -168,8 +168,8 @@ void init()
   g_adsFrag->bind();
   g_adsFrag->setUniformfv("u_lightCoord", tmp, 3);
   
-  TinyGL::getInstance()->addShader("ads_vertex", g_adsVertex);
-  TinyGL::getInstance()->addShader("ads_frag", g_adsFrag);
+  TinyGL::getInstance()->addResource(SHADER, "ads_vertex", g_adsVertex);
+  TinyGL::getInstance()->addResource(SHADER, "ads_frag", g_adsFrag);
 
   initCalled = true;
 }
