@@ -136,7 +136,7 @@ void createFBO(GLuint w, GLuint h)
     Logger::getInstance()->error("FBO missing attachment");
     break;
   case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-    Logger::getInstance()->error("FBO incomplete draw buffe");
+    Logger::getInstance()->error("FBO incomplete draw buffer");
     break;
   case GL_FRAMEBUFFER_UNSUPPORTED:
     Logger::getInstance()->error("FBO unsupported");
@@ -148,8 +148,8 @@ void createFBO(GLuint w, GLuint h)
     Logger::getInstance()->error("FBO undefined problem");
   }
 
-  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-  glDrawBuffers(4, drawBuffer);
+  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+  glDrawBuffers(num_buffers, drawBuffer);
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

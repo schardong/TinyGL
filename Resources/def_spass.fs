@@ -15,11 +15,11 @@ in LightData
 
 vec4 g_ambientColor = vec4(0.1);*/
 
-in vec2 out_vTexCoord;
+in vec2 in_vTexCoord;
 
 void main()
 {
-  out_vColor = texture(u_colorTex, out_vTexCoord);
+  out_vColor = texture(u_colorTex, in_vTexCoord);
   
   /*
   float diff = max(dot(in_vLight.normal_camera, in_vLight.lightDir_camera), 0.f);
