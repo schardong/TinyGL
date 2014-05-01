@@ -16,12 +16,20 @@ in LightData
 } in_vLight;
 
 vec4 g_ambientColor = vec4(0.1);*/
+vec4 g_ambientColor = vec4(0.1);
 
 in vec2 vTexCoord;
 
+vec4 light_dir = vec4(0, 1, 0, 0);
+
 void main()
 {
-  fColor = texture(u_diffuseMap, vTexCoord);
+  vec4 diff_color = texture(u_diffuseMap, vTexCoord);
+  vec4 normal_camera = texture(u_normalMap, vTexCoord);
+  vec4 vertex_camera = texture(u_vertexMap, vTexCoord);
+  
+  float diff = max(dot(normal_camera, light_dir), 0.f);
+  fColor = diff * diff_color + g_ambientColor;
   
   /*
   float diff = max(dot(in_vLight.normal_camera, in_vLight.lightDir_camera), 0.f);
