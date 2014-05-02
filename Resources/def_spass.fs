@@ -15,21 +15,20 @@ in vec2 vTexCoord;
 
 void main()
 {
-  vec4 normal_camera = texture(u_normalMap, vTexCoord);
+  vec4 normal_camera = normalize(texture(u_normalMap, vTexCoord));
   if(length(normal_camera) == 0)
-    fColor = vec4(0.8);
+    fColor = vec4(1);
   else {
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     vec4 vertex_camera = texture(u_vertexMap, vTexCoord);
-    vec4 light_world = vec4(texelFetch(u_lightCoords, 30).rgb, 1);
-    fColor = light_world;
-  
-    /*vec4 light_dir = normalize((viewMatrix * g_lightPos) - vertex_camera);
+    vec4 light_world = texelFetch(u_lightCoords, 20);
     
-    float diff = max(dot(normal_camera, light_dir), 0.f);
-    fColor = diff * diff_color + g_ambientColor;
+    vec4 light_dir = normalize((viewMatrix * light_world) - vertex_camera);
     
-    vec4 reflection = normalize(reflect(-light_dir, normal_camera));
+    float diff = max(dot(normal_camera, -light_dir), 0.f);
+    fColor = diff * diff_color;//diff * diff_color + g_ambientColor;
+    
+    /*vec4 reflection = normalize(reflect(-light_dir, normal_camera));
     float spec = max(dot(normalize(vertex_camera), reflection), 0.f);
     
     if(diff != 0) {
