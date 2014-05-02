@@ -21,6 +21,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FCG-T1", "FCG-T1\FCG-T1.vcx
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T3", "INF2610-T3\INF2610-T3.vcxproj", "{16E94427-91B7-462A-BD3F-D3F37F522D8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E} = {22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
