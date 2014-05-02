@@ -16,13 +16,12 @@ out LightData
 
 void main()
 {
-  mat4 MV = viewMatrix * modelMatrix;
-  mat4 MVP = projMatrix * MV;
+  mat4 MVP = projMatrix * viewMatrix * modelMatrix;
   
   vec4 pos4 = modelMatrix * vec4(in_vPosition, 1);
-  vec3 pos3 = pos4.xyz / pos4.w;
+  //vec3 pos3 = pos4.xyz / pos4.w;
 
-  vLight.vertex_world = normalize(-pos3);
+  vLight.vertex_world = pos4.xyz;
   vLight.normal_camera = normalize(normalMatrix * in_vNormal);
   
   gl_Position = MVP * vec4(in_vPosition, 1.0);
