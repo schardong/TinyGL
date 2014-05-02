@@ -221,7 +221,7 @@ void init()
   lightSources = new Light*[NUM_LIGHTS];
   for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(0, 1, 1));
+    lightSources[i]->setPosition(glm::vec3(1, 0, 1));
     //set the light color and position here.
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
   }
@@ -235,8 +235,18 @@ void init()
     lightCoords[i * 3 + 2] = pos.z;
   }
 
-  lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    cout << "(" << lightCoords[i * 3] << ", " << lightCoords[i * 3 + 1] << ", " << lightCoords[i * 3 + 2] << ")\n";
+  }
+
+  lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_DYNAMIC_DRAW);
   lightbuff->sendData(lightCoords);
+  glGetBufferSubData(GL_TEXTURE_BUFFER, 0, sizeof(GLfloat)* 3 * NUM_LIGHTS, lightCoords);
+
+  cout << "\nAFTER\n\n";
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    cout << "(" << lightCoords[i * 3] << ", " << lightCoords[i * 3 + 1] << ", " << lightCoords[i * 3 + 2] << ")\n";
+  }
 
   delete lightCoords;
 
@@ -251,7 +261,7 @@ void init()
   for (int i = 0; i < NUM_SPHERES; i++) {
     spheres[i] = new Sphere(32, 32);
     spheres[i]->setDrawCb(drawSphere);
-    spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
+    spheres[i]->setMaterialColor(glm::vec4(1.0, 1.0, 0.0, 1.0));
   }
 
   for (int i = 0; i < W_SPHERES; i++) {
@@ -299,8 +309,8 @@ void init()
   glActiveTexture(GL_TEXTURE3);
   lightbuff->bind();
   glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, lightbuff->getId());
-  g_sPass->setUniform1i("u_lightCoords", 3);
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, lightbuff->getId());
+  g_sPass->setUniform1i("u_lightCoords", lightTexBuff);
  
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);

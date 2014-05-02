@@ -10,11 +10,11 @@ in LightData
 {
   vec3 vertex_camera;
   vec3 normal_camera;
-} in_vLight;
+} vLight;
 
 void main()
 {
   diffColor = u_materialColor;
-  normalEye = vec4(in_vLight.normal_camera, 1);
-  vertexEye = vec4(in_vLight.vertex_camera, 1);
+  normalEye = vec4(vLight.normal_camera, 1);
+  vertexEye = vec4(vLight.vertex_camera, 1);
 }
