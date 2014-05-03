@@ -25,16 +25,17 @@ void main()
     
     vec4 light_dir = normalize((viewMatrix * light_world) - vertex_camera);
     
-    float diff = max(dot(normal_camera, -light_dir), 0.f);
+    fColor = vertex_camera;
+    //float diff = max(dot(normal_camera, -light_dir), 0.f);
     //fColor = diff * diff_color + g_ambientColor;
     
-    vec4 reflection = normalize(reflect(-light_dir, normal_camera));
+    /*vec4 reflection = normalize(reflect(-light_dir, normal_camera));
     float spec = max(dot(normalize(vertex_camera), reflection), 0.f);
     
     if(diff != 0) {
       spec = pow(spec, 128.f);
       fColor.rgb += vec3(spec);
-    }
+    }*/
   }
 
 }

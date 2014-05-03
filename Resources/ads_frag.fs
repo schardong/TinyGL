@@ -24,5 +24,4 @@ void main()
     spec = pow(spec, 64.f);
     out_vColor.rgb += vec3(spec);
   }
-
 }
