@@ -15,6 +15,6 @@ in LightData
 void main()
 {
   diffColor = u_materialColor;
-  normalEye = vec4(vLight.normal_camera, 1);
-  vertexEye = vec4(vLight.vertex_camera, 1);
+  normalEye = vec4(vLight.normal_camera, 0);
+  vertexEye = vec4(vLight.vertex_camera, 0);
 }

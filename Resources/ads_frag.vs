@@ -30,6 +30,6 @@ void main()
   out_vLight.vertex_camera = normalize(-pos3);
   out_vLight.normal_camera = normalize(normalMatrix * in_vNormal);
   out_vLight.lightDir_camera = normalize((viewMatrix * vec4(u_lightCoord, 1)).xyz - pos3);
-  
+
   gl_Position = MVP * vec4(in_vPosition, 1.0);
 }

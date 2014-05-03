@@ -20,22 +20,21 @@ void main()
     fColor = vec4(0.8);
   else {
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
-    vec4 vertex_camera = texture(u_vertexMap, vTexCoord);
+    vec4 vertex_camera = normalize(texture(u_vertexMap, vTexCoord));
     vec4 light_world = texelFetch(u_lightCoords, 20);
     
     vec4 light_dir = normalize((viewMatrix * light_world) - vertex_camera);
+
+    float diff = max(dot(normal_camera, light_dir), 0.f);
+    fColor = diff * diff_color;//diff * diff_color + g_ambientColor;
     
-    fColor = vertex_camera;
-    //float diff = max(dot(normal_camera, -light_dir), 0.f);
-    //fColor = diff * diff_color + g_ambientColor;
+///    vec4 reflection = normalize(reflect(-light_dir, normal_camera));
+///    float spec = max(dot(normalize(vertex_camera), reflection), 0.f);
     
-    /*vec4 reflection = normalize(reflect(-light_dir, normal_camera));
-    float spec = max(dot(normalize(vertex_camera), reflection), 0.f);
-    
-    if(diff != 0) {
-      spec = pow(spec, 128.f);
-      fColor.rgb += vec3(spec);
-    }*/
+///    if(diff != 0) {
+///      spec = pow(spec, 128.f);
+///      fColor.rgb += vec3(spec);
+///    }
   }
 
 }
