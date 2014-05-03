@@ -62,6 +62,7 @@ public:
       return m_lightMap[name];
       break;
     }
+    return NULL;
   }
 
   Shader* getShader(std::string name)

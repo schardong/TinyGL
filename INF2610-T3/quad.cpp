@@ -17,7 +17,7 @@ Quad::Quad()
   };
     
   GLubyte indices[] = {
-    0, 1, 2, 3
+    1, 2, 0, 3
   };
   
   BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
@@ -44,7 +44,7 @@ Quad::Quad()
 
   glBindVertexArray(0);
 
-  m_numPoints = 6;
+  m_numPoints = 4;
 }
 
 Quad::~Quad()

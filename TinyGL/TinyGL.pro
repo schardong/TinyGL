@@ -13,7 +13,8 @@ SOURCES += \
     tinygl.cpp \
     sphere.cpp \
     grid.cpp \
-    axis.cpp
+    axis.cpp \
+    light.cpp
 
 HEADERS += \
     singleton.h \
@@ -25,7 +26,8 @@ HEADERS += \
     sphere.h \
     grid.h \
     axis.h \
-    tglconfig.h
+    tglconfig.h \
+    light.h
 
 INCLUDEPATH += ../include
 

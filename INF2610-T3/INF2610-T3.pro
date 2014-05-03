@@ -5,13 +5,14 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    quad.cpp
 
 OTHER_FILES += \
-    ../Resources/ads_vertex.vs \
-    ../Resources/ads_vertex.fs \
-    ../Resources/ads_frag.vs \
-    ../Resources/ads_frag.fs \
+    ../Resources/def_fpass.vs \
+    ../Resources/def_fpass.fs \
+    ../Resources/def_spass.vs \
+    ../Resources/def_spass.fs \
 
 INCLUDEPATH += ../include
 DEPENDPATH += ../include
@@ -33,3 +34,6 @@ CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -g3 -pg -O0
     LIBS += -ltinygld
 }
+
+HEADERS += \
+    quad.h

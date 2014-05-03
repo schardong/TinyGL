@@ -267,7 +267,7 @@ void init()
 
   screenQuad = new Quad();
   screenQuad->setDrawCb(drawQuad);
-  screenQuad->setMaterialColor(glm::vec4(0.f, 1.f, 1.f, 1.f));
+  screenQuad->setMaterialColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
   screenQuad->m_modelMatrix = glm::mat4(1.f);
   screenQuad->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * screenQuad->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "screenQuad", screenQuad);
@@ -281,7 +281,8 @@ void init()
   g_sPass->bind();
   g_sPass->bindFragDataLoc("fColor", 0);
   g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
-  g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
+  g_sPass->setUniformMatrix("viewMatrix", glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0)));
+  g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
 
   glActiveTexture(GL_TEXTURE0);
