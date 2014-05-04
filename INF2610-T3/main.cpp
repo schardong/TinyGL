@@ -461,7 +461,6 @@ void keyPress(unsigned char c, int x, int y)
     Shader* s = TinyGL::getInstance()->getShader("fPass");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-    s->setUniformfv("u_eyeCoord", tmp, 3);
     
     s = TinyGL::getInstance()->getShader("sPass");
     s->bind();
