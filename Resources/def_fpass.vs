@@ -22,7 +22,7 @@ void main()
   vec4 pos4 = MV * vec4(in_vPosition, 1);
   vec3 pos3 = pos4.xyz / pos4.w;
 
-  vLight.vertex_camera = normalize(pos3);
+  vLight.vertex_camera = pos3;
   vLight.normal_camera = normalize(normalMatrix * in_vNormal);
   
   gl_Position = MVP * vec4(in_vPosition, 1.0);
