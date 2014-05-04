@@ -32,10 +32,7 @@ void main()
       vec3 R = reflect(-light_dir, normal_camera);
       float spec = max(dot(normalize(-vertex_camera), R), 0.f);
       
-      //if(diff != 0) {
-      //  fColor.rgb += vec3(pow(spec, 1.f));
-      //}
-      fColor += vec4(pow(spec, 2.f));
+      fColor += vec4(pow(spec, 4.f));
     }
   }
 }
