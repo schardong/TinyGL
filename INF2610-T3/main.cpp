@@ -61,7 +61,6 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
-GLuint g_currBuffer = MATERIAL;
 
 void drawSphere(size_t num_points)
 {
@@ -218,28 +217,6 @@ void init()
   Quad* screenQuad;
   Light** lightSources;
 
-  lightSources = new Light*[NUM_LIGHTS];
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(0, 6, 4));
-    //set the light color and position here.
-    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
-  }
-
-  GLfloat* lightCoords = new GLfloat[3 * NUM_LIGHTS];
-
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    glm::vec3 pos = lightSources[i]->getPosition();
-    lightCoords[i * 3] = pos.x;
-    lightCoords[i * 3 + 1] = pos.y;
-    lightCoords[i * 3 + 2] = pos.z;
-  }
-
-  lightbuff = new BufferObject(GL_TEXTURE_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
-  lightbuff->sendData(lightCoords);
-  
-  delete lightCoords;
-
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
@@ -285,6 +262,43 @@ void init()
   g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
 
+  ////////////////////////
+  lightSources = new Light*[NUM_LIGHTS];
+  lightSources[0] = new Light(glm::vec3(12, 6, 12), glm::vec3(1.f));
+  for (int i = 1; i < NUM_LIGHTS; i++) {
+    lightSources[i] = new Light();
+    glm::vec4 pos = glm::rotate((float)M_PI / (float)i, glm::vec3(0, 1, 0)) * glm::vec4(lightSources[0]->getPosition(), 1);
+    lightSources[i]->setPosition(glm::vec3(pos));
+    //set the light color and position here.
+    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
+  }
+
+  GLfloat* lightCoords = new GLfloat[6 * NUM_LIGHTS];
+
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    glm::vec3 pos = lightSources[i]->getPosition();
+    glm::vec3 color = lightSources[i]->getColor();
+
+    lightCoords[i * 6] = pos.x;
+    lightCoords[i * 6 + 1] = pos.y;
+    lightCoords[i * 6 + 2] = pos.z;
+
+    lightCoords[i * 6 + 3] = color.x;
+    lightCoords[i * 6 + 4] = color.y;
+    lightCoords[i * 6 + 5] = color.z;
+  }
+
+  GLuint idx = glGetUniformBlockIndex(g_sPass->getProgramId(), "LightSource");
+  glUniformBlockBinding(g_sPass->getProgramId(), idx, 0);
+
+  BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 6 * NUM_LIGHTS, GL_STATIC_DRAW);
+  ubuffLight->sendData(lightCoords);
+
+  //glBindBufferBase(GL_UNIFORM_BUFFER, 0, GLuint bufferName);
+
+  delete lightCoords;
+  ////////////////////////////////////////
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
   g_sPass->setUniform1i("u_diffuseMap", 0);
@@ -296,12 +310,6 @@ void init()
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   g_sPass->setUniform1i("u_vertexMap", 2);
-  
-  glActiveTexture(GL_TEXTURE3);
-  lightbuff->bind();
-  glBindTexture(GL_TEXTURE_BUFFER, lightTexBuff);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, lightbuff->getId());
-  g_sPass->setUniform1i("u_lightCoords", 3);
  
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);
@@ -442,15 +450,6 @@ void keyPress(unsigned char c, int x, int y)
     back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
     g_eye = back + g_center;
     cameraChanged = true;
-    break;
-  case '1':
-    g_currBuffer = MATERIAL;
-    break;
-  case '2':
-    g_currBuffer = NORMAL;
-    break;
-  case '3':
-    g_currBuffer = VERTEX;
     break;
   }
 

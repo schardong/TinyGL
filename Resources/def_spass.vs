@@ -9,10 +9,15 @@ uniform mat4 projMatrix;
 out vec2 vTexCoord;
 out vec3 vLightPos[5];
 
-struct LightParameters
+struct LightParam
 {
   vec3 pos;
   vec3 color;
+};
+
+layout (std140) uniform LightSource
+{
+  LightParam lights[50];
 };
 
 void main()
