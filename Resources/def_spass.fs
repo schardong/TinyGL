@@ -7,10 +7,21 @@ uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform mat4 viewMatrix;
 
+const int g_numLights = 10;
 vec4 g_ambientColor = vec4(0.1);
 
 in vec2 vTexCoord;
-in vec3 vLightPos[5];
+
+struct LightParam
+{
+  vec3 pos;
+  vec3 color;
+};
+
+layout (std140) uniform LightSource
+{
+  LightParam lights[g_numLights];
+};
 
 void main()
 {
@@ -22,11 +33,11 @@ void main()
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
 	
-    for(int i = 0; i < 5; i++) {
-      vec3 light_camera = (viewMatrix * vec4(vLightPos[i], 1)).xyz;
+    for(int i = 0; i < g_numLights; i++) {
+      vec3 light_camera = (viewMatrix * vec4(lights[i].pos, 1)).xyz;
       vec3 light_dir = normalize(light_camera - vertex_camera);
       float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor += (diff * diff_color + g_ambientColor) / 2;
+      fColor += (diff * diff_color + g_ambientColor) / (g_numLights / 2);
       
       //vec3 R = reflect(-light_dir, normal_camera);
       //float spec = max(dot(normalize(-vertex_camera), R), 0.f) / 10;

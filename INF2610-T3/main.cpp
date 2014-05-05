@@ -23,7 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 50;
+static const int NUM_LIGHTS = 10;
 
 using namespace std;
 
@@ -269,6 +269,7 @@ void init()
     lightSources[i] = new Light();
     glm::vec4 pos = glm::rotate((float)M_PI / (float)i, glm::vec3(0, 1, 0)) * glm::vec4(lightSources[0]->getPosition(), 1);
     lightSources[i]->setPosition(glm::vec3(pos));
+    lightSources[i]->setColor(glm::vec3(rand() / RAND_MAX, 1 - rand() / RAND_MAX, rand() / RAND_MAX));
     //set the light color and position here.
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
   }
@@ -294,7 +295,7 @@ void init()
   BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 6 * NUM_LIGHTS, GL_STATIC_DRAW);
   ubuffLight->sendData(lightCoords);
 
-  //glBindBufferBase(GL_UNIFORM_BUFFER, 0, GLuint bufferName);
+  glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubuffLight->getId());
 
   delete lightCoords;
   ////////////////////////////////////////
