@@ -262,16 +262,22 @@ void init()
   g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
   g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
 
-  ////////////////////////
+  ////////////////////////////////////////
+
+  Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
+
   lightSources = new Light*[NUM_LIGHTS];
-  lightSources[0] = new Light(glm::vec3(12, 6, 12), glm::vec3(1.f));
-  for (int i = 1; i < NUM_LIGHTS; i++) {
+  for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
-    glm::vec4 pos = glm::rotate((float)M_PI / (float)i, glm::vec3(0, 1, 0)) * glm::vec4(lightSources[0]->getPosition(), 1);
-    lightSources[i]->setPosition(glm::vec3(pos));
-    lightSources[i]->setColor(glm::vec3(rand() / RAND_MAX, 1 - rand() / RAND_MAX, rand() / RAND_MAX));
-    //set the light color and position here.
+    lightSources[i]->setPosition(glm::vec3(2*i, 4, 2*i));
+    lightSources[i]->setColor(glm::vec3(1.f, 1.f, 1.f));
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
+
+    lightMesh[i] = new Sphere(10, 10);
+    lightMesh[i]->setDrawCb(drawSphere);
+    lightMesh[i]->setMaterialColor(glm::vec4(lightSources[i]->getColor(), 1.f));
+    lightMesh[i]->m_modelMatrix = glm::translate(glm::vec3(lightSources[i]->getPosition())) * glm::scale(glm::vec3(0.2f));
+    TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);
   }
 
   GLfloat* lightCoords = new GLfloat[6 * NUM_LIGHTS];
@@ -289,13 +295,19 @@ void init()
     lightCoords[i * 6 + 5] = color.z;
   }
 
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    cout << "pos = (" << lightCoords[i * 6] << ", " << lightCoords[i * 6 + 1] << ", " << lightCoords[i * 6 + 2] <<
+      ")   color = (" << lightCoords[i * 6 + 3] << ", " << lightCoords[i * 6 + 4] << ", " << lightCoords[i * 6 + 5] <<  ")\n";
+  }
+
   GLuint idx = glGetUniformBlockIndex(g_sPass->getProgramId(), "LightSource");
-  glUniformBlockBinding(g_sPass->getProgramId(), idx, 0);
+  glUniformBlockBinding(g_sPass->getProgramId(), idx, 1);
 
   BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 6 * NUM_LIGHTS, GL_STATIC_DRAW);
   ubuffLight->sendData(lightCoords);
 
-  glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubuffLight->getId());
+  glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLight->getId());
+  TinyGL::getInstance()->addResource(BUFFER, "light_buff", ubuffLight);
 
   delete lightCoords;
   ////////////////////////////////////////
@@ -349,6 +361,12 @@ void draw()
     s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->m_normalMatrix);
     s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->getMaterialColor());
     glPtr->draw("sphere" + to_string(i));
+  }
+
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->m_modelMatrix);
+    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->getMaterialColor());
+    glPtr->draw("lightMesh" + to_string(i));
   }
 
   s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("ground")->m_modelMatrix);
