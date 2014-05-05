@@ -25,9 +25,13 @@ void TinyGL::freeResources()
   for (std::map<std::string, Light*>::iterator it = m_lightMap.begin(); it != m_lightMap.end(); it++)
     delete it->second;
 
+  for (std::map<std::string, BufferObject*>::iterator it = m_buffMap.begin(); it != m_buffMap.end(); it++)
+    delete it->second;
+
   m_meshMap.clear();
   m_shaderMap.clear();
   m_lightMap.clear();
+  m_buffMap.clear();
 }
 
 bool TinyGL::addResource(resource_type type, std::string name, void* resource)
@@ -42,6 +46,9 @@ bool TinyGL::addResource(resource_type type, std::string name, void* resource)
     break;
   case LIGHT:
     m_lightMap[name] = new Light(*(Light*)resource);
+    break;
+  case BUFFER:
+    m_buffMap[name] = new BufferObject(*(BufferObject*)resource);
     break;
   }
   return true;

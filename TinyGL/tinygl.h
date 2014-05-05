@@ -14,6 +14,7 @@ enum resource_type
   MESH,
   SHADER,
   LIGHT,
+  BUFFER,
   num_resources
 };
 
@@ -61,13 +62,11 @@ public:
     case LIGHT:
       return m_lightMap[name];
       break;
+    case BUFFER:
+      return m_buffMap[name];
+      break;
     }
     return NULL;
-  }
-
-  Shader* getShader(std::string name)
-  {
-    return (Shader*)getResource(SHADER, name);
   }
 
   Mesh* getMesh(std::string name)
@@ -75,10 +74,26 @@ public:
     return (Mesh*)getResource(MESH, name);;
   }
 
+  Shader* getShader(std::string name)
+  {
+    return (Shader*)getResource(SHADER, name);
+  }
+
+  Light* getLight(std::string name)
+  {
+    return (Light*)getResource(LIGHT, name);
+  }
+
+  BufferObject* getBuffer(std::string name)
+  {
+    return (BufferObject*)getResource(BUFFER, name);
+  }
+
 private:
   std::map<std::string, Mesh*> m_meshMap;
   std::map<std::string, Shader*> m_shaderMap;
   std::map<std::string, Light*> m_lightMap;
+  std::map<std::string, BufferObject*> m_buffMap;
 };
 
 #endif // TINY_GL_H
