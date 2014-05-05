@@ -275,36 +275,43 @@ void init()
 
     lightMesh[i] = new Sphere(10, 10);
     lightMesh[i]->setDrawCb(drawSphere);
-    lightMesh[i]->setMaterialColor(glm::vec4(lightSources[i]->getColor(), 1.f));
+    lightMesh[i]->setMaterialColor(glm::vec4(1.f));
     lightMesh[i]->m_modelMatrix = glm::translate(glm::vec3(lightSources[i]->getPosition())) * glm::scale(glm::vec3(0.2f));
     TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);
   }
 
-  GLfloat* lightCoords = new GLfloat[6 * NUM_LIGHTS];
+  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     glm::vec3 pos = lightSources[i]->getPosition();
     glm::vec3 color = lightSources[i]->getColor();
 
-    lightCoords[i * 6] = pos.x;
-    lightCoords[i * 6 + 1] = pos.y;
-    lightCoords[i * 6 + 2] = pos.z;
+    lightCoords[i * 4] = pos.x;
+    lightCoords[i * 4 + 1] = pos.y;
+    lightCoords[i * 4 + 2] = pos.z;
+    lightCoords[i * 4 + 3] = 1.f;
 
-    lightCoords[i * 6 + 3] = color.x;
-    lightCoords[i * 6 + 4] = color.y;
-    lightCoords[i * 6 + 5] = color.z;
+    /*lightCoords[i * 4 + 4] = color.x;
+    lightCoords[i * 4 + 5] = color.y;
+    lightCoords[i * 4 + 6] = color.z;
+    lightCoords[i * 4 + 7] = 1.f;*/
   }
 
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    cout << "pos = (" << lightCoords[i * 6] << ", " << lightCoords[i * 6 + 1] << ", " << lightCoords[i * 6 + 2] <<
+  /*for (int i = 0; i < NUM_LIGHTS; i++) {
+    cout << "pos = (" << lightCoords[i * 3] << ", " << lightCoords[i * 3 + 1] << ", " << lightCoords[i * 3 + 2] <<
       ")   color = (" << lightCoords[i * 6 + 3] << ", " << lightCoords[i * 6 + 4] << ", " << lightCoords[i * 6 + 5] <<  ")\n";
-  }
+  }*/
 
   GLuint idx = glGetUniformBlockIndex(g_sPass->getProgramId(), "LightSource");
   glUniformBlockBinding(g_sPass->getProgramId(), idx, 1);
 
-  BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 6 * NUM_LIGHTS, GL_STATIC_DRAW);
+  BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 4 * NUM_LIGHTS, GL_STATIC_DRAW);
   ubuffLight->sendData(lightCoords);
+  glGetBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * NUM_LIGHTS, lightCoords);
+
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    cout << "pos = (" << lightCoords[i * 4] << ", " << lightCoords[i * 4 + 1] << ", " << lightCoords[i * 4 + 2] << ", " << lightCoords[i * 4 + 3] << ")\n";
+  }
 
   glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLight->getId());
   TinyGL::getInstance()->addResource(BUFFER, "light_buff", ubuffLight);

@@ -7,7 +7,7 @@ uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform mat4 viewMatrix;
 
-const int g_numLights = 3;
+const int g_numLights = 10;
 vec4 g_ambientColor = vec4(0.1);
 
 in vec2 vTexCoord;
@@ -20,7 +20,7 @@ struct LightParam
 
 layout (std140) uniform LightSource
 {
-  LightParam lights[g_numLights];
+  vec3 lights[g_numLights];
 };
 
 void main()
@@ -34,19 +34,18 @@ void main()
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
 	
     for(int i = 0; i < g_numLights; i++) {
-      vec3 light_camera = (viewMatrix * vec4(lights[i].pos, 1)).xyz;
+      vec3 light_camera = (viewMatrix * vec4(lights[i], 1)).xyz;
       vec3 light_dir = light_camera - vertex_camera;
       float dist = length(light_dir);
       light_dir = normalize(light_dir);
       
       float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor += (diff * diff_color * vec4(lights[i].color, 1)) / (dist * dist);
+      fColor += diff * diff_color / (dist);
       
       vec3 R = reflect(-light_dir, normal_camera);
-      //float spec = max(dot(normalize(-vertex_camera), R), 0.f); // (dist * dist);
-      //fColor = vec4(pow(spec, 2.f));
+      float spec = max(dot(normalize(-vertex_camera), R), 0.f); // (dist * dist);
+      fColor += vec4(pow(spec, 1.f)) / dist;
     }
-    //fColor = vec4(-vertex_camera, 1);
     fColor += g_ambientColor;
   }
   
