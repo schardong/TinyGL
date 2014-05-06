@@ -1,6 +1,6 @@
 #version 330 core
 
-layout (location = 0) out vec4 diffColor;
+layout (location = 0) out vec3 diffColor;
 layout (location = 1) out vec3 normalEye;
 layout (location = 2) out vec3 vertexEye;
 
@@ -14,7 +14,7 @@ in LightData
 
 void main()
 {
-  diffColor = u_materialColor;
-  normalEye = vLight.normal_camera;
+  diffColor = u_materialColor.rgb;
+  normalEye = normalize(vLight.normal_camera);
   vertexEye = vLight.vertex_camera;
 }
