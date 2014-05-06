@@ -23,7 +23,9 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 20;
+static const int NUM_LIGHTS = 50;
+static const int WINDOW_W = 800;
+static const int WINDOW_H = 600;
 
 using namespace std;
 
@@ -62,6 +64,11 @@ GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
 
+void setupLights();
+void setupFBO(GLuint w, GLuint h);
+void setupShaders();
+void setupGeometry();
+
 void drawSphere(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
@@ -75,59 +82,6 @@ void drawGrid(size_t num_points)
 void drawQuad(size_t num_points)
 {
   glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
-}
-
-void createFBO(GLuint w, GLuint h)
-{
-  glGenFramebuffers(1, &g_fboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
-  
-  glGenTextures(num_buffers, g_colorId);
-
-  for (int i = 0; i < num_buffers; i++) {
-    glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
-  }
-
-  glGenRenderbuffers(1, &g_depthId);
-  glBindRenderbuffer(GL_RENDERBUFFER, g_depthId);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_depthId);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  switch (fboStatus) {
-  case GL_FRAMEBUFFER_UNDEFINED:
-    Logger::getInstance()->error("FBO undefined");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-    Logger::getInstance()->error("FBO incomplete attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-    Logger::getInstance()->error("FBO missing attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-    Logger::getInstance()->error("FBO incomplete draw buffer");
-    break;
-  case GL_FRAMEBUFFER_UNSUPPORTED:
-    Logger::getInstance()->error("FBO unsupported");
-    break;
-  case GL_FRAMEBUFFER_COMPLETE:
-    Logger::getInstance()->log("FBO created successfully");
-    break;
-  default:
-    Logger::getInstance()->error("FBO undefined problem");
-  }
-
-  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-  glDrawBuffers(num_buffers, drawBuffer);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int main(int argc, char** argv)
@@ -184,118 +138,27 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
 
-  createFBO(800, 600);
-  Grid* ground;
-  Sphere** spheres;
-  Quad* screenQuad;
+  setupGeometry();
+  setupShaders();
+  setupFBO(WINDOW_W, WINDOW_H);
+  setupLights();
 
-  ground = new Grid(10, 10);
-  ground->setDrawCb(drawGrid);
-  ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
-  ground->m_modelMatrix = glm::scale(glm::vec3(30, 1, 30)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
-  ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
-  TinyGL::getInstance()->addResource(MESH, "ground", ground);
-
-  spheres = new Sphere*[NUM_SPHERES];
-  for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(32, 32);
-    spheres[i]->setDrawCb(drawSphere);
-    spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
-  }
-
-  for (int i = 0; i < W_SPHERES; i++) {
-    for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 3, 0.5, j * 3)) * glm::scale(glm::vec3(0.5));
-      spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
-    }
-  }
-
-  for (int i = 0; i < NUM_SPHERES; i++) {
-    TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
-  }
-
-  screenQuad = new Quad();
-  screenQuad->setDrawCb(drawQuad);
-  screenQuad->setMaterialColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
-  screenQuad->m_modelMatrix = glm::mat4(1.f);
-  screenQuad->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * screenQuad->m_modelMatrix));
-  TinyGL::getInstance()->addResource(MESH, "screenQuad", screenQuad);
-
-  Shader* g_fPass = new Shader("../Resources/def_fpass.vs", "../Resources/def_fpass.fs");
-  g_fPass->bind();
-  g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
-  g_fPass->setUniformMatrix("projMatrix", projMatrix);
-
-  Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
-  g_sPass->bind();
-  g_sPass->bindFragDataLoc("fColor", 0);
-  g_sPass->setUniformMatrix("modelMatrix", screenQuad->m_modelMatrix);
-  g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
-  g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
-  g_sPass->setUniform4fv("u_materialColor", screenQuad->getMaterialColor());
-
-  ////////////////////////////////////////
-
-  Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
-  Light** lightSources = new Light*[NUM_LIGHTS];
-
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(rand() % 25, 2, rand() % 25));
-    lightSources[i]->setColor(glm::vec3(1.f, 1.f, 1.f));
-    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
-
-    lightMesh[i] = new Sphere(10, 10);
-    lightMesh[i]->setDrawCb(drawSphere);
-    lightMesh[i]->setMaterialColor(glm::vec4(1.f));
-    lightMesh[i]->m_modelMatrix = glm::translate(glm::vec3(lightSources[i]->getPosition())) * glm::scale(glm::vec3(0.2f));
-    TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);
-  }
-
-  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
-
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    glm::vec3 pos = lightSources[i]->getPosition();
-    glm::vec3 color = lightSources[i]->getColor();
-
-    lightCoords[i * 4] = pos.x;
-    lightCoords[i * 4 + 1] = pos.y;
-    lightCoords[i * 4 + 2] = pos.z;
-    lightCoords[i * 4 + 3] = 1.f;
-
-    /*lightCoords[i * 4 + 4] = color.x;
-    lightCoords[i * 4 + 5] = color.y;
-    lightCoords[i * 4 + 6] = color.z;
-    lightCoords[i * 4 + 7] = 1.f;*/
-  }
-
-  GLuint idx = glGetUniformBlockIndex(g_sPass->getProgramId(), "LightSource");
-  glUniformBlockBinding(g_sPass->getProgramId(), idx, 1);
-
-  BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 4 * NUM_LIGHTS, GL_STATIC_DRAW);
-  ubuffLight->sendData(lightCoords);
-  glGetBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * NUM_LIGHTS, lightCoords);
-
-  glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLight->getId());
-  TinyGL::getInstance()->addResource(BUFFER, "light_buff", ubuffLight);
-
-  //delete lightCoords;
-  ////////////////////////////////////////
+  Shader* s = TinyGL::getInstance()->getShader("sPass");
+  Mesh* quad = TinyGL::getInstance()->getMesh("screenQuad");
+  s->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
+  s->setUniform4fv("u_materialColor", quad->getMaterialColor());
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
-  g_sPass->setUniform1i("u_diffuseMap", 0);
+  s->setUniform1i("u_diffuseMap", 0);
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, g_colorId[NORMAL]);
-  g_sPass->setUniform1i("u_normalMap", 1);
+  s->setUniform1i("u_normalMap", 1);
 
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
-  g_sPass->setUniform1i("u_vertexMap", 2);
- 
-  TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
-  TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);
+  s->setUniform1i("u_vertexMap", 2);
 
   initCalled = true;
 }
@@ -351,11 +214,11 @@ void draw()
     glPtr->draw("sphere" + to_string(i));
   }
 
-  for (int i = 0; i < NUM_LIGHTS; i++) {
+  /*for (int i = 0; i < NUM_LIGHTS; i++) {
     s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->m_modelMatrix);
     s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->getMaterialColor());
     glPtr->draw("lightMesh" + to_string(i));
-  }
+  }*/
 
   s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("ground")->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("ground")->m_normalMatrix);
@@ -481,4 +344,173 @@ void exit_cb()
   glutDestroyWindow(g_window);
   destroy();
   exit(EXIT_SUCCESS);
+}
+
+void setupLights()
+{
+  //Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
+  Light** lightSources = new Light*[NUM_LIGHTS];
+
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    lightSources[i] = new Light();
+    lightSources[i]->setPosition(glm::vec3(rand() % 50, 5 + rand() % 10, rand() % 50));
+    lightSources[i]->setColor(glm::vec3((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX));
+    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
+
+    /*lightMesh[i] = new Sphere(20, 20);
+    lightMesh[i]->setDrawCb(drawSphere);
+    lightMesh[i]->setMaterialColor(glm::vec4(lightSources[i]->getColor(), 1.f));
+    lightMesh[i]->m_modelMatrix = glm::translate(glm::vec3(lightSources[i]->getPosition())) * glm::scale(glm::vec3(0.1f));
+    TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);*/
+  }
+
+  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    glm::vec3 pos = lightSources[i]->getPosition();
+
+    lightCoords[i * 4] = pos.x;
+    lightCoords[i * 4 + 1] = pos.y;
+    lightCoords[i * 4 + 2] = pos.z;
+    lightCoords[i * 4 + 3] = 1.f;
+  }
+
+  /*GLfloat* lightColors = new GLfloat[4 * NUM_LIGHTS];
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    glm::vec3 color = lightSources[i]->getColor();
+
+    lightColors[i * 4] = color.x;
+    lightColors[i * 4 + 1] = color.y;
+    lightColors[i * 4 + 2] = color.z;
+    lightColors[i * 4 + 3] = 1.f;
+  }*/
+
+  Shader* s = TinyGL::getInstance()->getShader("sPass");
+
+  GLuint idxPos = glGetUniformBlockIndex(s->getProgramId(), "LightPos");
+  glUniformBlockBinding(s->getProgramId(), idxPos, 0);
+  /*GLuint idxColor = glGetUniformBlockIndex(s->getProgramId(), "LightColor");
+  glUniformBlockBinding(s->getProgramId(), idxColor, 1);*/
+
+  BufferObject* ubuffLightPos = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
+  ubuffLightPos->sendData(lightCoords);
+
+  /*BufferObject* ubuffLightColor = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
+  ubuffLightColor->sendData(lightColors);*/
+
+  glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubuffLightPos->getId());
+  //glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLightColor->getId());
+  TinyGL::getInstance()->addResource(BUFFER, "lightpos_buff", ubuffLightPos);
+  //TinyGL::getInstance()->addResource(BUFFER, "lightcolor_buff", ubuffLightColor);
+
+  delete lightCoords;
+  //delete lightColors;
+}
+
+void setupFBO(GLuint w, GLuint h)
+{
+  glGenFramebuffers(1, &g_fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+
+  glGenTextures(num_buffers, g_colorId);
+
+  for (int i = 0; i < num_buffers; i++) {
+    glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
+  }
+
+  glGenRenderbuffers(1, &g_depthId);
+  glBindRenderbuffer(GL_RENDERBUFFER, g_depthId);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_depthId);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  switch (fboStatus) {
+  case GL_FRAMEBUFFER_UNDEFINED:
+    Logger::getInstance()->error("FBO undefined");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+    Logger::getInstance()->error("FBO incomplete attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+    Logger::getInstance()->error("FBO missing attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+    Logger::getInstance()->error("FBO incomplete draw buffer");
+    break;
+  case GL_FRAMEBUFFER_UNSUPPORTED:
+    Logger::getInstance()->error("FBO unsupported");
+    break;
+  case GL_FRAMEBUFFER_COMPLETE:
+    Logger::getInstance()->log("FBO created successfully");
+    break;
+  default:
+    Logger::getInstance()->error("FBO undefined problem");
+  }
+
+  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+  glDrawBuffers(num_buffers, drawBuffer);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void setupShaders()
+{
+  Shader* g_fPass = new Shader("../Resources/def_fpass.vs", "../Resources/def_fpass.fs");
+  g_fPass->bind();
+  g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
+  g_fPass->setUniformMatrix("projMatrix", projMatrix);
+
+  Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
+  g_sPass->bind();
+  g_sPass->bindFragDataLoc("fColor", 0);
+  g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
+  g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
+
+  TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
+  TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);
+}
+
+void setupGeometry()
+{
+  Grid* ground;
+  Sphere** spheres;
+  Quad* screenQuad;
+
+  ground = new Grid(10, 10);
+  ground->setDrawCb(drawGrid);
+  ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
+  ground->m_modelMatrix = glm::scale(glm::vec3(50, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
+  ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
+  TinyGL::getInstance()->addResource(MESH, "ground", ground);
+
+  spheres = new Sphere*[NUM_SPHERES];
+  for (int i = 0; i < NUM_SPHERES; i++) {
+    spheres[i] = new Sphere(32, 32);
+    spheres[i]->setDrawCb(drawSphere);
+    spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
+  }
+
+  for (int i = 0; i < W_SPHERES; i++) {
+    for (int j = 0; j < H_SPHERES; j++) {
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 5, 1.5, j * 5)) * glm::scale(glm::vec3(1.5));
+      spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
+    }
+  }
+
+  for (int i = 0; i < NUM_SPHERES; i++) {
+    TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
+  }
+
+  screenQuad = new Quad();
+  screenQuad->setDrawCb(drawQuad);
+  screenQuad->setMaterialColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
+  screenQuad->m_modelMatrix = glm::mat4(1.f);
+  screenQuad->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * screenQuad->m_modelMatrix));
+  TinyGL::getInstance()->addResource(MESH, "screenQuad", screenQuad);
 }
