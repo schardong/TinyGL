@@ -61,6 +61,7 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
+GLfloat* lightCoords;
 
 void drawSphere(size_t num_points)
 {
@@ -179,7 +180,6 @@ void initGLUT(int argc, char** argv)
   glutReshapeFunc(reshape);
   glutDisplayFunc(update);
   glutKeyboardFunc(keyPress);
-  glutSpecialFunc(specialKeyPress);
 
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutCloseFunc(exit_cb);
@@ -291,7 +291,7 @@ void init()
     TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);
   }
 
-  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
+  lightCoords = new GLfloat[4 * NUM_LIGHTS];
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     glm::vec3 pos = lightSources[i]->getPosition();
@@ -320,14 +320,14 @@ void init()
   ubuffLight->sendData(lightCoords);
   glGetBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * NUM_LIGHTS, lightCoords);
 
-  for (int i = 0; i < NUM_LIGHTS; i++) {
+  /*for (int i = 0; i < NUM_LIGHTS; i++) {
     cout << "pos = (" << lightCoords[i * 4] << ", " << lightCoords[i * 4 + 1] << ", " << lightCoords[i * 4 + 2] << ", " << lightCoords[i * 4 + 3] << ")\n";
-  }
+  }*/
 
   glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLight->getId());
   TinyGL::getInstance()->addResource(BUFFER, "light_buff", ubuffLight);
 
-  delete lightCoords;
+  //delete lightCoords;
   ////////////////////////////////////////
 
   glActiveTexture(GL_TEXTURE0);
@@ -402,11 +402,14 @@ void draw()
 
   s = glPtr->getShader("sPass");
   s->bind();
+  //s->setUniformMatrix("viewMatrix", viewMatrix);
+  glDisable(GL_DEPTH_TEST);
 
   glPtr->draw("screenQuad");
   
   glutSwapBuffers();
   glutPostRedisplay();
+  glEnable(GL_DEPTH_TEST);
 }
 
 void reshape(int w, int h)
@@ -421,10 +424,6 @@ void reshape(int w, int h)
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
 
-  /*s = TinyGL::getInstance()->getShader("sPass");
-  s->bind();
-  s->setUniformMatrix("projMatrix", projMatrix);*/
-
   Shader::unbind();
 }
 
@@ -432,7 +431,6 @@ void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
   //printf("%d\n", c);
-  glm::vec3 back = g_eye - g_center;
   switch (c) {
   case 'w':
     g_eye += glm::vec3(0, 0, -0.3f);
@@ -464,35 +462,10 @@ void keyPress(unsigned char c, int x, int y)
     g_center += glm::vec3(0, -0.3f, 0);
     cameraChanged = true;
     break;
-  case 'i':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'k':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(1, 0, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'j':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate((float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
-  case 'l':
-    //back = g_eye - g_center;
-    back = glm::mat3(glm::rotate(-(float)M_PI / 100.f, glm::vec3(0, 1, 0))) * back;
-    g_eye = back + g_center;
-    cameraChanged = true;
-    break;
   }
 
   if (cameraChanged) {
     viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-    float tmp[] = {g_eye[0], g_eye[1], g_eye[2]};
 
     Shader* s = TinyGL::getInstance()->getShader("fPass");
     s->bind();
@@ -501,67 +474,25 @@ void keyPress(unsigned char c, int x, int y)
     s = TinyGL::getInstance()->getShader("sPass");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
+
+    /*BufferObject* ubuff = TinyGL::getInstance()->getBuffer("light_buff");
+    ubuff->bind();
+    GLfloat* buff = new GLfloat[4 * NUM_LIGHTS];
+    
+    for (int i = 0; i < NUM_LIGHTS; i++) {
+      glm::vec4 tmp = glm::vec4(lightCoords[4 * i], lightCoords[4 * i + 1], lightCoords[4 * i + 2], lightCoords[4 * i + 3]);
+      tmp = viewMatrix * tmp;
+      buff[4 * i] = tmp.x;
+      buff[4 * i + 1] = tmp.y;
+      buff[4 * i + 2] = tmp.z;
+      buff[4 * i + 3] = tmp.w;
+    }
+
+    ubuff->sendData(buff);
+    delete buff;*/
+
+    Shader::unbind();
   }
-}
-
-void specialKeyPress(int c, int x, int y)
-{
-  bool lightChanged = false;
-  Mesh* light_ptr = TinyGL::getInstance()->getMesh("light01");
-  
-  switch (c) {
-  /*case GLUT_KEY_LEFT:
-    g_light.x -= 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;
-  case GLUT_KEY_RIGHT:
-    g_light.x += 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;
-  case GLUT_KEY_UP:
-    g_light.z -= 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;
-  case GLUT_KEY_DOWN:
-    g_light.z += 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;
-  case GLUT_KEY_F1:
-    g_light.y += 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;
-  case GLUT_KEY_F2:
-    g_light.y -= 0.1f;
-    light_ptr->m_modelMatrix = glm::translate(g_light);
-    light_ptr->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * light_ptr->m_modelMatrix));
-    lightChanged = true;
-    break;*/
-  case GLUT_KEY_F3:
-    //g_perVertex = !g_perVertex;
-    break;
-  }
-
-  /*if (lightChanged) {
-    float tmp[] = { g_light[0], g_light[1], g_light[2] };
-
-    Shader* s = TinyGL::getInstance()->getShader("fPass");
-    s->bind();
-    s->setUniformfv("u_lightCoord", tmp, 3);
-
-    s = TinyGL::getInstance()->getShader("sPass");
-    s->bind();
-    s->setUniformfv("u_lightCoord", tmp, 3);
-  }*/
 }
 
 void exit_cb()
