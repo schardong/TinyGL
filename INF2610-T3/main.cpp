@@ -23,7 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 10;
+static const int NUM_LIGHTS = 20;
 
 using namespace std;
 
@@ -220,7 +220,7 @@ void init()
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
   ground->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
-  ground->m_modelMatrix = glm::scale(glm::vec3(20, 1, 20)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
+  ground->m_modelMatrix = glm::scale(glm::vec3(30, 1, 30)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
   ground->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * ground->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "ground", ground);
 
@@ -233,7 +233,7 @@ void init()
 
   for (int i = 0; i < W_SPHERES; i++) {
     for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 2, 0.5, j * 2)) * glm::scale(glm::vec3(0.5));
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3(i * 3, 0.5, j * 3)) * glm::scale(glm::vec3(0.5));
       spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
     }
   }
@@ -267,9 +267,20 @@ void init()
   Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
 
   lightSources = new Light*[NUM_LIGHTS];
-  for (int i = 0; i < NUM_LIGHTS; i++) {
+  lightSources[0] = new Light();
+  lightSources[0]->setPosition(glm::vec3(0, 6, 4));
+  lightSources[0]->setColor(glm::vec3(1.f, 1.f, 1.f));
+  TinyGL::getInstance()->addResource(LIGHT, "light0", lightSources[0]);
+
+  lightMesh[0] = new Sphere(10, 10);
+  lightMesh[0]->setDrawCb(drawSphere);
+  lightMesh[0]->setMaterialColor(glm::vec4(1.f));
+  lightMesh[0]->m_modelMatrix = glm::translate(glm::vec3(lightSources[0]->getPosition())) * glm::scale(glm::vec3(0.2f));
+  TinyGL::getInstance()->addResource(MESH, "lightMesh0", lightMesh[0]);
+
+  for (int i = 1; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(2*i, 4, 2*i));
+    lightSources[i]->setPosition(glm::vec3(rand() % 25, 6, rand() % 25));
     lightSources[i]->setColor(glm::vec3(1.f, 1.f, 1.f));
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
 
@@ -346,7 +357,7 @@ void update()
 {
   if (!initCalled || !initGLEWCalled)
     return;
-  
+
   draw();
 }
 

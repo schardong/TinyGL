@@ -7,16 +7,10 @@ uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform mat4 viewMatrix;
 
-const int g_numLights = 10;
+const int g_numLights = 20;
 vec4 g_ambientColor = vec4(0.1);
 
 in vec2 vTexCoord;
-
-struct LightParam
-{
-  vec3 pos;
-  vec3 color;
-};
 
 layout (std140) uniform LightSource
 {
@@ -40,11 +34,13 @@ void main()
       light_dir = normalize(light_dir);
       
       float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor += diff * diff_color / (dist);
+      fColor += diff * diff_color / dist;
       
-      vec3 R = reflect(-light_dir, normal_camera);
-      float spec = max(dot(normalize(-vertex_camera), R), 0.f); // (dist * dist);
-      fColor += vec4(pow(spec, 1.f)) / dist;
+      if(diff != 0.f) {
+        vec3 R = normalize(reflect(-light_dir, normal_camera));
+        float spec = pow(max(dot(-vertex_camera, R), 0.f), 1.f) / (dist * dist);
+        fColor.rgb += vec3(spec);
+      }
     }
     fColor += g_ambientColor;
   }
