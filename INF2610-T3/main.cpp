@@ -374,6 +374,9 @@ void setupLights()
     lightCoords[i * 4 + 3] = 1.f;
   }
 
+  for (int i = 0; i < NUM_LIGHTS; i++)
+    cout << "(" << lightCoords[i * 4] << ", " << lightCoords[i * 4 + 1] << ", " << lightCoords[i * 4 + 2] << ", " << lightCoords[i * 4 + 3] << ")\n";
+
   /*GLfloat* lightColors = new GLfloat[4 * NUM_LIGHTS];
   for (int i = 0; i < NUM_LIGHTS; i++) {
     glm::vec3 color = lightSources[i]->getColor();

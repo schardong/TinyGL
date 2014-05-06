@@ -27,7 +27,7 @@ void main()
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
 	
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < g_numLights; i++) {
       vec3 light_camera = (viewMatrix * u_lightPos[i]).xyz;
       vec3 light_dir = light_camera - vertex_camera;
       float dist = length(light_dir);
