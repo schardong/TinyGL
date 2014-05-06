@@ -61,7 +61,6 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
-GLfloat* lightCoords;
 
 void drawSphere(size_t num_points)
 {
@@ -87,7 +86,7 @@ void createFBO(GLuint w, GLuint h)
 
   for (int i = 0; i < num_buffers; i++) {
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGB, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -189,7 +188,6 @@ void init()
   Grid* ground;
   Sphere** spheres;
   Quad* screenQuad;
-  Light** lightSources;
 
   ground = new Grid(10, 10);
   ground->setDrawCb(drawGrid);
@@ -239,20 +237,9 @@ void init()
   ////////////////////////////////////////
 
   Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
+  Light** lightSources = new Light*[NUM_LIGHTS];
 
-  lightSources = new Light*[NUM_LIGHTS];
-  lightSources[0] = new Light();
-  lightSources[0]->setPosition(glm::vec3(0, 6, 4));
-  lightSources[0]->setColor(glm::vec3(1.f, 1.f, 1.f));
-  TinyGL::getInstance()->addResource(LIGHT, "light0", lightSources[0]);
-
-  lightMesh[0] = new Sphere(10, 10);
-  lightMesh[0]->setDrawCb(drawSphere);
-  lightMesh[0]->setMaterialColor(glm::vec4(1.f));
-  lightMesh[0]->m_modelMatrix = glm::translate(glm::vec3(lightSources[0]->getPosition())) * glm::scale(glm::vec3(0.2f));
-  TinyGL::getInstance()->addResource(MESH, "lightMesh0", lightMesh[0]);
-
-  for (int i = 1; i < NUM_LIGHTS; i++) {
+  for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
     lightSources[i]->setPosition(glm::vec3(rand() % 25, 2, rand() % 25));
     lightSources[i]->setColor(glm::vec3(1.f, 1.f, 1.f));
@@ -265,7 +252,7 @@ void init()
     TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);
   }
 
-  lightCoords = new GLfloat[4 * NUM_LIGHTS];
+  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     glm::vec3 pos = lightSources[i]->getPosition();
@@ -282,21 +269,12 @@ void init()
     lightCoords[i * 4 + 7] = 1.f;*/
   }
 
-  /*for (int i = 0; i < NUM_LIGHTS; i++) {
-    cout << "pos = (" << lightCoords[i * 3] << ", " << lightCoords[i * 3 + 1] << ", " << lightCoords[i * 3 + 2] <<
-      ")   color = (" << lightCoords[i * 6 + 3] << ", " << lightCoords[i * 6 + 4] << ", " << lightCoords[i * 6 + 5] <<  ")\n";
-  }*/
-
   GLuint idx = glGetUniformBlockIndex(g_sPass->getProgramId(), "LightSource");
   glUniformBlockBinding(g_sPass->getProgramId(), idx, 1);
 
   BufferObject* ubuffLight = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 4 * NUM_LIGHTS, GL_STATIC_DRAW);
   ubuffLight->sendData(lightCoords);
   glGetBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * NUM_LIGHTS, lightCoords);
-
-  /*for (int i = 0; i < NUM_LIGHTS; i++) {
-    cout << "pos = (" << lightCoords[i * 4] << ", " << lightCoords[i * 4 + 1] << ", " << lightCoords[i * 4 + 2] << ", " << lightCoords[i * 4 + 3] << ")\n";
-  }*/
 
   glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLight->getId());
   TinyGL::getInstance()->addResource(BUFFER, "light_buff", ubuffLight);
