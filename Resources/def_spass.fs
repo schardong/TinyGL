@@ -34,12 +34,14 @@ void main()
       light_dir = normalize(light_dir);
       
       float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor += diff * diff_color / dist;
+      fColor.rgb += diff * diff_color.rgb / (dist);
       
       if(diff != 0.f) {
+        vec3 V = normalize(-vertex_camera);
         vec3 R = normalize(reflect(-light_dir, normal_camera));
-        float spec = pow(max(dot(-vertex_camera, R), 0.f), 1.f) / (dist * dist);
-        fColor.rgb += vec3(spec);
+        float spec = pow(max(dot(V, R), 0.f), 32.f); // (dist * dist);
+        vec3 specColor = vec3(spec);
+        fColor.rgb += specColor;
       }
     }
     fColor += g_ambientColor;

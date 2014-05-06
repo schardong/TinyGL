@@ -280,7 +280,7 @@ void init()
 
   for (int i = 1; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(rand() % 25, 6, rand() % 25));
+    lightSources[i]->setPosition(glm::vec3(rand() % 25, 2, rand() % 25));
     lightSources[i]->setColor(glm::vec3(1.f, 1.f, 1.f));
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
 
