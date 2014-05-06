@@ -303,6 +303,18 @@ void init()
 void destroy()
 {
   TinyGL::getInstance()->freeResources();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  
+  glDeleteTextures(num_buffers, g_colorId);
+  glDeleteRenderbuffers(1, &g_depthId);
+  glDeleteFramebuffers(1, &g_fboId);
 }
 
 void update()
@@ -374,6 +386,17 @@ void reshape(int w, int h)
 {
   if (!initCalled || !initGLEWCalled)
     return;
+
+  glActiveTexture(GL_TEXTURE3);
+  for (int i = 0; i < num_buffers; i++) {
+    glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, NULL);
+  }
+
+  glBindRenderbuffer(GL_RENDERBUFFER, g_depthId);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_depthId);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
