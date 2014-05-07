@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T3", "INF2610-T3\IN
 		{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E} = {22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T4", "INF2610-T4\INF2610-T4.vcxproj", "{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -51,6 +53,10 @@ Global
 		{16E94427-91B7-462A-BD3F-D3F37F522D8E}.Debug|Win32.Build.0 = Debug|Win32
 		{16E94427-91B7-462A-BD3F-D3F37F522D8E}.Release|Win32.ActiveCfg = Release|Win32
 		{16E94427-91B7-462A-BD3F-D3F37F522D8E}.Release|Win32.Build.0 = Release|Win32
+		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Debug|Win32.Build.0 = Debug|Win32
+		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Release|Win32.ActiveCfg = Release|Win32
+		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
