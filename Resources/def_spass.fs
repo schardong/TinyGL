@@ -7,14 +7,15 @@ uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform mat4 viewMatrix;
 
-const int g_numLights = 50;
+uniform int u_numLights;
+const int g_maxLights = 50;
 vec4 g_ambientColor = vec4(0.1);
 
 in vec2 vTexCoord;
 
 layout (std140) uniform LightPos
 {
-  vec4 u_lightPos[g_numLights];
+  vec4 u_lightPos[g_maxLights];
 };
 
 void main()
@@ -23,11 +24,12 @@ void main()
   if(length(normal_camera) == 0)
     fColor = vec4(0.8);
   else {
+    if(u_numLights > g_maxLights) discard;
     fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
 	
-    for(int i = 0; i < g_numLights; i++) {
+    for(int i = 0; i < u_numLights; i++) {
       vec3 light_camera = (viewMatrix * u_lightPos[i]).xyz;
       vec3 light_dir = light_camera - vertex_camera;
       float dist = length(light_dir);

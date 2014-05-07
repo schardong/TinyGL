@@ -23,7 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 50;
+static const int NUM_LIGHTS = 20;
 static const int WINDOW_W = 800;
 static const int WINDOW_H = 600;
 
@@ -388,6 +388,7 @@ void setupLights()
   }*/
 
   Shader* s = TinyGL::getInstance()->getShader("sPass");
+  s->setUniform1i("u_numLights", NUM_LIGHTS);
 
   GLuint idxPos = glGetUniformBlockIndex(s->getProgramId(), "LightPos");
   glUniformBlockBinding(s->getProgramId(), idxPos, 0);
