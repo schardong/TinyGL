@@ -111,6 +111,8 @@ void init()
     imgDestroy(pattern);
   }
 
+  //IMPLEMENT HARRIS. SHI TOMASI GIVES A LOT OF FAKE CORNERS.
+
   Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
