@@ -11,10 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="image.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fcgt2config.h" />
+    <ClInclude Include="image.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F748693C-B554-4D21-83DE-333DA07CA11D}</ProjectGuid>

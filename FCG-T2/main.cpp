@@ -3,10 +3,10 @@
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
-#include "mesh.h"
-#include "grid.h"
-#include "sphere.h"
-#include "axis.h"
+
+extern "C" {
+#include "image.h"
+}
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -98,6 +98,14 @@ void init()
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
+
+  Image* pattern = imgReadBMP ("../Resources/padrao.bmp");
+  if(pattern == NULL)
+    Logger::getInstance()->error("Pattern not loaded");
+  else {
+    Logger::getInstance()->log("Pattern loaded. The pattern will be destroyed now.");
+    imgDestroy(pattern);
+  }
 
   Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
   g_shader->bind();
