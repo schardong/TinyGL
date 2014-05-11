@@ -43,6 +43,8 @@ glm::vec3 g_center;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
+void createQuad();
+void drawQuad(size_t num_points);
 
 int main(int argc, char** argv)
 {
@@ -94,10 +96,12 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(3.0, 3.0, 3.0);
+  g_eye = glm::vec3(0.0, 0.0, 2.0);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
+  projMatrix = glm::perspective(45.f, 1.f, 1.f, 5.f);
+
+  createQuad();
 
   Image* pattern = imgReadBMP ("../Resources/padrao.bmp");
   if(pattern == NULL)
@@ -143,7 +147,8 @@ void draw()
   s->bind();
 
   //Draw something here.
-  
+  s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
+  glPtr->getMesh("quad")->draw();
   
   //glBindVertexArray(0);
   Shader::unbind();
@@ -158,7 +163,8 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.f);
+  //projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.f);
+  projMatrix = glm::ortho(-1, 1, -1, 1);
 
   Shader* s = TinyGL::getInstance()->getShader("fcgt1");
   s->bind();
@@ -190,4 +196,61 @@ void exit_cb()
   glutDestroyWindow(g_window);
   destroy();
   exit(EXIT_SUCCESS);
+}
+
+void createQuad()
+{
+  GLfloat vertices[] = {
+    -1, -1, 0,
+    1, -1, 0,
+    1, 1, 0,
+    -1, 1, 0
+  };
+
+  GLfloat texCoord[] = {
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1
+  };
+    
+  GLubyte indices[] = {
+    1, 2, 0, 3
+  };
+  
+  Mesh* m = new Mesh();
+
+  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
+  vbuff->sendData(&vertices[0]);
+  m->attachBuffer(vbuff);
+
+  BufferObject* tbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, GL_STATIC_DRAW);
+  tbuff->sendData(&texCoord[0]);
+  m->attachBuffer(tbuff);
+
+  m->bind();
+
+  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 4, GL_STATIC_DRAW);
+  ibuff->sendData(&indices[0]);
+  m->attachBuffer(ibuff);
+
+  vbuff->bind();
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(0);
+
+  tbuff->bind();
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(1);
+
+  glBindVertexArray(0);
+
+  m->setNumPoints(4);
+  m->setDrawCb(drawQuad);
+  m->setMaterialColor(glm::vec4(1.f));
+  TinyGL::getInstance()->addResource(MESH, "quad", m);
+}
+
+void drawQuad(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
 }
