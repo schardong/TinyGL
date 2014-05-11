@@ -99,12 +99,12 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
 
-  /*Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
+  Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);
   g_shader->setUniformMatrix("projMatrix", projMatrix);
-  TinyGL::getInstance()->addResource(SHADER, "fcgt1", g_shader);*/
+  TinyGL::getInstance()->addResource(SHADER, "fcgt1", g_shader);
 
   initCalled = true;
 }
@@ -130,15 +130,15 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  /*Shader* s = glPtr->getShader("fcgt1");
+  Shader* s = glPtr->getShader("fcgt1");
 
-  s->bind();*/
+  s->bind();
 
   //Draw something here.
   
   
-  /*glBindVertexArray(0);
-  Shader::unbind();*/
+  //glBindVertexArray(0);
+  Shader::unbind();
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -152,9 +152,9 @@ void reshape(int w, int h)
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.f);
 
-  /*Shader* s = TinyGL::getInstance()->getShader("fcgt1");
+  Shader* s = TinyGL::getInstance()->getShader("fcgt1");
   s->bind();
-  s->setUniformMatrix("projMatrix", projMatrix);*/
+  s->setUniformMatrix("projMatrix", projMatrix);
 
   Shader::unbind();
 }
