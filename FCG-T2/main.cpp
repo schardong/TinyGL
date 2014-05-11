@@ -111,12 +111,10 @@ void init()
     imgDestroy(pattern);
   }
 
-  Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
+  Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
   g_shader->bind();
-  g_shader->bindFragDataLoc("out_vColor", 0);
-  g_shader->setUniformMatrix("viewMatrix", viewMatrix);
-  g_shader->setUniformMatrix("projMatrix", projMatrix);
-  TinyGL::getInstance()->addResource(SHADER, "fcgt1", g_shader);
+  g_shader->bindFragDataLoc("fColor", 0);
+  TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
 }
@@ -142,7 +140,7 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  Shader* s = glPtr->getShader("fcgt1");
+  Shader* s = glPtr->getShader("fcgt2");
 
   s->bind();
 
@@ -163,14 +161,6 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  //projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.f);
-  projMatrix = glm::ortho(-1, 1, -1, 1);
-
-  Shader* s = TinyGL::getInstance()->getShader("fcgt1");
-  s->bind();
-  s->setUniformMatrix("projMatrix", projMatrix);
-
-  Shader::unbind();
 }
 
 void keyPress(unsigned char c, int x, int y)
@@ -246,6 +236,7 @@ void createQuad()
 
   m->setNumPoints(4);
   m->setDrawCb(drawQuad);
+  m->m_modelMatrix = glm::mat4(1.f);
   m->setMaterialColor(glm::vec4(1.f));
   TinyGL::getInstance()->addResource(MESH, "quad", m);
 }

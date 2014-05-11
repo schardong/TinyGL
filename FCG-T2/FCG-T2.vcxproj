@@ -18,6 +18,10 @@
     <ClInclude Include="fcgt2config.h" />
     <ClInclude Include="image.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\fcgt2.fs" />
+    <None Include="..\Resources\fcgt2.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F748693C-B554-4D21-83DE-333DA07CA11D}</ProjectGuid>
     <RootNamespace>INF2610T2</RootNamespace>
