@@ -10,7 +10,8 @@ HEADERS += color.h \
     colorspace.h \
     ciepointcloud.h \
     ciemesh.h \
-    srgbmesh.h
+    srgbmesh.h \
+    fcgt1config.h
 
 SOURCES += main.cpp \
     color.c \
