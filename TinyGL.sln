@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
-VisualStudioVersion = 12.0.30110.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyGL", "TinyGL\TinyGL.vcxproj", "{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T1", "INF2610-T1\INF2610-T1.vcxproj", "{7E04D27A-12BF-4E93-8BEE-DD048C030E5E}"
@@ -26,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T3", "INF2610-T3\IN
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INF2610-T4", "INF2610-T4\INF2610-T4.vcxproj", "{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FCG-T2", "FCG-T2\FCG-T2.vcxproj", "{F748693C-B554-4D21-83DE-333DA07CA11D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +57,10 @@ Global
 		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Debug|Win32.Build.0 = Debug|Win32
 		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Release|Win32.ActiveCfg = Release|Win32
 		{C24DA2F6-71DF-4A8D-BC51-FF1779B9A2F4}.Release|Win32.Build.0 = Release|Win32
+		{F748693C-B554-4D21-83DE-333DA07CA11D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F748693C-B554-4D21-83DE-333DA07CA11D}.Debug|Win32.Build.0 = Debug|Win32
+		{F748693C-B554-4D21-83DE-333DA07CA11D}.Release|Win32.ActiveCfg = Release|Win32
+		{F748693C-B554-4D21-83DE-333DA07CA11D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
