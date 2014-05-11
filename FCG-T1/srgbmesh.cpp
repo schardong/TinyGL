@@ -18,7 +18,7 @@ GLfloat cube_vertices[] = {
   0, 1, 1
 };
 
-GLbyte cube_indices[] {
+GLbyte cube_indices[] = {
   //BACK
   0, 1, 2,
   0, 2, 3,
@@ -39,8 +39,15 @@ GLbyte cube_indices[] {
   0, 5, 4
 };
 
-glm::mat3 srgbToXYZ = { 0.412, 0.357, 0.180, 0.212, 0.715, 0.072, 0.019, 0.119, 0.950 };
-glm::mat3 rgbToXYZ = { 0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990 };
+glm::mat3 srgbToXYZ()
+{
+  return glm::mat3(0.412, 0.357, 0.180, 0.212, 0.715, 0.072, 0.019, 0.119, 0.950);
+} 
+
+glm::mat3 rgbToXYZ()
+{
+  return glm::mat3(0.490, 0.310, 0.200, 0.177, 0.813, 0.011, 0.000, 0.010, 0.990);
+}
 
 SRGBMesh::SRGBMesh()
 {
@@ -79,13 +86,13 @@ void SRGBMesh::convertColorspace()
 {
   switch (m_colorspace) {
   case colorspace::CIEXYZ:
-    m_modelMatrix = glm::mat4(srgbToXYZ);
+    m_modelMatrix = glm::mat4(srgbToXYZ());
     break;
   case colorspace::CIERGB:
-    m_modelMatrix = glm::mat4(rgbToXYZ);
+    m_modelMatrix = glm::mat4(rgbToXYZ());
     break;
   case colorspace::CIELab:
-    m_modelMatrix = glm::scale(glm::vec3(0.01));
+    m_modelMatrix = glm::scale(glm::vec3(0.01f));
     break;
   case colorspace::sRGB:
     m_modelMatrix = glm::mat4(1.f);

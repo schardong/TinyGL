@@ -116,7 +116,7 @@ glm::vec3 rgbToCIERGB(glm::vec3 rgb)
 
 glm::vec3 CIEXYZtoCIEsRGB(glm::vec3 ciexyz, glm::vec3 white)
 {
-  glm::mat3 m = { 0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920, 0.9503041 };
+  glm::mat3 m(0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920, 0.9503041);
 
   glm::vec3 xyz = ciexyz;
   xyz.x /= white.x;
