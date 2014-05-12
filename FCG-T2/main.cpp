@@ -3,6 +3,7 @@
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
+#include "harris.h"
 
 extern "C" {
 #include "image.h"
@@ -106,10 +107,12 @@ void init()
   createQuad();
 
   Image* pattern_rgb = imgReadBMP ("../Resources/padrao.bmp");
-  //Image* pattern = imgGrey(pattern_rgb);
-  //imgDestroy(pattern_rgb);
+  Image* pattern = imgGrey(pattern_rgb);
+  imgDestroy(pattern_rgb);
+  Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
+  HarrisCornerDetector(pattern, corners);
 
-  float* pattern_data = imgGetData(pattern_rgb);
+  float* pattern_data = imgGetData(corners);
 
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &pattern_tex);
@@ -118,7 +121,7 @@ void init()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb), 0, GL_RGB, GL_FLOAT, pattern_data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   //float screenSize[2] = {imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb)};
@@ -131,7 +134,7 @@ void init()
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
-  glutReshapeWindow(imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb));
+  glutReshapeWindow(imgGetWidth(pattern), imgGetHeight(pattern));
 }
 
 void destroy()
