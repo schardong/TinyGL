@@ -30,7 +30,6 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t kernel_si
 
   for(int i = 1; i < h-1; i++) {
     for(int j = 1; j < w-1; j++) {
-      //dst_data[i * w + j] = src_data[i * w + j];
       float tmp = kernel[0] * src_data[(i-1) * w + (j-1)];
       tmp += kernel[1] * src_data[(i-1) * w + j];
       tmp += kernel[2] * src_data[(i-1) * w + (j+1)];
