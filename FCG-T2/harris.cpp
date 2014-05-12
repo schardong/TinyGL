@@ -26,7 +26,9 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   ApplyKernel(src_img, dx_img, k_dx, 9);
   ApplyKernel(src_img, dy_img, k_dy, 9);
 
-
+  float* dst_data = imgGetData(dst_img);
+  float* dx_img_data = imgGetData(dx_img);
+  memcpy(dst_data, dx_img_data, w * h * sizeof(float));
 
   return true;
 }
@@ -42,7 +44,7 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t kernel_si
 
   for(int i = 1; i < h; i++) {
     for(int j = 1; j < w; j++) {
-      dst_data[i * h + j] = src_data[i * h + j];
+      dst_data[i * w + j] = src_data[i * w + j];
     }
   }
 
