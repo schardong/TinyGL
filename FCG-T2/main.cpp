@@ -40,6 +40,8 @@ glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
+GLuint pattern_tex;
+
 bool initCalled = false;
 bool initGLEWCalled = false;
 
@@ -103,27 +105,41 @@ void init()
 
   createQuad();
 
-  Image* pattern = imgReadBMP ("../Resources/padrao.bmp");
-  if(pattern == NULL)
-    Logger::getInstance()->error("Pattern not loaded");
-  else {
-    Logger::getInstance()->log("Pattern loaded. The pattern will be destroyed now.");
-    imgDestroy(pattern);
-  }
+  Image* pattern_rgb = imgReadBMP ("../Resources/padrao.bmp");
+  //Image* pattern = imgGrey(pattern_rgb);
+  //imgDestroy(pattern_rgb);
 
-  //IMPLEMENT HARRIS. SHI TOMASI GIVES A LOT OF FAKE CORNERS.
+  float* pattern_data = imgGetData(pattern_rgb);
+
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1, &pattern_tex);
+  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb), 0, GL_RGB, GL_FLOAT, pattern_data);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  //float screenSize[2] = {imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb)};
 
   Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
+  g_shader->setUniform1i("u_image", 0);
+  //g_shader->setUniformfv("u_screenSize", screenSize, 2);
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
+  glutReshapeWindow(imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb));
 }
 
 void destroy()
 {
   TinyGL::getInstance()->freeResources();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDeleteTextures(1, &pattern_tex);
 }
 
 void update()
@@ -145,12 +161,14 @@ void draw()
   Shader* s = glPtr->getShader("fcgt2");
 
   s->bind();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, pattern_tex);
 
-  //Draw something here.
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
   glPtr->getMesh("quad")->draw();
-  
-  //glBindVertexArray(0);
+
+  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  glBindVertexArray(0);
   Shader::unbind();
 
   glutSwapBuffers();
@@ -163,6 +181,8 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
+  //float screenSize[2] = {w, h};
+  //TinyGL::getInstance()->getShader("fcgt2")->setUniformfv("u_screenSize", screenSize, 2);
 }
 
 void keyPress(unsigned char c, int x, int y)
