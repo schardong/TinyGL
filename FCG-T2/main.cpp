@@ -113,7 +113,7 @@ void init()
   HarrisCornerDetector(pattern, corners);
 
   float* pattern_data = imgGetData(corners);
-
+  
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &pattern_tex);
   glBindTexture(GL_TEXTURE_2D, pattern_tex);
