@@ -1,7 +1,7 @@
 #include "harris.h"
 #include "logger.h"
 
-bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel);
+bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
 bool Sobel(Image* src_img, Image* dst_img);
 
 bool HarrisCornerDetector(Image* src_img, Image* dst_img)
@@ -27,14 +27,14 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   Image* dy_img = imgCreate(w, h, 1);
 
   //Computing the image derivates.
-  ApplyKernel(src_img, dx_img, k_dx);
-  ApplyKernel(src_img, dy_img, k_dy);
+  ApplyKernel(src_img, dx_img, k_dx, 3);
+  ApplyKernel(src_img, dy_img, k_dy, 3);
 
   Image* dxy_img = imgCreate(w, h, 1);
 
   float* dx_img_data = imgGetData(dx_img);
   float* dy_img_data = imgGetData(dy_img);
-  float* dxy_img_data = imgGetData(dxy_img);
+  float* dxy_img_data = imgGetData(dst_img);
 
   for(int i = 0; i < img_size; i++) {
     dx_img_data[i] *= dx_img_data[i];
@@ -42,23 +42,29 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
     dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
   }
 
-  //Sobel(src_img, dst_img);
-
-  /**/
-
   return true;
 }
 
-bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel)
+bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
 {
-  int w = imgGetWidth(src_img);
-  int h = imgGetHeight(src_img);
   float* src_data = imgGetData(src_img);
   float* dst_data = imgGetData(dst_img);
+  int w = imgGetWidth(src_img);
+  int h = imgGetHeight(src_img);
 
-  for(int i = 1; i < h-1; i++) {
-    for(int j = 1; j < w-1; j++) {
-      float tmp = kernel[0] * src_data[(i-1) * w + (j-1)];
+  int kernel_size = order * order;
+  int limit = (int)ceil(order / 2);
+
+  for(size_t i = limit; i < h - limit; i++) {
+    for(size_t j = limit; j < w - limit; j++) {
+      float tmp = 0;
+      for(int k = -limit; k <= limit; k++) {
+        for(int l = -limit; l <= limit; l++) {
+          tmp += kernel[(k + limit) * order + (l + limit)] * src_data[(i + k) * w + (j + l)];
+        }
+      }
+
+      /*float tmp = kernel[0] * src_data[(i-1) * w + (j-1)];
       tmp += kernel[1] * src_data[(i-1) * w + j];
       tmp += kernel[2] * src_data[(i-1) * w + (j+1)];
 
@@ -68,7 +74,7 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel)
 
       tmp += kernel[6] * src_data[(i+1) * w + (j-1)];
       tmp += kernel[7] * src_data[(i+1) * w + j];
-      tmp += kernel[8] * src_data[(i+1) * w + (j+1)];
+      tmp += kernel[8] * src_data[(i+1) * w + (j+1)];*/
 
       dst_data[i * w + j] = tmp;
     }
@@ -98,8 +104,8 @@ bool Sobel(Image* src_img, Image* dst_img)
   Image* dx_img = imgCreate(w, h, 1);
   Image* dy_img = imgCreate(w, h, 1);
 
-  ApplyKernel(src_img, dx_img, k_dx);
-  ApplyKernel(src_img, dy_img, k_dy);
+  ApplyKernel(src_img, dx_img, k_dx, 3);
+  ApplyKernel(src_img, dy_img, k_dy, 3);
 
   float* dx_img_data = imgGetData(dx_img);
   float* dy_img_data = imgGetData(dy_img);
