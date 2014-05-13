@@ -5,8 +5,8 @@
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
 bool Sobel(Image* src_img, Image* dst_img);
-double trace(float* m, size_t order);
-double det(float* m, size_t order); 
+bool NonmaxSuppression(Image* src_img, Image* dst_img);
+float trace(float* m, size_t order);
 
 bool HarrisCornerDetector(Image* src_img, Image* dst_img)
 {
@@ -78,14 +78,12 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
 
   float* dst_data = imgGetData(dst_img);
 
-  double* r = new double[img_size];
+  float* r = new float[img_size];
   for(int i = 0; i < img_size; i++) {
-    double t = trace(glm::value_ptr(harris_mat[i]), 2);
-    double d = glm::determinant(harris_mat[i]);
+    float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
+    float d = glm::determinant(harris_mat[i]);
 
-  //  /*printf("%f %f\n%f %f\n", harris_mat[i][0][0], harris_mat[i][0][1], harris_mat[i][1][0], harris_mat[i][1][1]);
-  //  printf("%lf %lf\n\n", d, 0.04 * t * t);*/
-    r[i] = d - (0.004 * t * t);
+    r[i] = d - (0.004f * t * t);
     dst_data[i] = r[i];
   }
 
@@ -110,8 +108,8 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
   int kernel_size = order * order;
   int limit = (int)ceil(order / 2);
 
-  for(size_t i = limit; i < h - limit; i++) {
-    for(size_t j = limit; j < w - limit; j++) {
+  for(int i = limit; i < h - limit; i++) {
+    for(int j = limit; j < w - limit; j++) {
 
       float tmp = 0;
 
@@ -120,18 +118,6 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
           tmp += kernel[(k + limit) * order + (l + limit)] * src_data[(i + k) * w + (j + l)];
         }
       }
-
-      /*float tmp = kernel[0] * src_data[(i-1) * w + (j-1)];
-      tmp += kernel[1] * src_data[(i-1) * w + j];
-      tmp += kernel[2] * src_data[(i-1) * w + (j+1)];
-
-      tmp += kernel[3] * src_data[i * w + (j-1)];
-      tmp += kernel[4] * src_data[i * w + j];
-      tmp += kernel[5] * src_data[i * w + (j+1)];
-
-      tmp += kernel[6] * src_data[(i+1) * w + (j-1)];
-      tmp += kernel[7] * src_data[(i+1) * w + j];
-      tmp += kernel[8] * src_data[(i+1) * w + (j+1)];*/
 
       dst_data[i * w + j] = tmp;
     }
@@ -175,18 +161,23 @@ bool Sobel(Image* src_img, Image* dst_img)
   return true;
 }
 
-double trace(float* m, size_t order) {
+bool NonmaxSuppression(Image* src_img, Image* dst_img)
+{
+  if(src_img == NULL || dst_img == NULL) {
+    Logger::getInstance()->warn("NonmaxSuppression -> one of the images is NULL. Aborting function.");
+    return false;
+  }
+
+
+}
+
+float trace(float* m, size_t order) {
 
   size_t s = order * order;
-  double t = 0.0;
+  float t = 0.0;
 
   for(int i = 0; i < s; i += (order + 1))
     t += m[i];
 
   return t;
-}
-
-double det(float* m, size_t order)
-{
-  return 0.0;
 }
