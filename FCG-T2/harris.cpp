@@ -27,8 +27,8 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   Image* dy_img = imgCreate(w, h, 1);
 
   //Computing the image derivates.
-  ApplyKernel(src_img, dx_img, k_dx, 9);
-  ApplyKernel(src_img, dy_img, k_dy, 9);
+  ApplyKernel(src_img, dx_img, k_dx);
+  ApplyKernel(src_img, dy_img, k_dy);
 
   Image* dxy_img = imgCreate(w, h, 1);
 
@@ -98,8 +98,8 @@ bool Sobel(Image* src_img, Image* dst_img)
   Image* dx_img = imgCreate(w, h, 1);
   Image* dy_img = imgCreate(w, h, 1);
 
-  ApplyKernel(src_img, dx_img, k_dx, 9);
-  ApplyKernel(src_img, dy_img, k_dy, 9);
+  ApplyKernel(src_img, dx_img, k_dx);
+  ApplyKernel(src_img, dy_img, k_dy);
 
   float* dx_img_data = imgGetData(dx_img);
   float* dy_img_data = imgGetData(dy_img);
