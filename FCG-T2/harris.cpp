@@ -1,7 +1,7 @@
 #include "harris.h"
 #include "logger.h"
 
-bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t kernel_size);
+bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel);
 bool Sobel(Image* src_img, Image* dst_img);
 
 bool HarrisCornerDetector(Image* src_img, Image* dst_img)
@@ -11,18 +11,46 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
     return false;
   }
 
-  Sobel(src_img, dst_img);
+  float k_dx[9] = {-1, 0, 1,
+                   -2, 0, 2,
+                   -1, 0, 1};
 
-  /*int w = imgGetWidth(src_img);
-  int h = imgGetHeight(src_img);*/
+  float k_dy[9] = { 1,  2,  1,
+                    0,  0,  0,
+                   -1, -2, -1};
+
+  int w = imgGetWidth(src_img);
+  int h = imgGetHeight(src_img);
+  int img_size = w * h;
+
+  Image* dx_img = imgCreate(w, h, 1);
+  Image* dy_img = imgCreate(w, h, 1);
+
+  //Computing the image derivates.
+  ApplyKernel(src_img, dx_img, k_dx, 9);
+  ApplyKernel(src_img, dy_img, k_dy, 9);
+
+  Image* dxy_img = imgCreate(w, h, 1);
+
+  float* dx_img_data = imgGetData(dx_img);
+  float* dy_img_data = imgGetData(dy_img);
+  float* dxy_img_data = imgGetData(dxy_img);
+
+  for(int i = 0; i < img_size; i++) {
+    dx_img_data[i] *= dx_img_data[i];
+    dy_img_data[i] *= dy_img_data[i];
+    dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
+  }
+
+  //Sobel(src_img, dst_img);
+
+  /**/
 
   return true;
 }
 
-bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t kernel_size)
+bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel)
 {
-  Logger::getInstance()->warn("ApplyKernel not fully implemented yet. Returning false.");
-
   int w = imgGetWidth(src_img);
   int h = imgGetHeight(src_img);
   float* src_data = imgGetData(src_img);
