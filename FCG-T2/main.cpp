@@ -106,7 +106,7 @@ void init()
 
   createQuad();
 
-  Image* pattern_rgb = imgReadBMP ("../Resources/padrao.bmp");
+  Image* pattern_rgb = imgReadBMP("../Resources/soccer_field.bmp");
   Image* pattern = imgGrey(pattern_rgb);
   imgDestroy(pattern_rgb);
   Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
