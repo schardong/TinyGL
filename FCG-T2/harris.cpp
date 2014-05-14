@@ -104,7 +104,6 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
   int w = imgGetWidth(src_img);
   int h = imgGetHeight(src_img);
 
-  int kernel_size = order * order;
   int limit = (int)ceil(order / 2);
 
   for(int i = limit; i < h - limit; i++) {
