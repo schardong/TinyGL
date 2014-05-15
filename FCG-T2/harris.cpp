@@ -1,10 +1,11 @@
 #include "harris.h"
 #include "logger.h"
+#include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
-bool NonmaxSuppression(Image* src_img, Image* dst_img);
+bool NonmaxSuppression(Image* dx_img, Image* dy_img, Image* dst_img);
 float trace(float* m, size_t order);
 
 bool HarrisCornerDetector(Image* src_img, Image* dst_img)
@@ -85,6 +86,7 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
     r[i] = d - (0.004f * t * t);
     dst_data[i] = r[i];
   }
+  //NonmaxSuppression(dx_img, dy_img, dst_img);
 
   imgDestroy(dx_img);
   imgDestroy(dy_img);
@@ -121,13 +123,27 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
   return false;
 }
 
-bool NonmaxSuppression(Image* src_img, Image* dst_img)
+bool NonmaxSuppression(Image* dx_img, Image* dy_img, Image* dst_img)
 {
-  if(src_img == NULL || dst_img == NULL) {
-    Logger::getInstance()->warn("NonmaxSuppression -> one of the images is NULL. Aborting function.");
+  if(dx_img == NULL || dy_img == NULL || dst_img == NULL) {
+    Logger::getInstance()->error("NonmaxSuppression -> one of the images is NULL. Aborting function.");
     return false;
   }
 
+  Logger::getInstance()->warn("NonmaxSuppression -> not fully implemented.");
+
+  int img_size = imgGetWidth(dx_img) * imgGetHeight(dx_img);
+  float* dx_data = imgGetData(dx_img);
+  float* dy_data = imgGetData(dy_img);
+  float* dst_data = imgGetData(dst_img);
+
+  for(int i = 0; i < img_size; i++) {
+    float angle = atan(sqrt(dx_data[i] + dy_data[i])) / 45.f;
+    float intpart;
+    float fractpart = modf(angle, &intpart);
+    if(fractpart > 0.5f) intpart++;
+    dst_data[i] = intpart * 45.f;
+  }
 
 }
 
