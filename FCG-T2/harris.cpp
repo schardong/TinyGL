@@ -6,8 +6,8 @@
 
 enum
 {
-  DX2,
-  DY2,
+  DX,
+  DY,
   DXY,
   DXGAUSS,
   DYGAUSS,
@@ -19,7 +19,7 @@ enum
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
 bool Threshold(Image* src_img, Image* dst_img, float t);
-bool NonmaximaSuppresion(Image* src_img, Image* dst_img);
+bool NonmaximaSuppression(Image* src_img, Image* dst_img);
 float trace(float* m, size_t order);
 
 std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
@@ -52,16 +52,16 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
   int img_size = w * h;
 
   Image** int_img = new Image*[num_images];
-  for(int i = DX2; i < num_images; i++) {
+  for(int i = DX; i < num_images; i++) {
     int_img[i] = imgCreate(w, h, 1);
   }
 
   //Computing the image derivates.
-  ApplyKernel(src_img, int_img[DX2], k_dx, 3);
-  ApplyKernel(src_img, int_img[DY2], k_dy, 3);
+  ApplyKernel(src_img, int_img[DX], k_dx, 3);
+  ApplyKernel(src_img, int_img[DY], k_dy, 3);
 
-  float* dx_img_data = imgGetData(int_img[DX2]);
-  float* dy_img_data = imgGetData(int_img[DY2]);
+  float* dx_img_data = imgGetData(int_img[DX]);
+  float* dy_img_data = imgGetData(int_img[DY]);
   float* dxy_img_data = imgGetData(int_img[DXY]);
 
   for(int i = 0; i < img_size; i++) {
@@ -70,8 +70,8 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
     dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
   }
   
-  ApplyKernel(int_img[DX2], int_img[DXGAUSS], k_gauss, 5);
-  ApplyKernel(int_img[DY2], int_img[DYGAUSS], k_gauss, 5);
+  ApplyKernel(int_img[DX], int_img[DXGAUSS], k_gauss, 5);
+  ApplyKernel(int_img[DY], int_img[DYGAUSS], k_gauss, 5);
   ApplyKernel(int_img[DXY], int_img[DXYGAUSS], k_gauss, 5);
 
   dx_img_data = imgGetData(int_img[DXGAUSS]);
@@ -97,13 +97,13 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
   }
 
   Threshold(int_img[R], int_img[THRESH], 0.9f);
-  //NonmaximaSupression(int_img[THRESH], dst_img);
+  NonmaximaSuppression(int_img[THRESH], dst_img);
 
   for(int i = 0; i < h; i++)
     for(int j = 0; j < w; j++)
       if(dst_data[i * w + j] >= 0.9f) corners.push_back(glm::vec2(i, j));
   
-  for(int i = DX2; i < num_images; i++) {
+  for(int i = DX; i < num_images; i++) {
     imgDestroy(int_img[i]);
     int_img[i] = NULL;
   }
@@ -154,25 +154,58 @@ bool Threshold(Image* src_img, Image* dst_img, float t)
   return true;
 }
 
-bool NonmaximaSuppresion(Image* src_img, Image* dst_img)
+bool NonmaximaSuppression(Image* src_img, Image* dst_img)
 {
   if(src_img == NULL || dst_img == NULL) {
     Logger::getInstance()->error("NonmaximaSuppresion -> invalid values passed. Aborting function.");
     return false;
   }
 
+  float k_dx[9] = {-1, 0, 1,
+                   -2, 0, 2,
+                   -1, 0, 1};
+
+  float k_dy[9] = { 1,  2,  1,
+                    0,  0,  0,
+                   -1, -2, -1};
+
   int w = imgGetWidth(src_img);
   int h = imgGetHeight(src_img);
-  int order = 1;
+  int img_size = w * h;
+  
+  Image** img = new Image*[2];
+  img[DX] = imgCreate(w, h, 1);
+  img[DY] = imgCreate(w, h, 1);
+
   float* src_data = imgGetData(src_img);
+  float* dx_data = imgGetData(img[DX]);
+  float* dy_data = imgGetData(img[DY]);
   float* dst_data = imgGetData(dst_img);
 
-  for(int i = order; i < h - order; i++) {
+  ApplyKernel(src_img, img[DX], k_dx, 3);
+  ApplyKernel(src_img, img[DY], k_dy, 3);
+
+  float* theta = new float[img_size];
+  for(int i = 0; i < img_size; i++) {
+    float angle = 0;
+    if(dx_data[i] != 0) angle = atan(dy_data[i] / dx_data[i]);
+    float intpart;
+    float floatpart = modf(angle, &intpart);
+    dst_data[i] = intpart;
+    //std::cout << dy_data[i] / dx_data[i] << " ";
+    //std::cout << intpart << "." << floatpart << "   ";
+  }
+
+  /*for(int i = order; i < h - order; i++) {
     for(int j = order; j < w - order; j++) {
 
     }
-  }
+  }*/
 
+  imgDestroy(img[DX]);
+  imgDestroy(img[DY]);
+  img[DX] = img[DY] = NULL;
+  delete[] img;
   return true;
 }
 
@@ -181,7 +214,7 @@ float trace(float* m, size_t order) {
   size_t s = order * order;
   float t = 0.0;
 
-  for(int i = 0; i < s; i += (order + 1))
+  for(size_t i = 0; i < s; i += (order + 1))
     t += m[i];
 
   return t;
