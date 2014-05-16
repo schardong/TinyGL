@@ -155,7 +155,7 @@ bool Threshold(Image* src_img, Image* dst_img, float t)
   float* dst_data = imgGetData(dst_img);
 
   for(int i = 0; i < img_size; i++) {
-    dst_data[i] = src_data[i] > t ? 1.f : 0.f;
+    dst_data[i] = src_data[i] > t ? src_data[i] : 0.f;
   }
 
   return true;
@@ -193,7 +193,8 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   ApplyKernel(src_img, img[DY], k_dy, 3);
 
   memset(dst_data, 0.f, sizeof(float) * img_size);
-  for(int i = 0; i < img_size; i++) {
+  for(int i = 1; i < h - 1; i++) {
+    
     int angle = 0;
     if(dx_data[i] != 0) angle = RAD2DEG(atan(dy_data[i] / dx_data[i]));
     
@@ -205,13 +206,13 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
     float newangle = div * 45;
     
     if(newangle == 0 || newangle == 180) {
-      int largest_idx = i - 5;
-      for(int j = i; j <= i + 5; j++)
+      int largest_idx = i - 1;
+      for(int j = i; j <= i + 1; j++)
         if(src_data[j] > src_data[largest_idx])
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
     } else if(newangle == 45 || newangle == -135) {
-      int largest_idx = i - 5 * w + 1;
+      int largest_idx = i - 1 * w + 1;
       for(int j = i; j <= i + 5 * w; j += w - 1)
         if(src_data[j] > src_data[largest_idx])
           largest_idx = j;
@@ -229,26 +230,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
     }
-
-    /*float intpart;
-    float floatpart = modf(angle, &intpart);
-    int pi_multiple = (int)intpart;*/
-
-    /*float intpart;
-    float floatpart = modf(angle, &intpart);
-    dst_data[i] = floatpart;
-    if(intpart != 0.f || floatpart != 0.f) {
-      std::cout << M_PI / (angle) << "   ";
-    }*/
-    //std::cout << dy_data[i] / dx_data[i] << " ";
-    
   }
-
-  /*for(int i = order; i < h - order; i++) {
-    for(int j = order; j < w - order; j++) {
-
-    }
-  }*/
 
   imgDestroy(img[DX]);
   imgDestroy(img[DY]);
