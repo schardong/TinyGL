@@ -5,8 +5,20 @@
 #include <glm/gtc/type_ptr.hpp>
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
-bool NonmaxSuppression(Image* dx_img, Image* dy_img, Image* dst_img);
+bool Threshold(Image* src_img, Image* dst_img, float t);
 float trace(float* m, size_t order);
+
+enum
+{
+  DX2,
+  DY2,
+  DXY,
+  DXGAUSS,
+  DYGAUSS,
+  DXYGAUSS,
+  R,
+  num_images
+};
 
 bool HarrisCornerDetector(Image* src_img, Image* dst_img)
 {
@@ -36,36 +48,32 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   int h = imgGetHeight(src_img);
   int img_size = w * h;
 
-  Image* dx_img = imgCreate(w, h, 1);
-  Image* dy_img = imgCreate(w, h, 1);
+  Image** int_img = new Image*[num_images];
+  for(int i = DX2; i < num_images; i++) {
+    int_img[i] = imgCreate(w, h, 1);
+  }
 
   //Computing the image derivates.
-  ApplyKernel(src_img, dx_img, k_dx, 3);
-  ApplyKernel(src_img, dy_img, k_dy, 3);
+  ApplyKernel(src_img, int_img[DX2], k_dx, 3);
+  ApplyKernel(src_img, int_img[DY2], k_dy, 3);
 
-  Image* dxy_img = imgCreate(w, h, 1);
-
-  float* dx_img_data = imgGetData(dx_img);
-  float* dy_img_data = imgGetData(dy_img);
-  float* dxy_img_data = imgGetData(dxy_img);
+  float* dx_img_data = imgGetData(int_img[DX2]);
+  float* dy_img_data = imgGetData(int_img[DY2]);
+  float* dxy_img_data = imgGetData(int_img[DXY]);
 
   for(int i = 0; i < img_size; i++) {
     dx_img_data[i] *= dx_img_data[i];
     dy_img_data[i] *= dy_img_data[i];
     dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
   }
+  
+  ApplyKernel(int_img[DX2], int_img[DXGAUSS], k_gauss, 5);
+  ApplyKernel(int_img[DY2], int_img[DYGAUSS], k_gauss, 5);
+  ApplyKernel(int_img[DXY], int_img[DXYGAUSS], k_gauss, 5);
 
-  Image* dx_img_gauss = imgCreate(w, h, 1);
-  Image* dy_img_gauss = imgCreate(w, h, 1);
-  Image* dxy_img_gauss = imgCreate(w, h, 1);
-
-  ApplyKernel(dx_img, dx_img_gauss, k_gauss, 5);
-  ApplyKernel(dy_img, dy_img_gauss, k_gauss, 5);
-  ApplyKernel(dxy_img, dxy_img_gauss, k_gauss, 5);
-
-  dx_img_data = imgGetData(dx_img_gauss);
-  dy_img_data = imgGetData(dy_img_gauss);
-  dxy_img_data = imgGetData(dxy_img_gauss);
+  dx_img_data = imgGetData(int_img[DXGAUSS]);
+  dy_img_data = imgGetData(int_img[DYGAUSS]);
+  dxy_img_data = imgGetData(int_img[DXYGAUSS]);
 
   glm::mat2* harris_mat = new glm::mat2[img_size];
 
@@ -78,23 +86,21 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
 
   float* dst_data = imgGetData(dst_img);
 
-  float* r = new float[img_size];
+  float* r = imgGetData(int_img[R]);
   for(int i = 0; i < img_size; i++) {
     float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
     float d = glm::determinant(harris_mat[i]);
 
     r[i] = d - (0.004f * t * t);
-    dst_data[i] = r[i];
   }
-  //NonmaxSuppression(dx_img, dy_img, dst_img);
 
-  imgDestroy(dx_img);
-  imgDestroy(dy_img);
-  imgDestroy(dxy_img);
-  imgDestroy(dx_img_gauss);
-  imgDestroy(dy_img_gauss);
-  imgDestroy(dxy_img_gauss);
-  delete[] r;
+  Threshold(int_img[R], dst_img, 0.9f);
+  
+  for(int i = DX2; i < num_images; i++) {
+    imgDestroy(int_img[i]);
+    int_img[i] = NULL;
+  }
+  delete[] int_img;
   delete[] harris_mat;
   return true;
 }
@@ -123,28 +129,22 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
   return false;
 }
 
-bool NonmaxSuppression(Image* dx_img, Image* dy_img, Image* dst_img)
+bool Threshold(Image* src_img, Image* dst_img, float t)
 {
-  if(dx_img == NULL || dy_img == NULL || dst_img == NULL) {
-    Logger::getInstance()->error("NonmaxSuppression -> one of the images is NULL. Aborting function.");
+  if(src_img == NULL || dst_img == NULL || t <= 0.f || t >= 1.f) {
+    Logger::getInstance()->error("Threshold -> invalid values passed. Aborting function.");
     return false;
   }
 
-  Logger::getInstance()->warn("NonmaxSuppression -> not fully implemented.");
-
-  int img_size = imgGetWidth(dx_img) * imgGetHeight(dx_img);
-  float* dx_data = imgGetData(dx_img);
-  float* dy_data = imgGetData(dy_img);
+  int img_size = imgGetWidth(src_img) * imgGetHeight(src_img);
+  float* src_data = imgGetData(src_img);
   float* dst_data = imgGetData(dst_img);
 
   for(int i = 0; i < img_size; i++) {
-    float angle = atan(sqrt(dx_data[i] + dy_data[i])) / 45.f;
-    float intpart;
-    float fractpart = modf(angle, &intpart);
-    if(fractpart > 0.5f) intpart++;
-    dst_data[i] = intpart * 45.f;
+    dst_data[i] = src_data[i] > t ? 1.f : 0.f;
   }
 
+  return true;
 }
 
 float trace(float* m, size_t order) {
