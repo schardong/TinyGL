@@ -110,7 +110,7 @@ void init()
   Image* pattern = imgGrey(pattern_rgb);
   imgDestroy(pattern_rgb);
   Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
-  HarrisCornerDetector(pattern, corners);
+  std::vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
 
   float* pattern_data = imgGetData(corners);
   
@@ -130,7 +130,6 @@ void init()
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
-  //g_shader->setUniformfv("u_screenSize", screenSize, 2);
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;

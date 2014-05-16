@@ -4,10 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
-bool Threshold(Image* src_img, Image* dst_img, float t);
-float trace(float* m, size_t order);
-
 enum
 {
   DX2,
@@ -17,14 +13,21 @@ enum
   DYGAUSS,
   DXYGAUSS,
   R,
+  THRESH,
   num_images
 };
 
-bool HarrisCornerDetector(Image* src_img, Image* dst_img)
+bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
+bool Threshold(Image* src_img, Image* dst_img, float t);
+bool NonmaximaSuppresion(Image* src_img, Image* dst_img);
+float trace(float* m, size_t order);
+
+std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
 {
+  std::vector<glm::vec2> corners;
   if(src_img == NULL || dst_img == NULL) {
     Logger::getInstance()->error("HarrisCornerDetector -> one of the images is NULL. Aborting function.");
-    return false;
+    return corners;
   }
 
   float k_dx[9] = {-1, 0, 1,
@@ -90,11 +93,15 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   for(int i = 0; i < img_size; i++) {
     float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
     float d = glm::determinant(harris_mat[i]);
-
     r[i] = d - (0.004f * t * t);
   }
 
-  Threshold(int_img[R], dst_img, 0.9f);
+  Threshold(int_img[R], int_img[THRESH], 0.9f);
+  //NonmaximaSupression(int_img[THRESH], dst_img);
+
+  for(int i = 0; i < h; i++)
+    for(int j = 0; j < w; j++)
+      if(dst_data[i * w + j] >= 0.9f) corners.push_back(glm::vec2(i, j));
   
   for(int i = DX2; i < num_images; i++) {
     imgDestroy(int_img[i]);
@@ -102,7 +109,7 @@ bool HarrisCornerDetector(Image* src_img, Image* dst_img)
   }
   delete[] int_img;
   delete[] harris_mat;
-  return true;
+  return corners;
 }
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order)
@@ -142,6 +149,28 @@ bool Threshold(Image* src_img, Image* dst_img, float t)
 
   for(int i = 0; i < img_size; i++) {
     dst_data[i] = src_data[i] > t ? 1.f : 0.f;
+  }
+
+  return true;
+}
+
+bool NonmaximaSuppresion(Image* src_img, Image* dst_img)
+{
+  if(src_img == NULL || dst_img == NULL) {
+    Logger::getInstance()->error("NonmaximaSuppresion -> invalid values passed. Aborting function.");
+    return false;
+  }
+
+  int w = imgGetWidth(src_img);
+  int h = imgGetHeight(src_img);
+  int order = 1;
+  float* src_data = imgGetData(src_img);
+  float* dst_data = imgGetData(dst_img);
+
+  for(int i = order; i < h - order; i++) {
+    for(int j = order; j < w - order; j++) {
+
+    }
   }
 
   return true;
