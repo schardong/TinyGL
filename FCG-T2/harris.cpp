@@ -192,8 +192,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   ApplyKernel(src_img, img[DX], k_dx, 3);
   ApplyKernel(src_img, img[DY], k_dy, 3);
 
-  float* theta = new float[img_size];
-  memset(theta, 0.f, sizeof(float) * img_size);
+  memset(dst_data, 0.f, sizeof(float) * img_size);
   for(int i = 0; i < img_size; i++) {
     int angle = 0;
     if(dx_data[i] != 0) angle = RAD2DEG(atan(dy_data[i] / dx_data[i]));
@@ -203,8 +202,33 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
     int div = ceil(angle / 45);
     int rest = angle % 45;
     if(rest > ceil(45 / 2)) div++;
-    angle = DEG2RAD(div * 45);
+    float newangle = div * 45;
     
+    if(newangle == 0 || newangle == 180) {
+      int largest_idx = i - 5;
+      for(int j = i; j <= i + 5; j++)
+        if(src_data[j] > src_data[largest_idx])
+          largest_idx = j;
+      dst_data[largest_idx] = src_data[largest_idx];
+    } else if(newangle == 45 || newangle == -135) {
+      int largest_idx = i - 5 * w + 1;
+      for(int j = i; j <= i + 5 * w; j += w - 1)
+        if(src_data[j] > src_data[largest_idx])
+          largest_idx = j;
+      dst_data[largest_idx] = src_data[largest_idx];
+    } else if(newangle == 90 || newangle == -90) {
+      int largest_idx = i - 5 * w;
+      for(int j = i; j <= i + 5 * w; j += w)
+        if(src_data[j] > src_data[largest_idx])
+          largest_idx = j;
+      dst_data[largest_idx] = src_data[largest_idx];
+    } else {
+      int largest_idx = i - 5 * w - 1;
+      for(int j = i; j <= i + 5 * w; j += w + 1)
+        if(src_data[j] > src_data[largest_idx])
+          largest_idx = j;
+      dst_data[largest_idx] = src_data[largest_idx];
+    }
 
     /*float intpart;
     float floatpart = modf(angle, &intpart);
