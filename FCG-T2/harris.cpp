@@ -1,8 +1,13 @@
 #include "harris.h"
 #include "logger.h"
-#include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#define _USE_MATH_DEFINES
+extern "C" {
+#include <math.h>
+}
+
 
 enum
 {
@@ -186,14 +191,21 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   ApplyKernel(src_img, img[DY], k_dy, 3);
 
   float* theta = new float[img_size];
+  memset(theta, 0.f, sizeof(float) * img_size);
   for(int i = 0; i < img_size; i++) {
     float angle = 0;
     if(dx_data[i] != 0) angle = atan(dy_data[i] / dx_data[i]);
-    float intpart;
+
+
+
+    /*float intpart;
     float floatpart = modf(angle, &intpart);
-    dst_data[i] = intpart;
+    dst_data[i] = floatpart;
+    if(intpart != 0.f || floatpart != 0.f) {
+      std::cout << M_PI / (angle) << "   ";
+    }*/
     //std::cout << dy_data[i] / dx_data[i] << " ";
-    //std::cout << intpart << "." << floatpart << "   ";
+    
   }
 
   /*for(int i = order; i < h - order; i++) {
