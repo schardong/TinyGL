@@ -8,6 +8,8 @@ extern "C" {
 #include <math.h>
 }
 
+#define RAD2DEG(x) (180.0f/M_PI * (x))
+#define DEG2RAD(x) (M_PI/180.0f * (x))
 
 enum
 {
@@ -193,10 +195,20 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   float* theta = new float[img_size];
   memset(theta, 0.f, sizeof(float) * img_size);
   for(int i = 0; i < img_size; i++) {
-    float angle = 0;
-    if(dx_data[i] != 0) angle = atan(dy_data[i] / dx_data[i]);
+    int angle = 0;
+    if(dx_data[i] != 0) angle = RAD2DEG(atan(dy_data[i] / dx_data[i]));
+    
+    if(angle == 0) continue;
 
+    int div = ceil(angle / 45);
+    int rest = angle % 45;
+    if(rest > ceil(45 / 2)) div++;
+    angle = DEG2RAD(div * 45);
+    
 
+    /*float intpart;
+    float floatpart = modf(angle, &intpart);
+    int pi_multiple = (int)intpart;*/
 
     /*float intpart;
     float floatpart = modf(angle, &intpart);
