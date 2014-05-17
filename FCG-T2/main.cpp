@@ -113,6 +113,12 @@ void init()
   std::vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
 
   float* pattern_data = imgGetData(corners);
+
+  Logger* log = Logger::getInstance();
+  log->log("Found " + to_string(c.size()) + " corners in the given image.");
+  for(auto it = c.begin(); it != c.end(); it++) {
+    log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
+  }
   
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &pattern_tex);
