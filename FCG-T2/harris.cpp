@@ -72,9 +72,9 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
   float* dxy_img_data = imgGetData(int_img[DXY]);
 
   for(int i = 0; i < img_size; i++) {
+    dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
     dx_img_data[i] *= dx_img_data[i];
     dy_img_data[i] *= dy_img_data[i];
-    dxy_img_data[i] = dx_img_data[i] * dy_img_data[i];
   }
   
   ApplyKernel(int_img[DX], int_img[DXGAUSS], k_gauss, 5);
