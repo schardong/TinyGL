@@ -131,7 +131,7 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(3.0, 3.0, 3.0);
+  g_eye = glm::vec3(0.2, 0.2, 0.2);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -347,10 +347,12 @@ void initGamuts()
   std::vector<CIEPointCloud*> cieclouds(colorspace::n_colorspaces);
   std::vector<CIEMesh*> ciemesh(colorspace::n_colorspaces);
 
-  float* beta = new float[100000 * 400];
+  //float* beta = new float[100000 * 400];
+  float* beta = new float[400];
   float* illum = new float[400];
   std::vector<glm::vec3> xyzbar;
 
+  memset(beta, 0, sizeof(float) * 400);
   for (int i = 0; i < 400; i++)  {
     float x, y, z;
     illum[i] = corGetD65(380.f + i);
@@ -358,7 +360,51 @@ void initGamuts()
     xyzbar.push_back(glm::vec3(x, y, z));
   }
 
-  FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
+  //for(int window = 1; window <= 400; window++) {
+    for(int i = 0; i < 400; i++) {
+      beta[i] = 1.f;
+      glm::vec3 tmp;
+      tmp = createCIEXYZ(beta, illum, xyzbar, STEP);
+      xyz_cloud.push_back(tmp);
+       glm::vec3 tmp2;
+      corCIEXYZtoCIERGB(tmp.x, tmp.z, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b);
+      rgb_cloud.push_back(tmp2);
+
+      corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      lab_cloud.push_back(tmp2);
+
+      corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      srgb_cloud.push_back(tmp2);
+      beta[i] = 0.f;
+    }
+
+    for(int i = 0; i < 400; i++) {
+      beta[i] = 1.f;
+      if(i == 399)
+        beta[0] = 1.f;
+      else
+        beta[i+1] = 1.f;
+      glm::vec3 tmp;
+      tmp = createCIEXYZ(beta, illum, xyzbar, STEP);
+      xyz_cloud.push_back(tmp);
+      glm::vec3 tmp2;
+      corCIEXYZtoCIERGB(tmp.x, tmp.z, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b);
+      rgb_cloud.push_back(tmp2);
+
+      corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      lab_cloud.push_back(tmp2);
+
+      corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      srgb_cloud.push_back(tmp2);
+      beta[i] = 0.f;
+      if(i == 399)
+        beta[0] = 0.f;
+      else
+        beta[i+1] = 0.f;
+    }
+  //}
+
+  /*FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
   fread(beta, sizeof(float), 15000 * 400, fp);
 
   for (size_t i = 0; i < 15000; i++) {
@@ -374,7 +420,7 @@ void initGamuts()
 
     corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
     srgb_cloud.push_back(tmp2);
-  }
+  }*/
 
   delete[] beta;
   delete[] illum;
