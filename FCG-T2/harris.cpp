@@ -26,7 +26,7 @@ enum
 
 bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
 bool Threshold(Image* src_img, Image* dst_img, float t);
-bool NonmaximaSuppression(Image* src_img, Image* dst_img);
+bool NonmaximaSuppression(Image* src_img, Image* dst_img, int neigh_width);
 float trace(float* m, size_t order);
 
 std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
@@ -103,9 +103,9 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
     r[i] = d - (0.004f * t * t);
   }
 
-  Threshold(int_img[R], int_img[THRESH], 0.9f);
-  NonmaximaSuppression(int_img[THRESH], dst_img);
-
+  NonmaximaSuppression(int_img[R], int_img[THRESH], 7);
+  Threshold(int_img[THRESH], dst_img, 0.9f);
+  
   for(int i = 0; i < h; i++)
     for(int j = 0; j < w; j++)
       if(dst_data[i * w + j] >= 0.9f) corners.push_back(glm::vec2(i, j));
@@ -161,14 +161,36 @@ bool Threshold(Image* src_img, Image* dst_img, float t)
   return true;
 }
 
-bool NonmaximaSuppression(Image* src_img, Image* dst_img)
+bool NonmaximaSuppression(Image* src_img, Image* dst_img, int neigh_width)
 {
-  if(src_img == NULL || dst_img == NULL) {
+  if(src_img == NULL || dst_img == NULL || neigh_width <= 0) {
     Logger::getInstance()->error("NonmaximaSuppresion -> invalid values passed. Aborting function.");
     return false;
   }
 
-  float k_dx[9] = {-1, 0, 1,
+  int w = imgGetWidth(src_img);
+  int h = imgGetHeight(src_img);
+  neigh_width = ceil(neigh_width / 2);
+  float* src_data = imgGetData(src_img);
+  float* dst_data = imgGetData(dst_img);
+
+  for(int i = neigh_width; i < (h - neigh_width); i++) {
+    for(int j = neigh_width; j < (w - neigh_width); j++) {
+      
+      float val = src_data[i * w + j];
+      bool max = true;
+      
+      for(int k = i - neigh_width; k <= (i + neigh_width); k++)
+        for(int l = j - neigh_width; l <= (j + neigh_width); l++)
+          max = max && (src_data[k * w + l] <= val);
+      
+      if(!max) continue;
+
+      dst_data[i * w + j] = src_data[i * w + j];
+    }
+  }
+
+  /*float k_dx[9] = {-1, 0, 1,
                    -2, 0, 2,
                    -1, 0, 1};
 
@@ -193,7 +215,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   ApplyKernel(src_img, img[DY], k_dy, 3);
 
   memset(dst_data, 0.f, sizeof(float) * img_size);
-  for(int i = 1; i < h - 1; i++) {
+  for(int i = 1; i < img_size; i++) {
     
     int angle = 0;
     if(dx_data[i] != 0) angle = RAD2DEG(atan(dy_data[i] / dx_data[i]));
@@ -212,20 +234,20 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
     } else if(newangle == 45 || newangle == -135) {
-      int largest_idx = i - 1 * w + 1;
-      for(int j = i; j <= i + 5 * w; j += w - 1)
+      int largest_idx = (i - 1) * w + 1;
+      for(int j = i; j <= (i + 1) * w; j += w - 1)
         if(src_data[j] > src_data[largest_idx])
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
     } else if(newangle == 90 || newangle == -90) {
-      int largest_idx = i - 5 * w;
-      for(int j = i; j <= i + 5 * w; j += w)
+      int largest_idx = (i - 1) * w;
+      for(int j = i; j <= (i + 1) * w; j += w)
         if(src_data[j] > src_data[largest_idx])
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
     } else {
-      int largest_idx = i - 5 * w - 1;
-      for(int j = i; j <= i + 5 * w; j += w + 1)
+      int largest_idx = (i - 1) * w - 1;
+      for(int j = i; j <= (i + 1) * w; j += w + 1)
         if(src_data[j] > src_data[largest_idx])
           largest_idx = j;
       dst_data[largest_idx] = src_data[largest_idx];
@@ -235,7 +257,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img)
   imgDestroy(img[DX]);
   imgDestroy(img[DY]);
   img[DX] = img[DY] = NULL;
-  delete[] img;
+  delete[] img;*/
   return true;
 }
 
