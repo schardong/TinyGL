@@ -131,7 +131,7 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(0.2, 0.2, 0.2);
+  g_eye = glm::vec3(3.0, 3.0, 3.0);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -360,8 +360,40 @@ void initGamuts()
     xyzbar.push_back(glm::vec3(x, y, z));
   }
 
-  //for(int window = 1; window <= 400; window++) {
+  for(int window = 1; window < 400; window++) {
+
     for(int i = 0; i < 400; i++) {
+
+      if((i + window) >= 400) {
+        int rest = (i + window) % 400;
+        for(int j = i; j < 400; j++)
+          beta[j] = 1.f;
+        for(int j = 0; j < rest; j++)
+          beta[j] = 1.f;
+      } else {
+        for(int j = i; j < (i + window); j++)
+          beta[j] = 1.f;
+      }
+//      printf("LOLOLO\n");
+//      for(int j = 0; j < 400; j++)
+//        printf("%.1f ", beta[j]);
+//      cout << endl << endl;
+
+      glm::vec3 tmp = createCIEXYZ(beta, illum, xyzbar, STEP);
+      xyz_cloud.push_back(tmp);
+      glm::vec3 tmp2;
+      corCIEXYZtoCIERGB(tmp.x, tmp.z, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b);
+      rgb_cloud.push_back(tmp2);
+
+      corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      lab_cloud.push_back(tmp2);
+
+      corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      srgb_cloud.push_back(tmp2);
+      memset(beta, 0, sizeof(float) * 400);
+    }
+
+    /*for(int i = 0; i < 400; i++) {
       beta[i] = 1.f;
       glm::vec3 tmp;
       tmp = createCIEXYZ(beta, illum, xyzbar, STEP);
@@ -401,8 +433,8 @@ void initGamuts()
         beta[0] = 0.f;
       else
         beta[i+1] = 0.f;
-    }
-  //}
+    }*/
+  }
 
   /*FILE* fp = fopen("beta_reflectance_15000_1.dat", "rb");
   fread(beta, sizeof(float), 15000 * 400, fp);
