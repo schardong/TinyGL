@@ -456,7 +456,7 @@ void setupShaders()
   g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
   g_fPass->setUniformMatrix("projMatrix", projMatrix);
 
-  Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/def_spass.fs");
+  Shader* g_sPass = new Shader("../Resources/ssao.vs", "../Resources/ssao.fs");
   g_sPass->bind();
   g_sPass->bindFragDataLoc("fColor", 0);
   g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
