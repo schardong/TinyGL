@@ -103,7 +103,7 @@ void initGLUT(int argc, char** argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
   glutInitWindowSize(800, 600);
 
-  g_window = glutCreateWindow("INF2610-T3");
+  g_window = glutCreateWindow("INF2610-T4");
   glutReshapeFunc(reshape);
   glutDisplayFunc(update);
   glutKeyboardFunc(keyPress);
@@ -318,23 +318,7 @@ void keyPress(unsigned char c, int x, int y)
     s = TinyGL::getInstance()->getShader("sPass");
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
-
-    /*BufferObject* ubuff = TinyGL::getInstance()->getBuffer("light_buff");
-    ubuff->bind();
-    GLfloat* buff = new GLfloat[4 * NUM_LIGHTS];
     
-    for (int i = 0; i < NUM_LIGHTS; i++) {
-      glm::vec4 tmp = glm::vec4(lightCoords[4 * i], lightCoords[4 * i + 1], lightCoords[4 * i + 2], lightCoords[4 * i + 3]);
-      tmp = viewMatrix * tmp;
-      buff[4 * i] = tmp.x;
-      buff[4 * i + 1] = tmp.y;
-      buff[4 * i + 2] = tmp.z;
-      buff[4 * i + 3] = tmp.w;
-    }
-
-    ubuff->sendData(buff);
-    delete buff;*/
-
     Shader::unbind();
   }
 }

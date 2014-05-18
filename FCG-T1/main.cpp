@@ -272,7 +272,6 @@ void exit_cb()
 
 void initGamuts()
 {
-  const int STEP = 1;
   std::vector<glm::vec3> xyz_cloud;
   std::vector<glm::vec3> srgb_cloud;
   std::vector<glm::vec3> lab_cloud;
@@ -296,25 +295,28 @@ void initGamuts()
     for(int i = 0; i < 400; i++) {
 
       if((i + window) >= 400) {
+
         int rest = (i + window) % 400;
         for(int j = i; j < 400; j++)
           beta[j] = 1.f;
         for(int j = 0; j < rest; j++)
           beta[j] = 1.f;
+
       } else {
         for(int j = i; j < (i + window); j++)
           beta[j] = 1.f;
       }
 
-      glm::vec3 tmp = createCIEXYZ(beta, illum, xyzbar, STEP);
+      glm::vec3 tmp = createCIEXYZ(beta, illum, xyzbar, 1);
       xyz_cloud.push_back(tmp);
 
       glm::vec3 tmp2;
+      corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      srgb_cloud.push_back(tmp2);
+
       corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
       lab_cloud.push_back(tmp2);
 
-      corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
-      srgb_cloud.push_back(tmp2);
       memset(beta, 0, sizeof(float) * 400);
     }
   }
