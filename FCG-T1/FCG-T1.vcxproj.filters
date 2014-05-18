@@ -27,12 +27,6 @@
     <ClCompile Include="ciepointcloud.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ciemesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="srgbmesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h">
@@ -44,13 +38,7 @@
     <ClInclude Include="ciepointcloud.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ciemesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="colorspace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="srgbmesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fcgt1config.h">
