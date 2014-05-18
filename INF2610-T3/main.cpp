@@ -258,7 +258,6 @@ void reshape(int w, int h)
 
   glBindRenderbuffer(GL_RENDERBUFFER, g_depthId);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_depthId);
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
   glViewport(0, 0, w, h);
