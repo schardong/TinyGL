@@ -136,7 +136,7 @@ void init()
   g_eye = glm::vec3(0, 7, 15);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 100.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 1.f, 100.f);
 
   setupGeometry();
   setupShaders();
@@ -147,6 +147,8 @@ void init()
   Mesh* quad = TinyGL::getInstance()->getMesh("screenQuad");
   s->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
   s->setUniform4fv("u_materialColor", quad->getMaterialColor());
+  s->setUniform1f("u_zNear", 1.f);
+  s->setUniform1f("u_zFar", 100.f);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
@@ -200,13 +202,7 @@ void draw()
 
   //First pass. Filling the geometry buffers.
   glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  GLfloat uiZeros[4] = {0.f, 0.f, 0.f, 0.f};
-  GLfloat fOnes[4] = { 1.f, 1.f, 1.f, 1.f };
-  glClearBufferfv(GL_COLOR, 0, uiZeros);
-  glClearBufferfv(GL_COLOR, 1, uiZeros);
-  glClearBufferfv(GL_COLOR, 2, uiZeros);
-  glClearBufferfv(GL_DEPTH, 0, fOnes);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
   Shader* s = glPtr->getShader("fPass");
@@ -218,12 +214,6 @@ void draw()
     s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->getMaterialColor());
     glPtr->draw("sphere" + to_string(i));
   }
-
-  /*for (int i = 0; i < NUM_LIGHTS; i++) {
-    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->m_modelMatrix);
-    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("lightMesh" + to_string(i))->getMaterialColor());
-    glPtr->draw("lightMesh" + to_string(i));
-  }*/
 
   s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("ground")->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("ground")->m_normalMatrix);
@@ -240,7 +230,6 @@ void draw()
 
   s = glPtr->getShader("sPass");
   s->bind();
-  //s->setUniformMatrix("viewMatrix", viewMatrix);
   glDisable(GL_DEPTH_TEST);
 
   glPtr->draw("screenQuad");
@@ -266,7 +255,7 @@ void reshape(int w, int h)
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glViewport(0, 0, w, h);
-  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.f);
+  projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
 
   Shader* s = TinyGL::getInstance()->getShader("fPass");
   s->bind();
@@ -417,7 +406,7 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);

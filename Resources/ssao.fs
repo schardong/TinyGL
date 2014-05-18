@@ -6,9 +6,12 @@ uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform sampler2D u_depthMap;
-uniform mat4 viewMatrix;
 
+uniform mat4 viewMatrix;
 uniform int u_numLights;
+uniform float u_zNear;
+uniform float u_zFar;
+
 const int g_maxLights = 50;
 vec4 g_ambientColor = vec4(0.1);
 
@@ -19,9 +22,17 @@ layout (std140) uniform LightPos
   vec4 u_lightPos[g_maxLights];
 };
 
+float linearizeDepth(vec2 uv)
+{
+  float n = u_zNear; // camera z near
+  float f = u_zFar;  // camera z far
+  float z = texture(u_depthMap, uv).x; 
+  return (2.0 * n) / (f + n - z * (f - n));
+}
+
 void main()
 {
-  /*vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
+  vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   if(length(normal_camera) == 0)
     fColor = vec4(0.8);
   else {
@@ -51,6 +62,8 @@ void main()
     }
     fColor += g_ambientColor;
     
-  }*/
-  fColor = texture(u_depthMap, vTexCoord);
+  }
+  
+  //float d = linearizeDepth(vTexCoord);
+  //fColor = vec4(d, d, d, 1.0);
 }
