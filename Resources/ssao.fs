@@ -48,7 +48,7 @@ void main()
       light_dir = normalize(light_dir);
       
       float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor.rgb += diff * diff_color.rgb / (dist);
+      fColor.rgb += diff * diff_color.rgb / u_numLights;
       
       if(diff > 0.f) {
         vec3 V = normalize(-vertex_camera);
@@ -61,9 +61,7 @@ void main()
       }
     }
     fColor += g_ambientColor;
-    
   }
-  
   //float d = linearizeDepth(vTexCoord);
   //fColor = vec4(d, d, d, 1.0);
 }

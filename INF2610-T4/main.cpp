@@ -23,7 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 20;
+static const int NUM_LIGHTS = 3;
 static const int WINDOW_W = 800;
 static const int WINDOW_H = 600;
 
@@ -63,6 +63,7 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
+float* g_depth;
 
 void setupLights();
 void setupFBO(GLuint w, GLuint h);
@@ -125,8 +126,10 @@ void initGLEW()
 
   glClearColor(0.f, 0.f, 0.f, 0.f);
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glPointSize(5);
+  glClearDepth(1.0f);
+  //glPointSize(5);
 
   initGLEWCalled = true;
 }
@@ -150,6 +153,8 @@ void init()
   s->setUniform1f("u_zNear", 1.f);
   s->setUniform1f("u_zFar", 100.f);
 
+  g_depth = new float[WINDOW_W * WINDOW_H];
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
   s->setUniform1i("u_diffuseMap", 0);
@@ -162,9 +167,9 @@ void init()
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   s->setUniform1i("u_vertexMap", 2);
 
-  glActiveTexture(GL_TEXTURE3);
+  glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  s->setUniform1i("u_depthMap", 3);
+  s->setUniform1i("u_depthMap", 4);
 
   initCalled = true;
 }
@@ -185,6 +190,7 @@ void destroy()
   glDeleteTextures(num_buffers, g_colorId);
   glDeleteTextures(1, &g_depthId);
   glDeleteFramebuffers(1, &g_fboId);
+  delete[] g_depth;
 }
 
 void update()
@@ -202,7 +208,7 @@ void draw()
 
   //First pass. Filling the geometry buffers.
   glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) ;
 
   TinyGL* glPtr = TinyGL::getInstance();
   Shader* s = glPtr->getShader("fPass");
@@ -222,7 +228,6 @@ void draw()
   
   glBindVertexArray(0);
   Shader::unbind();
-
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   //Second pass. Shading occurs here.
@@ -406,11 +411,13 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
 
