@@ -21,18 +21,12 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mtwist.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ciepointcloud.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mtwist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ciepointcloud.h">

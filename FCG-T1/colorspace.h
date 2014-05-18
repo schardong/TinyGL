@@ -6,7 +6,6 @@
 #include "logger.h"
 
 extern "C" {
-#include "mtwist.h"
 #include "color.h"
 #include "math.h"
 }
@@ -60,36 +59,6 @@ glm::vec3 createCIEXYZPureSource(float* illuminant, std::vector<glm::vec3> xyzba
     ciexyz = glm::vec3(0);
 
   return ciexyz;
-}
-
-int createBetaCurve(float* beta, size_t n)
-{
-  if (beta == NULL || n == 0)
-    return 0;
-
-  for (size_t i = 0; i < n; i++) {
-    mts_goodseed(&mt_default_state);
-    beta[i] = (float)mt_drand();
-  }
-  return 1;
-}
-
-void createAndWriteBeta(size_t num_samples, size_t delta)
-{
-  std::string filename = "beta_reflectance_" + std::to_string(num_samples) + "_" + std::to_string(delta) + ".dat";
-  FILE* fp = fopen(filename.c_str(), "wb+");
-
-  float* beta = new float[400 / delta];
-
-  for (size_t i = 0; i < num_samples; i++) {
-    createBetaCurve(beta, 400 / delta);
-    if (i % 100 == 0)
-      Logger::getInstance()->log(std::to_string(i) + " beta spectrum");
-    fwrite(beta, sizeof(float), 400 / delta, fp);
-  }
-
-  fclose(fp);
-  delete[] beta;
 }
 
 glm::vec3 rgbToCIERGB(glm::vec3 rgb)

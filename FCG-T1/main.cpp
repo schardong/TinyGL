@@ -24,7 +24,6 @@
 
 extern "C" {
 #include "color.h"
-#include "mtwist.h"
 }
 
 using namespace std;

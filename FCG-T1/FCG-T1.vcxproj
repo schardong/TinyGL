@@ -14,14 +14,12 @@
     <ClCompile Include="ciepointcloud.cpp" />
     <ClCompile Include="color.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mtwist.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ciepointcloud.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
     <ClInclude Include="fcgt1config.h" />
-    <ClInclude Include="mtwist.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt1.fs" />
