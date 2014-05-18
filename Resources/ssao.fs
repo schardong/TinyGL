@@ -5,6 +5,7 @@ layout (location = 0) out vec4 fColor;
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
+uniform sampler2D u_depthMap;
 uniform mat4 viewMatrix;
 
 uniform int u_numLights;
@@ -20,7 +21,7 @@ layout (std140) uniform LightPos
 
 void main()
 {
-  vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
+  /*vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   if(length(normal_camera) == 0)
     fColor = vec4(0.8);
   else {
@@ -50,7 +51,6 @@ void main()
     }
     fColor += g_ambientColor;
     
-  }
-  
-  
+  }*/
+  fColor = texture(u_depthMap, vTexCoord);
 }

@@ -160,6 +160,10 @@ void init()
   glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
   s->setUniform1i("u_vertexMap", 2);
 
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, g_depthId);
+  s->setUniform1i("u_depthMap", 3);
+
   initCalled = true;
 }
 
@@ -167,16 +171,17 @@ void destroy()
 {
   TinyGL::getInstance()->freeResources();
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, 0);
   
   glDeleteTextures(num_buffers, g_colorId);
-  glDeleteRenderbuffers(1, &g_depthId);
+  glDeleteTextures(1, &g_depthId);
   glDeleteFramebuffers(1, &g_fboId);
 }
 
@@ -412,11 +417,12 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
 
   GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);

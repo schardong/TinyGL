@@ -78,8 +78,8 @@
   <ItemGroup>
     <None Include="..\Resources\def_fpass.fs" />
     <None Include="..\Resources\def_fpass.vs" />
-    <None Include="..\Resources\def_spass.fs" />
-    <None Include="..\Resources\def_spass.vs" />
+    <None Include="..\Resources\ssao.fs" />
+    <None Include="..\Resources\ssao.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="quad.h" />

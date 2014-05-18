@@ -29,10 +29,10 @@
     <None Include="..\Resources\def_fpass.vs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\def_spass.fs">
+    <None Include="..\Resources\ssao.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\def_spass.vs">
+    <None Include="..\Resources\ssao.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
