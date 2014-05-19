@@ -12,6 +12,9 @@ uniform int u_numLights;
 uniform float u_zNear;
 uniform float u_zFar;
 
+uniform int u_numSamples;
+uniform float u_sampleRadius;
+
 const int g_maxLights = 50;
 vec4 g_ambientColor = vec4(0.1);
 

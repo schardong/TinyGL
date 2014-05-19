@@ -6,28 +6,28 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 SOURCES += \
-    shader.cpp \
-    mesh.cpp \
-    logger.cpp \
-    bufferobject.cpp \
-    tinygl.cpp \
-    sphere.cpp \
-    grid.cpp \
     axis.cpp \
-    light.cpp
+    bufferobject.cpp \
+    grid.cpp \
+    light.cpp \
+    logger.cpp \
+    mesh.cpp \
+    shader.cpp \
+    sphere.cpp \
+    tinygl.cpp
 
 HEADERS += \
-    singleton.h \
-    shader.h \
-    mesh.h \
-    logger.h \
-    bufferobject.h \
-    tinygl.h \
-    sphere.h \
-    grid.h \
     axis.h \
+    bufferobject.h \
+    grid.h \
+    light.h \
+    logger.h \
+    mesh.h \
+    shader.h \
+    singleton.h \
+    sphere.h \
     tglconfig.h \
-    light.h
+    tinygl.h
 
 INCLUDEPATH += ../include
 
@@ -39,9 +39,22 @@ INSTALLS += header
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -g0 -O2
     TARGET = tinygl
+    LIBS += -L$$PWD/../build/x86/freeglut/lib/Release/ -lfreeglut
+    LIBS += -L$$PWD/../glew/lib/ -lglew32
 }
 
 CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -g3 -pg -O0
     TARGET = tinygld
+    LIBS += -L$$PWD/../build/x86/freeglut/lib/Debug/ -lfreeglutd
+    LIBS += -L$$PWD/../glew/lib/ -lglew32d
 }
+
+INCLUDEPATH += $$PWD/../../freeglut/include
+DEPENDPATH += $$PWD/../../freeglut/include
+
+INCLUDEPATH += $$PWD/../../glew/include
+DEPENDPATH += $$PWD/../../glew/include
+
+INCLUDEPATH += $$PWD/../../glm
+DEPENDPATH += $$PWD/../../glm
