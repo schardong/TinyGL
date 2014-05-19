@@ -18,8 +18,8 @@ void main()
 {
   mat4 MVP = projMatrix * viewMatrix * modelMatrix;
   mat4 MV = viewMatrix * modelMatrix;
-  
-  vec4 pos4 = MV * vec4(in_vPosition, 1);
+
+  vec4 pos4 = MV * vec4(in_vPosition, 1.f);
   vec3 pos3 = pos4.xyz / pos4.w;
 
   vLight.vertex_camera = pos3;

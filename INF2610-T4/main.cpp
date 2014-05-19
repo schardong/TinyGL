@@ -23,7 +23,7 @@
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 3;
+static const int NUM_LIGHTS = 1;
 static const int WINDOW_W = 800;
 static const int WINDOW_H = 600;
 
@@ -184,7 +184,7 @@ void destroy()
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glActiveTexture(GL_TEXTURE3);
+  glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, 0);
   
   glDeleteTextures(num_buffers, g_colorId);
@@ -251,12 +251,14 @@ void reshape(int w, int h)
 
   glActiveTexture(GL_TEXTURE3);
   for (int i = 0; i < num_buffers; i++) {
+    glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, NULL);
   }
 
+  glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glViewport(0, 0, w, h);
@@ -335,7 +337,7 @@ void setupLights()
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(rand() % 50, 5 + rand() % 10, rand() % 50));
+    lightSources[i]->setPosition(glm::vec3(rand() % 35, 5 + rand() % 10, rand() % 35));
     lightSources[i]->setColor(glm::vec3((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX));
     TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
 
@@ -411,12 +413,11 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  //glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);

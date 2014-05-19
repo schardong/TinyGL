@@ -58,7 +58,7 @@ void main()
         vec3 R = normalize(reflect(-light_dir, normal_camera));
         
         float angle = max(dot(R, V), 0.f);
-        float spec = pow(angle, 128.f);
+        float spec = pow(angle, 64.f);
         vec3 specColor = vec3(spec);
         fColor.rgb += specColor;
       }
