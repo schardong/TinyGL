@@ -7,6 +7,7 @@ namespace colorspace
   enum
   {
     CIEXYZ,
+    CIERGB,
     sRGB,
     CIELab,
     n_colorspaces

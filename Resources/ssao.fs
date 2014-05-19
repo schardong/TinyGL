@@ -40,6 +40,7 @@ void main()
     fColor = vec4(0.8);
   else {
     if(u_numLights > g_maxLights) discard;
+    
     fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
