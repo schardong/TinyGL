@@ -33,12 +33,27 @@ float linearizeDepth(vec2 uv)
   return (2.0 * n) / (f + n - z * (f - n));
 }
 
+float rand(vec2 co){
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main()
 {
+  vec3 kernel[9];
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   if(length(normal_camera) == 0)
     fColor = vec4(0.8);
   else {
+    /*if(vTexCoord.x > 0.5) {
+      float d = linearizeDepth(vTexCoord);
+      fColor = vec4(d, d, d, 1.0);
+    }*/
+    float ambientColor = 0;
+    /*for (int i = 0; i < 9; ++i) {
+      kernel[i] = vec3(random(-1.0f, 1.0f), random(-1.0f, 1.0f), random(0.0f, 1.0f));
+      kernel[i] = normalize(kernel[i]);
+    }*/
+        
     if(u_numLights > g_maxLights) discard;
     
     fColor = vec4(0.f);
@@ -64,8 +79,8 @@ void main()
         fColor.rgb += specColor;
       }
     }
-    fColor += g_ambientColor;
+    //fColor.rgb += vec3(ambientColor);
+    fColor.rgb = vec3(length(rand(vTexCoord)));
+    
   }
-  //float d = linearizeDepth(vTexCoord);
-  //fColor = vec4(d, d, d, 1.0);
-}
+ }

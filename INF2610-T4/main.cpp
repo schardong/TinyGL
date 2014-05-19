@@ -249,7 +249,6 @@ void reshape(int w, int h)
   if (!initCalled || !initGLEWCalled)
     return;
 
-  glActiveTexture(GL_TEXTURE3);
   for (int i = 0; i < num_buffers; i++) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
@@ -267,6 +266,23 @@ void reshape(int w, int h)
   Shader* s = TinyGL::getInstance()->getShader("fPass");
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
+
+  s = TinyGL::getInstance()->getShader("sPass");
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
+  s->setUniform1i("u_diffuseMap", 0);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[NORMAL]);
+  s->setUniform1i("u_normalMap", 1);
+
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, g_colorId[VERTEX]);
+  s->setUniform1i("u_vertexMap", 2);
+
+  glActiveTexture(GL_TEXTURE4);
+  glBindTexture(GL_TEXTURE_2D, g_depthId);
+  s->setUniform1i("u_depthMap", 4);
 
   Shader::unbind();
 }
