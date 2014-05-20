@@ -491,7 +491,7 @@ void setupFBO(GLuint w, GLuint h)
 
 void setupShaders()
 {
-  Shader* g_fPass = new Shader("../Resources/def_fpass.vs", "../Resources/def_fpass.fs");
+  Shader* g_fPass = new Shader("../Resources/ssao_fpass.vs", "../Resources/def_fpass.fs");
   g_fPass->bind();
   g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
   g_fPass->setUniformMatrix("projMatrix", projMatrix);
