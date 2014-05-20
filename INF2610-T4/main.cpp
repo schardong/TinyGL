@@ -24,8 +24,8 @@ static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 static const int NUM_LIGHTS = 1;
-static const int WINDOW_W = 800;
-static const int WINDOW_H = 800;
+static const int WINDOW_W = 1000;
+static const int WINDOW_H = 1000;
 
 using namespace std;
 
@@ -107,7 +107,7 @@ void initGLUT(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(WINDOW_W, WINDOW_H);
 
   g_window = glutCreateWindow("INF2610-T4");
   glutReshapeFunc(reshape);

@@ -23,9 +23,9 @@ layout (std140) uniform LightPos
   vec4 u_lightPos[g_maxLights];
 };
 
-const int g_sampleCount = 32;
+const int g_sampleCount = 16;
 const int g_radius = 10;
-const int g_distThresh = 10;
+const int g_distThresh = 5;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -71,8 +71,8 @@ void main()
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
     for(int i = 0; i < g_sampleCount; i++) {
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
-      float sampleDepth = texture(u_depthMap, sampleTexCoord).r;
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
+      float sampleDepth = linearizeDepth(sampleTexCoord);
       vec3 samplePos = vec3(texture(u_vertexMap, sampleTexCoord).xy, sampleDepth * 2 - 1);
       vec3 sampleDir = normalize(samplePos - vertex_camera);
       
@@ -102,19 +102,6 @@ void main()
         float spec = pow(angle, 128.f);
         vec3 specColor = vec3(spec);
         fColor.rgb += specColor;
-      }
-    }*/
-    
-    /*vec2 tex_step = vec2(1 / u_screenSize.x, 1 / u_screenSize.y);
-    
-    float aux = 4*tex_step.x;
-    float auy = 4*tex_step.x;
-    
-    float my_depth = linearizeDepth(vTexCoord);
-    for(float x = vTexCoord.x - aux; x < vTexCoord.x + aux; x += tex_step.x) {
-      for(float y = vTexCoord.y - auy; y < vTexCoord.y + auy; y += tex_step.y) {
-        float depth = linearizeDepth(vec2(x, y));
-        occ_factor += my_depth - depth;
       }
     }*/
     
