@@ -71,7 +71,8 @@ void main()
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
     for(int i = 0; i < g_sampleCount; i++) {
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
+    
+      /*vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
       float sampleDepth = linearizeDepth(sampleTexCoord);
       vec3 samplePos = vec3(texture(u_vertexMap, sampleTexCoord).xy, sampleDepth * 2 - 1);
       vec3 sampleDir = normalize(samplePos - vertex_camera);
@@ -80,7 +81,16 @@ void main()
       float sampleVertexDist = distance(vertex_camera, samplePos);
       float a = 1.0 - smoothstep(g_distThresh, g_distThresh * 2, sampleVertexDist);
       
-      occ_factor += (NS * a);
+      occ_factor += (NS * a);*/
+      
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
+      vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
+      
+      vec3 V = samplePos - vertex_camera;
+      float d = length(V);
+      V = normalize(V);
+      
+      occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d ));
     }
     
     /*fColor = vec4(0.f);
@@ -105,6 +115,6 @@ void main()
       }
     }*/
     
-    fColor.rgb = vec3(1.0 - (occ_factor / g_sampleCount));
+    fColor.rgb = vec3(1-(occ_factor / g_sampleCount));
   }
  }
