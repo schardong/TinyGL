@@ -23,8 +23,8 @@ layout (std140) uniform LightPos
   vec4 u_lightPos[g_maxLights];
 };
 
-const int g_sampleCount = 4;
-const int g_radius = 10;
+const int g_sampleCount = 80;
+const int g_radius = 20;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -53,10 +53,6 @@ float linearizeDepth(vec2 uv)
   return (2.0 * n) / (f + n - z * (f - n));
 }
 
-float rand(vec2 co){
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
 void main()
 {
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
@@ -76,7 +72,7 @@ void main()
       float d = length(V);
       V = normalize(V);
       
-      occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d ));
+      occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
     }
     
     /*fColor = vec4(0.f);
