@@ -1,0 +1,5 @@
+https://www.google.com.br/search?q=SSAO+OpenGL&ie=utf-8&oe=utf-8&aq=t&rls=org.mozilla:pt-BR:official&client=firefox-a&channel=fflb&gfe_rd=cr&ei=6nV1U9XdKabU8gfB9YGQBQ
+
+http://blog.evoserv.at/index.php/2012/12/hemispherical-screen-space-ambient-occlusion-ssao-for-deferred-renderers-using-openglglsl/
+
+https://stackoverflow.com/questions/9062116/opengl-glsl-ssao-implementation
