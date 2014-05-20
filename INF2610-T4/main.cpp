@@ -540,7 +540,7 @@ void setupGeometry()
 
   for (int i = 0; i < W_SPHERES; i++) {
     for (int j = 0; j < H_SPHERES; j++) {
-      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3((i+1) * 4, 1.5, (j+1) * 4)) * glm::scale(glm::vec3(1.5));
+      spheres[i * W_SPHERES + j]->m_modelMatrix = glm::translate(glm::vec3((i+1) * 4, 1.6, (j+1) * 4)) * glm::scale(glm::vec3(1.5));
       spheres[i * W_SPHERES + j]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * spheres[i * W_SPHERES + j]->m_modelMatrix));
     }
   }

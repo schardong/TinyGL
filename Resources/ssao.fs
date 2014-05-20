@@ -23,9 +23,8 @@ layout (std140) uniform LightPos
   vec4 u_lightPos[g_maxLights];
 };
 
-const int g_sampleCount = 16;
+const int g_sampleCount = 4;
 const int g_radius = 10;
-const int g_distThresh = 5;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -46,8 +45,6 @@ const vec2 g_poissonSamples[] = vec2[](
                                 vec2(  0.14383161,  -0.14100790 )
                                );
                                
-
-
 float linearizeDepth(vec2 uv)
 {
   float n = u_zNear; // camera z near
@@ -71,19 +68,8 @@ void main()
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
     for(int i = 0; i < g_sampleCount; i++) {
-    
-      /*vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
-      float sampleDepth = linearizeDepth(sampleTexCoord);
-      vec3 samplePos = vec3(texture(u_vertexMap, sampleTexCoord).xy, sampleDepth * 2 - 1);
-      vec3 sampleDir = normalize(samplePos - vertex_camera);
-      
-      float NS = max(dot(normal_camera, sampleDir), 0);
-      float sampleVertexDist = distance(vertex_camera, samplePos);
-      float a = 1.0 - smoothstep(g_distThresh, g_distThresh * 2, sampleVertexDist);
-      
-      occ_factor += (NS * a);*/
-      
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i]);// * g_radius / u_screenSize.x);
+          
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
       vec3 V = samplePos - vertex_camera;
