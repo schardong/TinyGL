@@ -3,7 +3,7 @@
 #include "logger.h"
 #include "shader.h"
 #include "mesh.h"
-#include "grid.h"
+#include "cube.h"
 #include "sphere.h"
 #include "quad.h"
 #include "light.h"
@@ -70,11 +70,6 @@ void setupFBO(GLuint w, GLuint h);
 void setupShaders();
 void setupGeometry();
 
-float try_rand(glm::vec2 co)
-{
-  return glm::fract(sin(glm::dot(co, glm::vec2(12.9898,78.233))) * 43758.5453);
-}
-
 void drawSphere(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
@@ -83,6 +78,11 @@ void drawSphere(size_t num_points)
 void drawGrid(size_t num_points)
 {
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
+}
+
+void drawByteIdx(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_BYTE, NULL);
 }
 
 void drawQuad(size_t num_points)
@@ -179,14 +179,6 @@ void init()
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   s->setUniform1i("u_depthMap", 4);
 
-  /*for(float i = 0; i < 1.f; i+=0.1) {
-    for(float j = 0; j < 1.f; j+= 0.1) {
-      float a = try_rand(glm::vec2(i, j));
-      glm::vec3 lol(a, a, a);
-      cout << a << " " << glm::length(lol) << endl;
-    }
-  }*/
-
   initCalled = true;
 }
 
@@ -237,13 +229,18 @@ void draw()
     glPtr->draw("sphere" + to_string(i));
   }
 
-  for(int i = 0; i < 5; i++) {
+  /*for(int i = 0; i < 5; i++) {
     s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_modelMatrix);
     s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_normalMatrix);
     s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->getMaterialColor());
     glPtr->draw("bottom_box" + to_string(i));
-  }
+  }*/
   
+  s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("box1")->m_modelMatrix);
+  s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("box1")->m_normalMatrix);
+  s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("box1")->getMaterialColor());
+  glPtr->draw("box1");
+
   glBindVertexArray(0);
   Shader::unbind();
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -437,7 +434,6 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(num_buffers, g_colorId);
 
-
   for (int i = 0; i < num_buffers; i++) {
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
@@ -508,28 +504,37 @@ void setupShaders()
 
 void setupGeometry()
 {
-  Grid** bottom_box;
+  //Grid** bottom_box;
   Sphere** spheres;
   Quad* screenQuad;
+  Cube* box;
 
-  bottom_box = new Grid*[5];
+  box = new Cube();
+  box->setDrawCb(drawByteIdx);
+  box->setMaterialColor(glm::vec4(0.4, 0.6, 0.1, 1.0));
+  box->m_modelMatrix = glm::scale(glm::vec3(50, 50, 50));
+  box->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * box->m_modelMatrix));
+  TinyGL::getInstance()->addResource(MESH, "box1", box);
+
+ /* bottom_box = new Grid*[5];
 
   for(int i = 0; i < 5; i++) {
-    bottom_box[i] = new Grid(10, 10);
+    bottom_box[i] = new Grid(50, 50);
     bottom_box[i]->setDrawCb(drawGrid);
     bottom_box[i]->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
   }
 
   bottom_box[0]->m_modelMatrix = glm::scale(glm::vec3(50, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(1, 0, 0));
-  bottom_box[1]->m_modelMatrix = glm::scale(glm::vec3(50, 1, 1));
-  bottom_box[2]->m_modelMatrix = glm::translate(glm::vec3(45, 0, 45)) * glm::scale(glm::vec3(1, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(0, 1, 0));
+  bottom_box[1]->m_modelMatrix = glm::translate(glm::vec3(0, 1, 0.1)) * glm::scale(glm::vec3(50, 1, 1)) * glm::rotate(static_cast<float>(M_PI), glm::vec3(1, 0, 0));
+
+  bottom_box[2]->m_modelMatrix = glm::translate(glm::vec3(50, 0, 50)) * glm::scale(glm::vec3(1, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(0, 1, 0));
   bottom_box[3]->m_modelMatrix = glm::translate(glm::vec3(0, 0, 45)) * glm::scale(glm::vec3(50, 1, 1));
-  bottom_box[4]->m_modelMatrix = glm::translate(glm::vec3(0, 0, 45)) * glm::scale(glm::vec3(1, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(0, 1, 0));
+  bottom_box[4]->m_modelMatrix = glm::translate(glm::vec3(0, 0, 45)) * glm::scale(glm::vec3(1, 1, 50)) * glm::rotate(static_cast<float>(M_PI / 2), glm::vec3(0, 1, 0));*/
   
-  for(int i = 0; i < 5; i++) {
+  /*for(int i = 0; i < 5; i++) {
     bottom_box[i]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * bottom_box[i]->m_modelMatrix));
     TinyGL::getInstance()->addResource(MESH, "bottom_box" + to_string(i), bottom_box[i]);
-  }
+  }*/
 
   spheres = new Sphere*[NUM_SPHERES];
   for (int i = 0; i < NUM_SPHERES; i++) {

@@ -10,4 +10,4 @@ public:
   ~Quad();
 };
 
-#endif
+#endif // QUAD_H
