@@ -25,7 +25,7 @@ static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 static const int NUM_LIGHTS = 1;
 static const int WINDOW_W = 800;
-static const int WINDOW_H = 600;
+static const int WINDOW_H = 800;
 
 using namespace std;
 
@@ -229,17 +229,17 @@ void draw()
     glPtr->draw("sphere" + to_string(i));
   }
 
-  /*for(int i = 0; i < 5; i++) {
+  for(int i = 0; i < 5; i++) {
     s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_modelMatrix);
     s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_normalMatrix);
     s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->getMaterialColor());
     glPtr->draw("bottom_box" + to_string(i));
-  }*/
+  }
   
-  s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("box1")->m_modelMatrix);
+  /*s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("box1")->m_modelMatrix);
   s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("box1")->m_normalMatrix);
   s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("box1")->getMaterialColor());
-  glPtr->draw("box1");
+  glPtr->draw("box1");*/
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -507,14 +507,38 @@ void setupGeometry()
   //Grid** bottom_box;
   Sphere** spheres;
   Quad* screenQuad;
-  Cube* box;
+  Cube** bottom_box;
 
-  box = new Cube();
+  bottom_box = new Cube*[5];
+  for(int i = 0; i < 5; i++) {
+    bottom_box[i] = new Cube();
+    bottom_box[i]->setDrawCb(drawByteIdx);
+    //bottom_box[i]->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
+  }
+
+  bottom_box[0]->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
+  bottom_box[1]->setMaterialColor(glm::vec4(0, 0.8, 0.0, 1.0));
+  bottom_box[2]->setMaterialColor(glm::vec4(0.6, 0, 0.0, 1.0));
+  bottom_box[3]->setMaterialColor(glm::vec4(0.4, 0.6, 0.9, 1.0));
+  bottom_box[4]->setMaterialColor(glm::vec4(0, 0, 0.8, 1.0));
+
+  bottom_box[0]->m_modelMatrix = glm::scale(glm::vec3(50, 0.1, 50));
+  bottom_box[1]->m_modelMatrix = glm::scale(glm::vec3(50, 5, 0.3));
+  bottom_box[2]->m_modelMatrix = glm::translate(glm::vec3(49.7, 0, 0)) * glm::scale(glm::vec3(0.3, 5, 50));
+  bottom_box[3]->m_modelMatrix = glm::translate(glm::vec3(0, 0, 50)) * glm::scale(glm::vec3(50, 5, 0.3));
+  bottom_box[4]->m_modelMatrix = glm::scale(glm::vec3(0.3, 5, 50));
+
+  for(int i = 0; i < 5; i++) {
+    bottom_box[i]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * bottom_box[i]->m_modelMatrix));
+    TinyGL::getInstance()->addResource(MESH, "bottom_box" + to_string(i), bottom_box[i]);
+  }
+
+  /*box = new Cube();
   box->setDrawCb(drawByteIdx);
   box->setMaterialColor(glm::vec4(0.4, 0.6, 0.1, 1.0));
   box->m_modelMatrix = glm::scale(glm::vec3(50, 50, 50));
   box->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * box->m_modelMatrix));
-  TinyGL::getInstance()->addResource(MESH, "box1", box);
+  TinyGL::getInstance()->addResource(MESH, "box1", box);*/
 
  /* bottom_box = new Grid*[5];
 

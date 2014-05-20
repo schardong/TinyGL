@@ -25,7 +25,7 @@ layout (std140) uniform LightPos
 
 const int g_sampleCount = 32;
 const int g_radius = 10;
-const int g_distThresh = 5;
+const int g_distThresh = 10;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -62,8 +62,8 @@ float rand(vec2 co){
 
 void main()
 {
-  //vec3 kernel[16];
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
+  
   if(length(normal_camera) == 0)
     fColor = vec4(0.8);
   else {
@@ -82,6 +82,28 @@ void main()
       
       occ_factor += (NS * a);
     }
+    
+    /*fColor = vec4(0.f);
+    vec4 diff_color = texture(u_diffuseMap, vTexCoord);
+    for(int i = 0; i < u_numLights; i++) {
+      vec3 light_camera = (viewMatrix * u_lightPos[i]).xyz;
+      vec3 light_dir = light_camera - vertex_camera;
+      float dist = length(light_dir);
+      light_dir = normalize(light_dir);
+      
+      float diff = max(dot(normal_camera, light_dir), 0.f);
+      fColor.rgb += diff * diff_color.rgb;
+      
+      if(diff > 0.f) {
+        vec3 V = normalize(-vertex_camera);
+        vec3 R = normalize(reflect(-light_dir, normal_camera));
+        
+        float angle = max(dot(R, V), 0.f);
+        float spec = pow(angle, 128.f);
+        vec3 specColor = vec3(spec);
+        fColor.rgb += specColor;
+      }
+    }*/
     
     /*vec2 tex_step = vec2(1 / u_screenSize.x, 1 / u_screenSize.y);
     
