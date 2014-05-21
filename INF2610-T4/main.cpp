@@ -24,8 +24,8 @@ static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 static const int NUM_LIGHTS = 1;
-static const int WINDOW_W = 1000;
-static const int WINDOW_H = 1000;
+static const int WINDOW_W = 700;
+static const int WINDOW_H = 700;
 
 using namespace std;
 
@@ -75,14 +75,9 @@ void drawSphere(size_t num_points)
   glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
-void drawGrid(size_t num_points)
+void drawArrays(size_t num_points)
 {
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
-}
-
-void drawByteIdx(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_BYTE, NULL);
+  glDrawArrays(GL_TRIANGLES, 0, num_points);
 }
 
 void drawQuad(size_t num_points)
@@ -223,23 +218,20 @@ void draw()
   
   s->bind();
   for (int i = 0; i < NUM_SPHERES; i++) {
-    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->m_normalMatrix);
-    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere" + to_string(i))->getMaterialColor());
-    glPtr->draw("sphere" + to_string(i));
+    std::string obj_name = "sphere" + to_string(i);
+    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh(obj_name)->m_modelMatrix);
+    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh(obj_name)->m_normalMatrix);
+    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh(obj_name)->getMaterialColor());
+    glPtr->draw(obj_name);
   }
 
   for(int i = 0; i < 5; i++) {
-    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_modelMatrix);
-    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->m_normalMatrix);
-    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("bottom_box" + to_string(i))->getMaterialColor());
-    glPtr->draw("bottom_box" + to_string(i));
+    std::string obj_name = "bottom_box" + to_string(i);
+    s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh(obj_name)->m_modelMatrix);
+    s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh(obj_name)->m_normalMatrix);
+    s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh(obj_name)->getMaterialColor());
+    glPtr->draw(obj_name);
   }
-  
-  /*s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh("box1")->m_modelMatrix);
-  s->setUniformMatrix("normalMatrix", TinyGL::getInstance()->getMesh("box1")->m_normalMatrix);
-  s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("box1")->getMaterialColor());
-  glPtr->draw("box1");*/
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -511,7 +503,7 @@ void setupGeometry()
   bottom_box = new Cube*[5];
   for(int i = 0; i < 5; i++) {
     bottom_box[i] = new Cube();
-    bottom_box[i]->setDrawCb(drawByteIdx);
+    bottom_box[i]->setDrawCb(drawArrays);
   }
 
   bottom_box[0]->setMaterialColor(glm::vec4(0.4, 0.6, 0.0, 1.0));
@@ -520,11 +512,11 @@ void setupGeometry()
   bottom_box[3]->setMaterialColor(glm::vec4(0.4, 0.6, 0.9, 1.0));
   bottom_box[4]->setMaterialColor(glm::vec4(0, 0, 0.8, 1.0));
 
-  bottom_box[0]->m_modelMatrix = glm::scale(glm::vec3(50, 0.1, 50));
-  bottom_box[1]->m_modelMatrix = glm::scale(glm::vec3(50, 5, 0.3));
-  bottom_box[2]->m_modelMatrix = glm::translate(glm::vec3(49.7, 0, 0)) * glm::scale(glm::vec3(0.3, 5, 50));
-  bottom_box[3]->m_modelMatrix = glm::translate(glm::vec3(0, 0, 50)) * glm::scale(glm::vec3(50, 5, 0.3));
-  bottom_box[4]->m_modelMatrix = glm::scale(glm::vec3(0.3, 5, 50));
+  bottom_box[0]->m_modelMatrix = glm::translate(glm::vec3(25, 0, 25)) * glm::scale(glm::vec3(50, 0.1, 50));
+  bottom_box[1]->m_modelMatrix = glm::translate(glm::vec3(25, 2.5, 0)) * glm::scale(glm::vec3(50, 5, 0.3));
+  bottom_box[2]->m_modelMatrix = glm::translate(glm::vec3(50, 2.5, 25)) * glm::scale(glm::vec3(0.3, 5, 50));
+  bottom_box[3]->m_modelMatrix = glm::translate(glm::vec3(25, 2.5, 50)) * glm::scale(glm::vec3(50, 5, 0.3));
+  bottom_box[4]->m_modelMatrix = glm::translate(glm::vec3(0, 2.5, 25)) * glm::scale(glm::vec3(0.3, 5, 50));
 
   for(int i = 0; i < 5; i++) {
     bottom_box[i]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * bottom_box[i]->m_modelMatrix));

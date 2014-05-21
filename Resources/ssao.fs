@@ -23,7 +23,7 @@ layout (std140) uniform LightPos
   vec4 u_lightPos[g_maxLights];
 };
 
-const int g_sampleCount = 80;
+const int g_sampleCount = 16;
 const int g_radius = 20;
 
 const vec2 g_poissonSamples[] = vec2[](
@@ -53,6 +53,10 @@ float linearizeDepth(vec2 uv)
   return (2.0 * n) / (f + n - z * (f - n));
 }
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main()
 {
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
@@ -75,6 +79,8 @@ void main()
       occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
     }
     
+    fColor.rgb = vec3(1 - (1.5* occ_factor / g_sampleCount));
+    
     /*fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
     for(int i = 0; i < u_numLights; i++) {
@@ -96,7 +102,5 @@ void main()
         fColor.rgb += specColor;
       }
     }*/
-    
-    fColor.rgb = vec3(1-(occ_factor / g_sampleCount));
   }
  }
