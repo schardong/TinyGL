@@ -63,10 +63,13 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
-float* g_depth;
+
+GLuint g_blurFboId;
+GLuint g_blurColorId;
 
 void setupLights();
 void setupFBO(GLuint w, GLuint h);
+void setupBlurFBO(GLuint w, GLuint h);
 void setupShaders();
 void setupGeometry();
 
@@ -144,6 +147,7 @@ void init()
   setupGeometry();
   setupShaders();
   setupFBO(WINDOW_W, WINDOW_H);
+  setupBlurFBO(WINDOW_W, WINDOW_H);
   setupLights();
 
   Shader* s = TinyGL::getInstance()->getShader("sPass");
@@ -155,8 +159,6 @@ void init()
 
   float ss[2] = {WINDOW_W, WINDOW_H};
   s->setUniformfv("u_screenSize", ss, 2);
-
-  g_depth = new float[WINDOW_W * WINDOW_H];
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
@@ -174,6 +176,14 @@ void init()
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   s->setUniform1i("u_depthMap", 4);
 
+  s = TinyGL::getInstance()->getShader("tPass");
+  s->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
+  s->setUniform4fv("u_materialColor", quad->getMaterialColor());
+
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  s->setUniform1i("u_ssaoMap", 6);
+
   initCalled = true;
 }
 
@@ -189,11 +199,14 @@ void destroy()
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, 0);
   
   glDeleteTextures(num_buffers, g_colorId);
   glDeleteTextures(1, &g_depthId);
+  glDeleteTextures(1, &g_blurColorId);
   glDeleteFramebuffers(1, &g_fboId);
-  delete[] g_depth;
+  glDeleteFramebuffers(1, &g_blurFboId);
 }
 
 void update()
@@ -265,7 +278,10 @@ void reshape(int w, int h)
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, NULL);
 
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
@@ -273,10 +289,11 @@ void reshape(int w, int h)
   Shader* s = TinyGL::getInstance()->getShader("fPass");
   s->bind();
   s->setUniformMatrix("projMatrix", projMatrix);
+
+  s = TinyGL::getInstance()->getShader("sPass");
   float ss[2] = {w, h};
   s->setUniformfv("u_screenSize", ss, 2);
 
-  s = TinyGL::getInstance()->getShader("sPass");
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, g_colorId[MATERIAL]);
   s->setUniform1i("u_diffuseMap", 0);
@@ -292,6 +309,12 @@ void reshape(int w, int h)
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   s->setUniform1i("u_depthMap", 4);
+
+  s = TinyGL::getInstance()->getShader("tPass");
+  s->setUniformfv("u_screenSize", ss, 2);
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  s->setUniform1i("u_ssaoMap", 6);
 
   Shader::unbind();
 }
@@ -477,6 +500,53 @@ void setupFBO(GLuint w, GLuint h)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void setupBlurFBO(GLuint w, GLuint h)
+{
+  glGenFramebuffers(1, &g_blurFboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, g_blurFboId);
+
+  glGenTextures(1, &g_blurColorId);
+
+  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g_blurColorId, 0);
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
+
+  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  switch (fboStatus) {
+  case GL_FRAMEBUFFER_UNDEFINED:
+    Logger::getInstance()->error("FBO undefined");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+    Logger::getInstance()->error("FBO incomplete attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+    Logger::getInstance()->error("FBO missing attachment");
+    break;
+  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+    Logger::getInstance()->error("FBO incomplete draw buffer");
+    break;
+  case GL_FRAMEBUFFER_UNSUPPORTED:
+    Logger::getInstance()->error("FBO unsupported");
+    break;
+  case GL_FRAMEBUFFER_COMPLETE:
+    Logger::getInstance()->log("FBO created successfully");
+    break;
+  default:
+    Logger::getInstance()->error("FBO undefined problem");
+  }
+
+  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
+  glDrawBuffers(1, drawBuffer);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void setupShaders()
 {
   Shader* g_fPass = new Shader("../Resources/ssao_fpass.vs", "../Resources/def_fpass.fs");
@@ -487,11 +557,15 @@ void setupShaders()
   Shader* g_sPass = new Shader("../Resources/def_spass.vs", "../Resources/ssao.fs");
   g_sPass->bind();
   g_sPass->bindFragDataLoc("fColor", 0);
-  g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
   g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
+
+  Shader* g_tPass = new Shader("../Resources/def_spass.vs", "../Resources/blur.fs");
+  g_tPass->bindFragDataLoc("fColor", 0);
+  g_tPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
 
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);
+  TinyGL::getInstance()->addResource(SHADER, "tPass", g_tPass);
 }
 
 void setupGeometry()

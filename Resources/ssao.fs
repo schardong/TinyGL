@@ -24,7 +24,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 20;
+const int g_radius = 30;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -44,18 +44,7 @@ const vec2 g_poissonSamples[] = vec2[](
                                 vec2(  0.19984126,   0.78641367 ),
                                 vec2(  0.14383161,  -0.14100790 )
                                );
-                               
-float linearizeDepth(vec2 uv)
-{
-  float n = u_zNear; // camera z near
-  float f = u_zFar;  // camera z far
-  float z = texture(u_depthMap, uv).x; 
-  return (2.0 * n) / (f + n - z * (f - n));
-}
 
-float rand(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
 
 void main()
 {
@@ -79,7 +68,7 @@ void main()
       occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
     }
     
-    fColor.rgb = vec3(1 - (1.5* occ_factor / g_sampleCount));
+    fColor.rgb = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
     
     /*fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
