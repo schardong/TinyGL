@@ -9,22 +9,21 @@ in vec2 vTexCoord;
 
 vec3 GaussBlur(vec2 tex_coord)
 {
-  float kernel[9] = {1, 2, 1,
-                     2, 4, 2,
-                     1, 2, 1};
+  float kernel[9] = float[](1, 2, 1,
+                            2, 4, 2,
+                            1, 2, 1);
                      
   vec3 blurred_color = vec3(0);
   
-  float mStepW = 1.0 / u_screenSize.x;
-  float mStepH = 1.0 / u_screenSize.y;
-  vec2 mOffset[9];
+  vec2 s = 1 / u_screenSize;
+  vec2 off[9];
   
-  mOffset[0] = vec2 (-mStepW, -mStepH); mOffset[1] = vec2 (0.0, -mStepH); mOffset[2] = vec2 (mStepW, -mStepH);
-  mOffset[3] = vec2 (-mStepW, 0.0);     mOffset[4] = vec2 (0.0, 0.0);     mOffset[5] = vec2 (mStepW, 0.0);
-  mOffset[6] = vec2 (-mStepW, mStepH);  mOffset[7] = vec2 (0.0, mStepH);  mOffset[8] = vec2 (mStepW, mStepH);
+  off[0] = -s; off[1] = vec2(0.0, -s.y); off[2] = vec2(s.x, -s.y);
+  off[3] = vec2(-s.x, 0.0); off[4] = vec2(0); off[5] = vec2(s.x, 0.0);
+  off[6] = vec2(-s.x, s.y); off[7] = vec2(0.0, s.y); off[8] = s;
     
   for(int i = 0; i < 9; i++) {
-    blurred_color += (texture(u_ssaoMap, vTexCoord + mOffset[i]).xyz * kernel[i]) / 16;
+    blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).xyz * kernel[i]) / 16;
   }
   
   return blurred_color;

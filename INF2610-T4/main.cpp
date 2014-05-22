@@ -248,11 +248,11 @@ void draw()
   }
 
   //Second pass. Shading occurs here.
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glDisable(GL_DEPTH_TEST);
 
-  //drawBuffer[0] = GL_COLOR_ATTACHMENT3;
-  //glDrawBuffers(1, drawBuffer);
+  drawBuffer[0] = GL_COLOR_ATTACHMENT3;
+  glDrawBuffers(1, &drawBuffer[0]);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -261,14 +261,15 @@ void draw()
 
   glPtr->draw("screenQuad");
 
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   //Third pass. Blurring the results.
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //s = glPtr->getShader("tPass");
-  //s->bind();
+  s = glPtr->getShader("tPass");
+  s->bind();
 
-  //glPtr->draw("screenQuad");
-  
+  glPtr->draw("screenQuad");
+
   glutSwapBuffers();
   glutPostRedisplay();
   glEnable(GL_DEPTH_TEST);
@@ -323,6 +324,7 @@ void reshape(int w, int h)
   s = TinyGL::getInstance()->getShader("tPass");
   s->bind();
   s->setUniformfv("u_screenSize", ss, 2);
+
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
   s->setUniform1i("u_ssaoMap", 6);
@@ -391,20 +393,12 @@ void exit_cb()
 
 void setupLights()
 {
-  //Sphere** lightMesh = new Sphere*[NUM_LIGHTS];
   Light** lightSources = new Light*[NUM_LIGHTS];
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     lightSources[i] = new Light();
     lightSources[i]->setPosition(glm::vec3(rand() % 35, 5 + rand() % 10, rand() % 35));
     lightSources[i]->setColor(glm::vec3((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX));
-    TinyGL::getInstance()->addResource(LIGHT, "light" + to_string(i), lightSources[i]);
-
-    /*lightMesh[i] = new Sphere(20, 20);
-    lightMesh[i]->setDrawCb(drawSphere);
-    lightMesh[i]->setMaterialColor(glm::vec4(lightSources[i]->getColor(), 1.f));
-    lightMesh[i]->m_modelMatrix = glm::translate(glm::vec3(lightSources[i]->getPosition())) * glm::scale(glm::vec3(0.1f));
-    TinyGL::getInstance()->addResource(MESH, "lightMesh" + to_string(i), lightMesh[i]);*/
   }
 
   GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
@@ -417,40 +411,19 @@ void setupLights()
     lightCoords[i * 4 + 3] = 1.f;
   }
 
-  for (int i = 0; i < NUM_LIGHTS; i++)
-    cout << "(" << lightCoords[i * 4] << ", " << lightCoords[i * 4 + 1] << ", " << lightCoords[i * 4 + 2] << ", " << lightCoords[i * 4 + 3] << ")\n";
-
-  /*GLfloat* lightColors = new GLfloat[4 * NUM_LIGHTS];
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    glm::vec3 color = lightSources[i]->getColor();
-
-    lightColors[i * 4] = color.x;
-    lightColors[i * 4 + 1] = color.y;
-    lightColors[i * 4 + 2] = color.z;
-    lightColors[i * 4 + 3] = 1.f;
-  }*/
-
   Shader* s = TinyGL::getInstance()->getShader("sPass");
   s->setUniform1i("u_numLights", NUM_LIGHTS);
 
   GLuint idxPos = glGetUniformBlockIndex(s->getProgramId(), "LightPos");
   glUniformBlockBinding(s->getProgramId(), idxPos, 0);
-  /*GLuint idxColor = glGetUniformBlockIndex(s->getProgramId(), "LightColor");
-  glUniformBlockBinding(s->getProgramId(), idxColor, 1);*/
 
   BufferObject* ubuffLightPos = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
   ubuffLightPos->sendData(lightCoords);
 
-  /*BufferObject* ubuffLightColor = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
-  ubuffLightColor->sendData(lightColors);*/
-
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubuffLightPos->getId());
-  //glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubuffLightColor->getId());
   TinyGL::getInstance()->addResource(BUFFER, "lightpos_buff", ubuffLightPos);
-  //TinyGL::getInstance()->addResource(BUFFER, "lightcolor_buff", ubuffLightColor);
 
   delete lightCoords;
-  //delete lightColors;
 }
 
 void setupFBO(GLuint w, GLuint h)

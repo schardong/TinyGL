@@ -1,6 +1,6 @@
 #version 330 core
 
-layout (location = 0) out vec4 fColor;
+layout (location = 0) out vec3 fColor;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
@@ -24,7 +24,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 30;
+const int g_radius = 16;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -51,7 +51,7 @@ void main()
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   
   if(length(normal_camera) == 0)
-    fColor = vec4(0.8);
+    fColor = vec3(0.8);
   else {
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
@@ -69,7 +69,7 @@ void main()
       occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
     }
     
-    fColor.rgb = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
+    fColor = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
     
     /*fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
