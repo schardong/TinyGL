@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "light.h"
+#include "framebufferobject.h"
 
 #include <string>
 #include <map>
@@ -15,6 +16,7 @@ enum resource_type
   SHADER,
   LIGHT,
   BUFFER,
+  FRAMEBUFFER,
   num_resources
 };
 
@@ -36,6 +38,7 @@ public:
 	friend class Singleton<TinyGL>;
   
   bool addResource(resource_type type, std::string name, void* resource);
+  void* getResource(resource_type type, std::string name);
 
   /*bool addMesh(std::string name, Mesh* m);
   bool addShader(std::string name, Shader* s);
@@ -47,26 +50,6 @@ public:
   void draw(std::string name)
   {
     m_meshMap[name]->draw();
-  }
-
-  void* getResource(resource_type type, std::string name)
-  {
-    if (name.empty() || type > num_resources) return NULL;
-    switch (type) {
-    case MESH:
-      return m_meshMap[name];
-      break;
-    case SHADER:
-      return m_shaderMap[name];
-      break;
-    case LIGHT:
-      return m_lightMap[name];
-      break;
-    case BUFFER:
-      return m_buffMap[name];
-      break;
-    }
-    return NULL;
   }
 
   Mesh* getMesh(std::string name)
@@ -89,11 +72,17 @@ public:
     return (BufferObject*)getResource(BUFFER, name);
   }
 
+  FramebufferObject* getFBO(std::string name)
+  {
+    return (FramebufferObject*)getResource(FRAMEBUFFER, name);
+  }
+
 private:
   std::map<std::string, Mesh*> m_meshMap;
   std::map<std::string, Shader*> m_shaderMap;
   std::map<std::string, Light*> m_lightMap;
   std::map<std::string, BufferObject*> m_buffMap;
+  std::map<std::string, FramebufferObject*> m_fboMap;
 };
 
 #endif // TINY_GL_H

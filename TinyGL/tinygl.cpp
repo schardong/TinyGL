@@ -1,6 +1,7 @@
 #include "tinygl.h"
 #include "logger.h"
 #include "tglconfig.h"
+#include "framebufferobject.h"
 #include <GL/glew.h>
 #include <string>
 
@@ -28,10 +29,14 @@ void TinyGL::freeResources()
   for (std::map<std::string, BufferObject*>::iterator it = m_buffMap.begin(); it != m_buffMap.end(); it++)
     delete it->second;
 
+  for (std::map<std::string, FramebufferObject*>::iterator it = m_fboMap.begin(); it != m_fboMap.end(); it++)
+    delete it->second;
+
   m_meshMap.clear();
   m_shaderMap.clear();
   m_lightMap.clear();
   m_buffMap.clear();
+  m_fboMap.clear();
 }
 
 bool TinyGL::addResource(resource_type type, std::string name, void* resource)
@@ -52,6 +57,29 @@ bool TinyGL::addResource(resource_type type, std::string name, void* resource)
     break;
   }
   return true;
+}
+
+void* TinyGL::getResource(resource_type type, std::string name)
+{
+  if (name.empty() || type > num_resources) return NULL;
+  switch (type) {
+  case MESH:
+    return m_meshMap[name];
+    break;
+  case SHADER:
+    return m_shaderMap[name];
+    break;
+  case LIGHT:
+    return m_lightMap[name];
+    break;
+  case BUFFER:
+    return m_buffMap[name];
+    break;
+  case FRAMEBUFFER:
+    return m_fboMap[name];
+    break;
+  }
+  return NULL;
 }
 
 //bool TinyGL::addMesh(std::string name, Mesh* m)
