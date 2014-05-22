@@ -37,7 +37,7 @@ private:
   GLuint m_height;
   bool m_bound;
 
-  std::map<GLenum, GLuint> m_colorAttMap;
+  std::map<GLenum, GLuint> m_attMap;
 };
 
 #endif // FRAMEBUFFEROBJECT_H

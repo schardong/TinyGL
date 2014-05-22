@@ -60,7 +60,6 @@ enum {
   num_buffers
 };
 
-GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
 GLuint g_blurColorId;
@@ -204,7 +203,7 @@ void destroy()
   glDeleteTextures(num_buffers, g_colorId);
   glDeleteTextures(1, &g_depthId);
   glDeleteTextures(1, &g_blurColorId);
-  glDeleteFramebuffers(1, &g_fboId);
+  //glDeleteFramebuffers(1, &g_fboId);
 }
 
 void update()
@@ -221,7 +220,8 @@ void draw()
     return;
 
   //First pass. Filling the geometry buffers.
-  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+  TinyGL::getInstance()->getFBO("SSAO_FBO")->bind(GL_FRAMEBUFFER);
+  //glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
 
   GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
   glDrawBuffers(num_buffers, drawBuffer);
@@ -261,7 +261,7 @@ void draw()
 
   glPtr->draw("screenQuad");
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  FramebufferObject::unbind();
 
   //Third pass. Blurring the results.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -429,8 +429,10 @@ void setupLights()
 
 void setupFBO(GLuint w, GLuint h)
 {
-  glGenFramebuffers(1, &g_fboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+  FramebufferObject* fbo = new FramebufferObject();
+  fbo->bind(GL_FRAMEBUFFER);
+  /*glGenFramebuffers(1, &g_fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);*/
 
   glGenTextures(num_buffers, g_colorId);
 
@@ -441,7 +443,8 @@ void setupFBO(GLuint w, GLuint h)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
+    fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
   }
 
   glGenTextures(1, &g_blurColorId);
@@ -451,7 +454,8 @@ void setupFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
+  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
+  fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
@@ -462,9 +466,11 @@ void setupFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
+  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
+  fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
 
-  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  fbo->checkStatus();
+  /*GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   switch (fboStatus) {
   case GL_FRAMEBUFFER_UNDEFINED:
     Logger::getInstance()->error("FBO undefined");
@@ -486,9 +492,11 @@ void setupFBO(GLuint w, GLuint h)
     break;
   default:
     Logger::getInstance()->error("FBO undefined problem");
-  }
+  }*/
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  FramebufferObject::unbind();
+  TinyGL::getInstance()->addResource(FRAMEBUFFER, "SSAO_FBO", fbo);
+  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void setupShaders()

@@ -15,12 +15,13 @@ FramebufferObject::~FramebufferObject()
 void FramebufferObject::attachTexBuffer(GLenum target, GLenum attach, GLenum textarg, GLuint texid, GLint level)
 {
   glFramebufferTexture2D(target, attach, textarg, texid, 0);
-  m_colorAttMap[attach] = texid;
+  m_attMap[attach] = texid;
 }
 
 void FramebufferObject::attachRenderBuffer(GLenum target, GLenum attach, GLenum rbtarg, GLuint rbid)
 {
   glFramebufferRenderbuffer(target, attach, rbtarg, rbid);
+  m_attMap[attach] = rbid;
 }
 
 void FramebufferObject::checkStatus()

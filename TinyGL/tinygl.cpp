@@ -55,6 +55,9 @@ bool TinyGL::addResource(resource_type type, std::string name, void* resource)
   case BUFFER:
     m_buffMap[name] = new BufferObject(*(BufferObject*)resource);
     break;
+  case FRAMEBUFFER:
+    m_fboMap[name] = new FramebufferObject(*(FramebufferObject*)resource);
+    break;
   }
   return true;
 }
