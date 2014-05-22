@@ -148,6 +148,7 @@ void init()
 
   Shader* s = TinyGL::getInstance()->getShader("sPass");
   Mesh* quad = TinyGL::getInstance()->getMesh("screenQuad");
+  s->bind();
   s->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
   s->setUniform4fv("u_materialColor", quad->getMaterialColor());
   s->setUniform1f("u_zNear", 1.f);
@@ -173,6 +174,7 @@ void init()
   s->setUniform1i("u_depthMap", 4);
 
   s = TinyGL::getInstance()->getShader("tPass");
+  s->bind();
   s->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
   s->setUniform4fv("u_materialColor", quad->getMaterialColor());
 
@@ -320,15 +322,11 @@ void reshape(int w, int h)
   s->setUniform1i("u_depthMap", 4);
 
   s = TinyGL::getInstance()->getShader("tPass");
+  s->bind();
   s->setUniformfv("u_screenSize", ss, 2);
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
   s->setUniform1i("u_ssaoMap", 6);
-
-  int* lol = s->getUniformiv("u_ssaoMap", 1);
-  printf("u_ssaoMap = %d\n", *lol);
-  float* lol2 = s->getUniformfv("u_screenSize", 2);
-  printf("u_screenSize = vec2(%.2f, %.2f)\n", lol2[0], lol2[1]);
 
   Shader::unbind();
 }
@@ -533,8 +531,11 @@ void setupShaders()
   g_sPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
 
   Shader* g_tPass = new Shader("../Resources/def_spass.vs", "../Resources/blur.fs");
+  g_tPass->bind();
   g_tPass->bindFragDataLoc("fColor", 0);
   g_tPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
+
+  Shader::unbind();
 
   TinyGL::getInstance()->addResource(SHADER, "fPass", g_fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", g_sPass);
