@@ -63,13 +63,10 @@ enum {
 GLuint g_fboId;
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
-
-GLuint g_blurFboId;
 GLuint g_blurColorId;
 
 void setupLights();
 void setupFBO(GLuint w, GLuint h);
-void setupBlurFBO(GLuint w, GLuint h);
 void setupShaders();
 void setupGeometry();
 
@@ -147,7 +144,6 @@ void init()
   setupGeometry();
   setupShaders();
   setupFBO(WINDOW_W, WINDOW_H);
-  setupBlurFBO(WINDOW_W, WINDOW_H);
   setupLights();
 
   Shader* s = TinyGL::getInstance()->getShader("sPass");
@@ -206,7 +202,6 @@ void destroy()
   glDeleteTextures(1, &g_depthId);
   glDeleteTextures(1, &g_blurColorId);
   glDeleteFramebuffers(1, &g_fboId);
-  glDeleteFramebuffers(1, &g_blurFboId);
 }
 
 void update()
@@ -224,6 +219,10 @@ void draw()
 
   //First pass. Filling the geometry buffers.
   glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+
+  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+  glDrawBuffers(num_buffers, drawBuffer);
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) ;
 
   TinyGL* glPtr = TinyGL::getInstance();
@@ -247,8 +246,12 @@ void draw()
   }
 
   //Second pass. Shading occurs here.
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  
   glDisable(GL_DEPTH_TEST);
+
+  drawBuffer[0] = GL_COLOR_ATTACHMENT3;
+  glDrawBuffers(1, drawBuffer);
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   s = glPtr->getShader("sPass");
@@ -258,12 +261,12 @@ void draw()
 
   //Third pass. Blurring the results.
   
-  /*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   s = glPtr->getShader("tPass");
   s->bind();
 
-  glPtr->draw("screenQuad");*/
+  glPtr->draw("screenQuad");
   
   glutSwapBuffers();
   glutPostRedisplay();
@@ -465,6 +468,15 @@ void setupFBO(GLuint w, GLuint h)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
   }
 
+  glGenTextures(1, &g_blurColorId);
+  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
+
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
@@ -499,56 +511,6 @@ void setupFBO(GLuint w, GLuint h)
   default:
     Logger::getInstance()->error("FBO undefined problem");
   }
-
-  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-  glDrawBuffers(num_buffers, drawBuffer);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void setupBlurFBO(GLuint w, GLuint h)
-{
-  glGenFramebuffers(1, &g_blurFboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, g_blurFboId);
-
-  glGenTextures(1, &g_blurColorId);
-
-  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g_blurColorId, 0);
-
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
-
-  GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  switch (fboStatus) {
-  case GL_FRAMEBUFFER_UNDEFINED:
-    Logger::getInstance()->error("FBO undefined");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-    Logger::getInstance()->error("FBO incomplete attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-    Logger::getInstance()->error("FBO missing attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-    Logger::getInstance()->error("FBO incomplete draw buffer");
-    break;
-  case GL_FRAMEBUFFER_UNSUPPORTED:
-    Logger::getInstance()->error("FBO unsupported");
-    break;
-  case GL_FRAMEBUFFER_COMPLETE:
-    Logger::getInstance()->log("FBO created successfully");
-    break;
-  default:
-    Logger::getInstance()->error("FBO undefined problem");
-  }
-
-  GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
-  glDrawBuffers(1, drawBuffer);
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
