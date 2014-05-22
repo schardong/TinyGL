@@ -11,3 +11,6 @@ http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html
 http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theory/a-simple-and-practical-approach-to-ssao-r2753
 
 http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/ScreenSpaceAO/doc/ScreenSpaceAO.pdf
+
+//new links FBO
+https://stackoverflow.com/questions/11502299/opengl-two-pass-shader-effect-with-fbo-render-to-texture-gives-noise-in-result-o
