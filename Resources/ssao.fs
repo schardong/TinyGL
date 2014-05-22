@@ -46,6 +46,12 @@ const vec2 g_poissonSamples[] = vec2[](
                                );
 
 
+float linearizeDepth(vec2 texcoord)
+{
+  float z = 2.0 * u_zNear/ (u_zFar + u_zNear - texture2D(u_depthMap, texcoord).x * (u_zFar - u_zNear));
+  return z;
+}
+                               
 void main()
 {
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
