@@ -57,8 +57,7 @@ void main()
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
     for(int i = 0; i < g_sampleCount; i++) {
-          
-      float depth = texture(u_depthMap, vTexCoord).r;
+      //float depth = texture(u_depthMap, vTexCoord).r;
       vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
@@ -70,27 +69,5 @@ void main()
     }
     
     fColor = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
-    
-    /*fColor = vec4(0.f);
-    vec4 diff_color = texture(u_diffuseMap, vTexCoord);
-    for(int i = 0; i < u_numLights; i++) {
-      vec3 light_camera = (viewMatrix * u_lightPos[i]).xyz;
-      vec3 light_dir = light_camera - vertex_camera;
-      float dist = length(light_dir);
-      light_dir = normalize(light_dir);
-      
-      float diff = max(dot(normal_camera, light_dir), 0.f);
-      fColor.rgb += diff * diff_color.rgb;
-      
-      if(diff > 0.f) {
-        vec3 V = normalize(-vertex_camera);
-        vec3 R = normalize(reflect(-light_dir, normal_camera));
-        
-        float angle = max(dot(R, V), 0.f);
-        float spec = pow(angle, 128.f);
-        vec3 specColor = vec3(spec);
-        fColor.rgb += specColor;
-      }
-    }*/
   }
  }

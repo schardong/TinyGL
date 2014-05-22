@@ -10,6 +10,7 @@ FramebufferObject::~FramebufferObject()
 {
   unbind();
   glDeleteFramebuffers(1, &m_id);
+  m_attMap.clear();
 }
 
 void FramebufferObject::attachTexBuffer(GLenum target, GLenum attach, GLenum textarg, GLuint texid, GLint level)

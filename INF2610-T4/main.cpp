@@ -218,22 +218,19 @@ void draw()
 {
   if (!initCalled || !initGLEWCalled)
     return;
-
+  
+  TinyGL* glPtr = TinyGL::getInstance();
   //First pass. Filling the geometry buffers.
-  TinyGL* tgl = TinyGL::getInstance();
-  FramebufferObject* fbo = tgl->getFBO("SSAO_FBO");
-  fbo->bind(GL_FRAMEBUFFER);
-  //glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
+  glPtr->getFBO("SSAO_FBO")->bind(GL_FRAMEBUFFER);
 
   GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
   glDrawBuffers(num_buffers, drawBuffer);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) ;
-
-  TinyGL* glPtr = TinyGL::getInstance();
+    
   Shader* s = glPtr->getShader("fPass");
-  
   s->bind();
+
   for (int i = 0; i < NUM_SPHERES; i++) {
     std::string obj_name = "sphere" + to_string(i);
     s->setUniformMatrix("modelMatrix", TinyGL::getInstance()->getMesh(obj_name)->m_modelMatrix);
@@ -256,7 +253,7 @@ void draw()
   drawBuffer[0] = GL_COLOR_ATTACHMENT3;
   glDrawBuffers(1, &drawBuffer[0]);
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   s = glPtr->getShader("sPass");
   s->bind();
@@ -266,7 +263,7 @@ void draw()
   FramebufferObject::unbind();
 
   //Third pass. Blurring the results.
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   s = glPtr->getShader("tPass");
   s->bind();
@@ -433,8 +430,6 @@ void setupFBO(GLuint w, GLuint h)
 {
   FramebufferObject* fbo = new FramebufferObject();
   fbo->bind(GL_FRAMEBUFFER);
-  /*glGenFramebuffers(1, &g_fboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);*/
 
   glGenTextures(num_buffers, g_colorId);
 
@@ -445,7 +440,6 @@ void setupFBO(GLuint w, GLuint h)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
     fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
   }
 
@@ -456,7 +450,6 @@ void setupFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
   fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
 
   glGenTextures(1, &g_depthId);
@@ -468,37 +461,12 @@ void setupFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NONE);
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
   fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, g_depthId, 0);
 
   fbo->checkStatus();
-  /*GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  switch (fboStatus) {
-  case GL_FRAMEBUFFER_UNDEFINED:
-    Logger::getInstance()->error("FBO undefined");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-    Logger::getInstance()->error("FBO incomplete attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-    Logger::getInstance()->error("FBO missing attachment");
-    break;
-  case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-    Logger::getInstance()->error("FBO incomplete draw buffer");
-    break;
-  case GL_FRAMEBUFFER_UNSUPPORTED:
-    Logger::getInstance()->error("FBO unsupported");
-    break;
-  case GL_FRAMEBUFFER_COMPLETE:
-    Logger::getInstance()->log("FBO created successfully");
-    break;
-  default:
-    Logger::getInstance()->error("FBO undefined problem");
-  }*/
 
   FramebufferObject::unbind();
   TinyGL::getInstance()->addResource(FRAMEBUFFER, "SSAO_FBO", fbo);
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void setupShaders()
