@@ -26,11 +26,11 @@ vec3 GaussBlur(vec2 tex_coord)
     blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).xyz * kernel[i]) / 16;
   }
   
-  return blurred_color;
+  return blurred_color.rrr;
 }
 
 void main()
 {
-  //fColor = GaussBlur(vTexCoord);
-  fColor = texture(u_ssaoMap, vTexCoord);
+  fColor.rgb = GaussBlur(vTexCoord);
+  //fColor.rgb = texture(u_ssaoMap, vTexCoord).rrr;
 }
