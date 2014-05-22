@@ -33,5 +33,5 @@ vec3 GaussBlur(vec2 tex_coord)
 void main()
 {
   //fColor = GaussBlur(vTexCoord);
-  fColor = vec4(1.f);
+  fColor = texture(u_ssaoMap, vTexCoord);
 }

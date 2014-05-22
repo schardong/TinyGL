@@ -58,7 +58,8 @@ void main()
         
     for(int i = 0; i < g_sampleCount; i++) {
           
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
+      float depth = texture(u_depthMap, vTexCoord).r;
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * (g_radius * depth)/ u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
       vec3 V = samplePos - vertex_camera;

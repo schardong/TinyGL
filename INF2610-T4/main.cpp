@@ -246,18 +246,24 @@ void draw()
     glPtr->draw(obj_name);
   }
 
-  glBindVertexArray(0);
-  Shader::unbind();
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
   //Second pass. Shading occurs here.
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glDisable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   s = glPtr->getShader("sPass");
   s->bind();
-  glDisable(GL_DEPTH_TEST);
 
   glPtr->draw("screenQuad");
+
+  //Third pass. Blurring the results.
+  
+  /*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  s = glPtr->getShader("tPass");
+  s->bind();
+
+  glPtr->draw("screenQuad");*/
   
   glutSwapBuffers();
   glutPostRedisplay();
