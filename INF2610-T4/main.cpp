@@ -325,6 +325,9 @@ void reshape(int w, int h)
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
   s->setUniform1i("u_ssaoMap", 6);
 
+  int* lol = s->getUniformiv("u_ssaoMap", 1);
+  printf("u_ssaoMap = %d\n", *lol);
+
   Shader::unbind();
 }
 

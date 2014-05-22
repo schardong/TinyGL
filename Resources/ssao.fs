@@ -1,6 +1,6 @@
 #version 330 core
 
-layout (location = 0) out vec4 fColor;
+layout (location = 0) out float fColor;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
@@ -51,7 +51,7 @@ void main()
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   
   if(length(normal_camera) == 0)
-    fColor = vec4(0.8);
+    fColor = 0.8;
   else {
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
@@ -69,7 +69,7 @@ void main()
       occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
     }
     
-    fColor.rgb = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
+    fColor = 1.0 - (2.5 * occ_factor / g_sampleCount);
     
     /*fColor = vec4(0.f);
     vec4 diff_color = texture(u_diffuseMap, vTexCoord);
