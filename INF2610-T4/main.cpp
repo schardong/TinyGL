@@ -129,7 +129,8 @@ void initGLEW()
   glDepthFunc(GL_LESS);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glClearDepth(1.0f);
-  //glPointSize(5);
+  glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
 
   initGLEWCalled = true;
 }
@@ -247,8 +248,7 @@ void draw()
     glPtr->draw(obj_name);
   }
 
-  //Second pass. Shading occurs here.
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //Second pass. SSAO is calculated here.
   glDisable(GL_DEPTH_TEST);
 
   drawBuffer[0] = GL_COLOR_ATTACHMENT3;
@@ -262,6 +262,7 @@ void draw()
   glPtr->draw("screenQuad");
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
   //Third pass. Blurring the results.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

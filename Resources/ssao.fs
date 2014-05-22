@@ -24,7 +24,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 16;
+const int g_radius = 8;
 
 const vec2 g_poissonSamples[] = vec2[](
                                 vec2( -0.94201624,  -0.39906216 ),
@@ -59,14 +59,14 @@ void main()
     for(int i = 0; i < g_sampleCount; i++) {
           
       float depth = texture(u_depthMap, vTexCoord).r;
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * (g_radius * depth)/ u_screenSize.x);
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
       vec3 V = samplePos - vertex_camera;
       float d = length(V);
       V = normalize(V);
       
-      occ_factor += max(0.0, dot(normal_camera, V)) * (1.0 / (1.0 + d));
+      occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
     }
     
     fColor = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
