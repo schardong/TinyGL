@@ -220,7 +220,9 @@ void draw()
     return;
 
   //First pass. Filling the geometry buffers.
-  TinyGL::getInstance()->getFBO("SSAO_FBO")->bind(GL_FRAMEBUFFER);
+  TinyGL* tgl = TinyGL::getInstance();
+  FramebufferObject* fbo = tgl->getFBO("SSAO_FBO");
+  fbo->bind(GL_FRAMEBUFFER);
   //glBindFramebuffer(GL_FRAMEBUFFER, g_fboId);
 
   GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
