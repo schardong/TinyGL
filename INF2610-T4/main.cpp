@@ -327,6 +327,8 @@ void reshape(int w, int h)
 
   int* lol = s->getUniformiv("u_ssaoMap", 1);
   printf("u_ssaoMap = %d\n", *lol);
+  float* lol2 = s->getUniformfv("u_screenSize", 2);
+  printf("u_screenSize = vec2(%.2f, %.2f)\n", lol2[0], lol2[1]);
 
   Shader::unbind();
 }
