@@ -51,6 +51,10 @@ float linearizeDepth(vec2 texcoord)
   float z = 2.0 * u_zNear/ (u_zFar + u_zNear - texture2D(u_depthMap, texcoord).x * (u_zFar - u_zNear));
   return z;
 }
+
+void AlchemyAO()
+{
+}
                                
 void main()
 {
@@ -62,12 +66,27 @@ void main()
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
-    for(int i = 0; i < g_sampleCount; i++) {
+    /*for(int i = 0; i < g_sampleCount; i++) {
       //float depth = texture(u_depthMap, vTexCoord).r;
       vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
       vec3 V = samplePos - vertex_camera;
+      float d = length(V);
+      V = normalize(V);
+      
+      occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
+    }*/
+    
+    vec3 t = normalize(texture(u_vertexMap, vec2(vTexCoord.x + 1 / u_screenSize.x, vTexCoord.y)).xyz - vertex_camera);
+    vec3 b = normalize(texture(u_vertexMap, vec2(vTexCoord.x, vTexCoord.y + 1 / u_screenSize.y)).xyz - vertex_camera);
+    mat3 tbn = mat3(t, b, normal_camera);
+    
+    for(int i = 0; i < g_sampleCount; i++) {
+      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
+      vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
+      
+      vec3 V = (samplePos) - vertex_camera;
       float d = length(V);
       V = normalize(V);
       
