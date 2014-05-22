@@ -248,11 +248,11 @@ void draw()
   }
 
   //Second pass. Shading occurs here.
-  
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glDisable(GL_DEPTH_TEST);
 
-  drawBuffer[0] = GL_COLOR_ATTACHMENT3;
-  glDrawBuffers(1, drawBuffer);
+  //drawBuffer[0] = GL_COLOR_ATTACHMENT3;
+  //glDrawBuffers(1, drawBuffer);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -262,13 +262,12 @@ void draw()
   glPtr->draw("screenQuad");
 
   //Third pass. Blurring the results.
-  
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  s = glPtr->getShader("tPass");
-  s->bind();
+  //s = glPtr->getShader("tPass");
+  //s->bind();
 
-  glPtr->draw("screenQuad");
+  //glPtr->draw("screenQuad");
   
   glutSwapBuffers();
   glutPostRedisplay();
@@ -473,7 +472,7 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_blurColorId);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
