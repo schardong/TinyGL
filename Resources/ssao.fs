@@ -84,15 +84,15 @@ void main()
     
     for(int i = 0; i < g_sampleCount; i++) {
       vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
-      vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
+      vec3 samplePos = tbn * texture(u_vertexMap, sampleTexCoord).xyz;
       
-      vec3 V = (samplePos) - vertex_camera;
+      vec3 V = (samplePos - vertex_camera);
       float d = length(V);
       V = normalize(V);
       
       occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
     }
     
-    fColor = vec3(1.0 - (2.5 * occ_factor / g_sampleCount));
+    fColor = vec3(1.0 - (1 * occ_factor / g_sampleCount));
   }
  }
