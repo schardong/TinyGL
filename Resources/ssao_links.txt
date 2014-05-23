@@ -14,5 +14,14 @@ http://developer.download.nvidia.com/SDK/10.5/direct3d/Source/ScreenSpaceAO/doc/
 
 http://www.spieleprogrammierung.net/p/opengl-tutorial-liste.html
 
-//new links FBO
-https://stackoverflow.com/questions/11502299/opengl-two-pass-shader-effect-with-fbo-render-to-texture-gives-noise-in-result-o
+http://theorangeduck.com/page/pure-depth-ssao
+
+https://mtnphil.wordpress.com/2013/06/26/know-your-ssao-artifacts/
+
+http://www.pouet.net/topic.php?which=9613&page=1
+
+https://pathtracing.wordpress.com/2011/03/03/cosine-weighted-hemisphere/
+
+http://www.rorydriscoll.com/2009/01/07/better-sampling/
+
+https://gamedev.stackexchange.com/questions/30823/not-getting-desired-results-with-ssao-implementation

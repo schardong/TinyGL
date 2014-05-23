@@ -24,6 +24,9 @@
     <ClCompile Include="cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="image.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\def_fpass.fs">
@@ -44,6 +47,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

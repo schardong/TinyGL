@@ -1,11 +1,12 @@
 #version 330 core
 
-layout (location = 0) out vec3 fColor;
+layout (location = 0) out float  fColor;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_vertexMap;
 uniform sampler2D u_depthMap;
+uniform sampler2D u_rndNormalMap;
 
 uniform mat4 viewMatrix;
 uniform int u_numLights;
@@ -44,7 +45,20 @@ const vec2 g_poissonSamples[] = vec2[](
                                 vec2(  0.19984126,   0.78641367 ),
                                 vec2(  0.14383161,  -0.14100790 )
                                );
+                               
+vec3 g_sphereSamples[] = vec3[](
+      vec3( 0.5381, 0.1856,-0.4319), vec3( 0.1379, 0.2486, 0.4430),
+      vec3( 0.3371, 0.5679,-0.0057), vec3(-0.6999,-0.0451,-0.0019),
+      vec3( 0.0689,-0.1598,-0.8547), vec3( 0.0560, 0.0069,-0.1843),
+      vec3(-0.0146, 0.1402, 0.0762), vec3( 0.0100,-0.1924,-0.0344),
+      vec3(-0.3577,-0.5301,-0.4358), vec3(-0.3169, 0.1063, 0.0158),
+      vec3( 0.0103,-0.5869, 0.0046), vec3(-0.0897,-0.4940, 0.3287),
+      vec3( 0.7119,-0.0154,-0.0918), vec3(-0.0533, 0.0596,-0.5411),
+      vec3( 0.0352,-0.0631, 0.5460), vec3(-0.4776, 0.2847,-0.0271));
 
+float rand(vec2 co){
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 float linearizeDepth(vec2 texcoord)
 {
@@ -61,38 +75,23 @@ void main()
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
   
   if(length(normal_camera) == 0)
-    fColor = vec3(0.8);
+    fColor = (0.8);
   else {
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
         
-    /*for(int i = 0; i < g_sampleCount; i++) {
-      //float depth = texture(u_depthMap, vTexCoord).r;
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
-      vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
+    // for(int i = 0; i < g_sampleCount; i++) {
+      // //float depth = texture(u_depthMap, vTexCoord).r;
+      // vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
+      // vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       
-      vec3 V = samplePos - vertex_camera;
-      float d = length(V);
-      V = normalize(V);
+      // vec3 V = samplePos - vertex_camera;
+      // float d = length(V);
+      // V = normalize(V);
       
-      occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
-    }*/
+      // occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
+    // }
     
-    vec3 t = normalize(texture(u_vertexMap, vec2(vTexCoord.x + 1 / u_screenSize.x, vTexCoord.y)).xyz - vertex_camera);
-    vec3 b = normalize(texture(u_vertexMap, vec2(vTexCoord.x, vTexCoord.y + 1 / u_screenSize.y)).xyz - vertex_camera);
-    mat3 tbn = mat3(t, b, normal_camera);
-    
-    for(int i = 0; i < g_sampleCount; i++) {
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
-      vec3 samplePos = tbn * texture(u_vertexMap, sampleTexCoord).xyz;
-      
-      vec3 V = (samplePos - vertex_camera);
-      float d = length(V);
-      V = normalize(V);
-      
-      occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
-    }
-    
-    fColor = vec3(1.0 - (1 * occ_factor / g_sampleCount));
+    fColor = 1 - occ_factor / g_sampleCount;
   }
  }

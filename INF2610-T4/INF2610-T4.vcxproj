@@ -46,6 +46,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -62,6 +63,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -73,6 +75,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cube.cpp" />
+    <ClCompile Include="image.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="quad.cpp" />
   </ItemGroup>
@@ -84,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube.h" />
+    <ClInclude Include="image.h" />
     <ClInclude Include="quad.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

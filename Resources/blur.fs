@@ -7,13 +7,13 @@ uniform vec2 u_screenSize;
 
 in vec2 vTexCoord;
 
-vec3 GaussBlur(vec2 tex_coord)
+float GaussBlur(vec2 tex_coord)
 {
   float kernel[9] = float[](1, 2, 1,
                             2, 4, 2,
                             1, 2, 1);
                      
-  vec3 blurred_color = vec3(0);
+  float blurred_color = 0;
   
   vec2 s = 1 / u_screenSize;
   vec2 off[9];
@@ -23,14 +23,14 @@ vec3 GaussBlur(vec2 tex_coord)
   off[6] = vec2(-s.x, s.y); off[7] = vec2(0.0, s.y); off[8] = s;
     
   for(int i = 0; i < 9; i++) {
-    blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).xyz * kernel[i]) / 16;
+    blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).x * kernel[i]) / 16;
   }
   
-  return blurred_color.rrr;
+  return blurred_color;
 }
 
 void main()
 {
-  //fColor.rgb = GaussBlur(vTexCoord);
+  //fColor = vec4(GaussBlur(vTexCoord));
   fColor.rgb = texture(u_ssaoMap, vTexCoord).rrr;
 }

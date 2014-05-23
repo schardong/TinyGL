@@ -8,6 +8,10 @@
 #include "quad.h"
 #include "light.h"
 
+extern "C" {
+#include "image.h"
+}
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <iostream>
@@ -24,8 +28,8 @@ static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 static const int NUM_LIGHTS = 1;
-static const int WINDOW_W = 700;
-static const int WINDOW_H = 700;
+static int WINDOW_W = 700;
+static int WINDOW_H = 700;
 
 using namespace std;
 
@@ -63,6 +67,7 @@ enum {
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
 GLuint g_blurColorId;
+GLuint g_rndNormalId;
 
 void resendShaderUniforms();
 void setupLights();
@@ -147,6 +152,17 @@ void init()
   setupFBO(WINDOW_W, WINDOW_H);
   setupLights();
 
+  Image* rnd_normal = imgReadBMP("../Resources/noise.bmp");
+  
+  glGenTextures(1, &g_rndNormalId);
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, g_rndNormalId);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgGetWidth(rnd_normal), imgGetWidth(rnd_normal), 0, GL_RGB, GL_UNSIGNED_BYTE, imgGetData(rnd_normal));
+
   resendShaderUniforms();
 
   initCalled = true;
@@ -164,13 +180,15 @@ void destroy()
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glDeleteTextures(num_buffers, g_colorId);
   glDeleteTextures(1, &g_depthId);
   glDeleteTextures(1, &g_blurColorId);
-  //glDeleteFramebuffers(1, &g_fboId);
+  glDeleteTextures(1, &g_rndNormalId);
 }
 
 void update()
@@ -273,7 +291,7 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   bool cameraChanged = false;
-  printf("%d\n", c);
+  //printf("%d\n", c);
   switch (c) {
   case 'w':
     g_eye += glm::vec3(0, 0, -0.3f);
@@ -384,6 +402,10 @@ void resendShaderUniforms()
   glBindTexture(GL_TEXTURE_2D, g_depthId);
   sPass->setUniform1i("u_depthMap", 4);
 
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, g_rndNormalId);
+  sPass->setUniform1i("u_rndNormalMap", 5);
+
   float ss[2] = {WINDOW_W, WINDOW_H};
   sPass->setUniformfv("u_screenSize", ss, 2);
 
@@ -453,9 +475,9 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_blurColorId);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
@@ -521,7 +543,7 @@ void setupGeometry()
 
   spheres = new Sphere*[NUM_SPHERES];
   for (int i = 0; i < NUM_SPHERES; i++) {
-    spheres[i] = new Sphere(32, 32);
+    spheres[i] = new Sphere(60, 60);
     spheres[i]->setDrawCb(drawSphere);
     spheres[i]->setMaterialColor(glm::vec4(1.0, 0.0, 0.0, 1.0));
   }
