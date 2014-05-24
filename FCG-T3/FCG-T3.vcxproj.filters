@@ -18,20 +18,8 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="image.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="harris.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="harris.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fcgt3config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
