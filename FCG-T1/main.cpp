@@ -96,7 +96,7 @@ void initGLUT(int argc, char** argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
   glutInitWindowSize(800, 600);
 
-  g_window = glutCreateWindow("FCG-T1");
+  g_window = glutCreateWindow(WINDOW_TITLE.c_str());
   glutReshapeFunc(reshape);
   glutDisplayFunc(update);
   glutKeyboardFunc(keyPress);

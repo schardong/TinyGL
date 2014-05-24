@@ -11,14 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="harris.cpp" />
-    <ClCompile Include="image.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fcgt2config.h" />
-    <ClInclude Include="harris.h" />
-    <ClInclude Include="image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\fcgt2.fs" />

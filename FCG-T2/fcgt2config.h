@@ -1,6 +1,8 @@
 #ifndef FCGT2CONFIG_H
 #define FCGT2CONFIG_H
 
-//Standard structures and configuration parameters go here.
+#include <string>
+
+const std::string WINDOW_TITLE = "FCG-T2";
 
 #endif
