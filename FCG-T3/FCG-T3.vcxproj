@@ -58,14 +58,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;../../opencv/build/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../glew/lib;../../build/x86/freeglut/lib/Debug;../Debug;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TinyGL.lib;glew32d.lib;freeglutd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../glew/lib;../../opencv/build/x86/vc11/staticlib;../../build/x86/freeglut/lib/Debug;../Debug;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>TinyGL.lib;glew32d.lib;freeglutd.lib;opencv_core249d.lib;opencv_features2d249d.lib;opencv_calib3d249d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -75,7 +75,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;../../opencv/build/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -83,8 +83,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../glew/lib;../../build/x86/freeglut/lib/Release;../../build/x86/freeglut/lib/Debug;../Release;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>TinyGL.lib;glew32.lib;freeglut.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../glew/lib;../../opencv/build/x86/vc11/staticlib;../../build/x86/freeglut/lib/Release;../../build/x86/freeglut/lib/Debug;../Release;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>TinyGL.lib;glew32.lib;freeglut.lib;opencv_core249.lib;opencv_features2d249.lib;opencv_calib3d249.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

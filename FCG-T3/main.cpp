@@ -20,6 +20,7 @@ extern "C" {
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
 
