@@ -35,6 +35,9 @@
     <None Include="..\Resources\def_spass.vs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\Resources\blur.fs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="image.h">
