@@ -80,11 +80,13 @@
   <ItemGroup>
     <ClCompile Include="axis.cpp" />
     <ClCompile Include="bufferobject.cpp" />
+    <ClCompile Include="cube.cpp" />
     <ClCompile Include="framebufferobject.cpp" />
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="quad.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="tinygl.cpp" />
@@ -92,11 +94,13 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="bufferobject.h" />
+    <ClInclude Include="cube.h" />
     <ClInclude Include="framebufferobject.h" />
     <ClInclude Include="grid.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="quad.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="sphere.h" />

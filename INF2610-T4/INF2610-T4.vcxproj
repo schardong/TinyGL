@@ -74,10 +74,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cube.cpp" />
     <ClCompile Include="image.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="quad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\def_fpass.fs" />
@@ -86,9 +84,7 @@
     <None Include="..\Resources\ssao.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cube.h" />
     <ClInclude Include="image.h" />
-    <ClInclude Include="quad.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
