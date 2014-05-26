@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "shader.h"
 #include "harris.h"
+#include "quad.h"
 
 extern "C" {
 #include "image.h"
@@ -105,7 +106,12 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(45.f, 1.f, 1.f, 5.f);
 
-  createQuad();
+  Quad* q = new Quad();
+  q->setDrawCb(drawQuad);
+  q->setMaterialColor(glm::vec4(1.f));
+  q->m_modelMatrix = glm::mat4(1.f);
+  q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
+  TinyGL::getInstance()->addResource(MESH, "quad", q);
 
   Image* pattern_rgb = imgReadBMP("../Resources/padrao.bmp");
   Image* pattern = imgGrey(pattern_rgb);
@@ -131,8 +137,8 @@ void init()
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  //float screenSize[2] = {imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb)};
-
+  imgDestroy(corners);
+  
   Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
@@ -190,8 +196,6 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  //float screenSize[2] = {w, h};
-  //TinyGL::getInstance()->getShader("fcgt2")->setUniformfv("u_screenSize", screenSize, 2);
 }
 
 void keyPress(unsigned char c, int x, int y)
@@ -217,59 +221,6 @@ void exit_cb()
   glutDestroyWindow(g_window);
   destroy();
   exit(EXIT_SUCCESS);
-}
-
-void createQuad()
-{
-  GLfloat vertices[] = {
-    -1, -1, 0,
-    1, -1, 0,
-    1, 1, 0,
-    -1, 1, 0
-  };
-
-  GLfloat texCoord[] = {
-    0, 0,
-    1, 0,
-    1, 1,
-    0, 1
-  };
-    
-  GLubyte indices[] = {
-    1, 2, 0, 3
-  };
-  
-  Mesh* m = new Mesh();
-
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
-  vbuff->sendData(&vertices[0]);
-  m->attachBuffer(vbuff);
-
-  BufferObject* tbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, GL_STATIC_DRAW);
-  tbuff->sendData(&texCoord[0]);
-  m->attachBuffer(tbuff);
-
-  m->bind();
-
-  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 4, GL_STATIC_DRAW);
-  ibuff->sendData(&indices[0]);
-  m->attachBuffer(ibuff);
-
-  vbuff->bind();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(0);
-
-  tbuff->bind();
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
-
-  m->setNumPoints(4);
-  m->setDrawCb(drawQuad);
-  m->m_modelMatrix = glm::mat4(1.f);
-  m->setMaterialColor(glm::vec4(1.f));
-  TinyGL::getInstance()->addResource(MESH, "quad", m);
 }
 
 void drawQuad(size_t num_points)
