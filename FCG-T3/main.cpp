@@ -117,7 +117,7 @@ void init()
 
   initPatterns();
   
-  Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
+  Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
@@ -206,18 +206,12 @@ void initPatterns()
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
 
-  /*vector<Mat> patterns(9);
-  for(int i = 0; i < 9; i++) {
-    patterns[i] = imread("../Resources/left0" + to_string(i+1) + ".jpg", CV_8UC1);
-  }*/
+  std::vector<Image*> patterns(10);
+  for(int i = 0; i <= 9; i++) {
+    patterns[i] = imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i) + ".bmp").c_str()));
+  }
 
- /* Mat corners = Mat::zeros(Size(patterns[0].cols, patterns[0].rows), CV_8UC1);
-  std::vector<glm::vec2> c = HarrisCornerDetector(patterns[0], corners);*/
-
-  //uchar* pattern_data = corners.data;
-
-  Image* pattern_rgb = imgReadBMP("../Resources/left12.bmp");
-  Image* pattern = imgGrey(pattern_rgb);
+  Image* pattern = imgGrey(patterns[2]);
   Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
   vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
 
