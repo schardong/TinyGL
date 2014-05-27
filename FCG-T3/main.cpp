@@ -21,9 +21,11 @@ extern "C" {
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
+using namespace cv;
 
 void init();
 void initGLUT(int argc, char** argv);
@@ -48,7 +50,7 @@ GLuint pattern_tex;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void createQuad();
+void initPatterns();
 void drawQuad(size_t num_points);
 
 int main(int argc, char** argv)
@@ -113,31 +115,7 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  Image* pattern_rgb = imgReadBMP("../Resources/padrao.bmp");
-  Image* pattern = imgGrey(pattern_rgb);
-  imgDestroy(pattern_rgb);
-  Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
-  std::vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
-
-  float* pattern_data = imgGetData(corners);
-
-  Logger* log = Logger::getInstance();
-  log->log("Found " + to_string(c.size()) + " corners in the given image.");
-  for(auto it = c.begin(); it != c.end(); it++) {
-    log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
-  }
-  
-  glActiveTexture(GL_TEXTURE0);
-  glGenTextures(1, &pattern_tex);
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  imgDestroy(corners);
+  initPatterns();
   
   Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
   g_shader->bind();
@@ -146,7 +124,7 @@ void init()
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
-  glutReshapeWindow(imgGetWidth(pattern), imgGetHeight(pattern));
+  
 }
 
 void destroy()
@@ -202,7 +180,7 @@ void keyPress(unsigned char c, int x, int y)
 {
   switch (c) {
   default:
-    printf("(%d, %d) = %d, %c", x, y, c, c);
+    printf("(%d, %d) = %d, %c\n", x, y, c, c);
     break;
   }
 }
@@ -211,7 +189,7 @@ void specialKeyPress(int c, int x, int y)
 {
   switch (c) {
   default:
-    printf("(%d, %d) = %d", x, y, c);
+    printf("(%d, %d) = %d\n", x, y, c);
     break;
   }
 }
@@ -221,6 +199,47 @@ void exit_cb()
   glutDestroyWindow(g_window);
   destroy();
   exit(EXIT_SUCCESS);
+}
+
+void initPatterns()
+{
+  Logger* log = Logger::getInstance();
+  log->log("Initializing the patterns.");
+
+  /*vector<Mat> patterns(9);
+  for(int i = 0; i < 9; i++) {
+    patterns[i] = imread("../Resources/left0" + to_string(i+1) + ".jpg", CV_8UC1);
+  }*/
+
+ /* Mat corners = Mat::zeros(Size(patterns[0].cols, patterns[0].rows), CV_8UC1);
+  std::vector<glm::vec2> c = HarrisCornerDetector(patterns[0], corners);*/
+
+  //uchar* pattern_data = corners.data;
+
+  Image* pattern_rgb = imgReadBMP("../Resources/left12.bmp");
+  Image* pattern = imgGrey(pattern_rgb);
+  Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
+  vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
+
+  float* pattern_data = imgGetData(corners);
+
+  log->log("Found " + to_string(c.size()) + " corners in the given image.");
+  for(auto it = c.begin(); it != c.end(); it++) {
+    log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
+  }
+  
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1, &pattern_tex);
+  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glutReshapeWindow(imgGetWidth(pattern), imgGetHeight(pattern));
+  //glutReshapeWindow(patterns[0].cols, patterns[0].rows);
 }
 
 void drawQuad(size_t num_points)
