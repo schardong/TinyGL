@@ -206,14 +206,19 @@ void initPatterns()
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
 
-  std::vector<Image*> patterns(10);
-  for(int i = 0; i <= 9; i++) {
-    patterns[i] = imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i) + ".bmp").c_str()));
+  
+  std::vector<Image*> patterns(9);
+  for(int i = 0; i < 9; i++) {
+    patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
   }
 
-  Image* pattern = imgGrey(patterns[2]);
-  Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
-  vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
+  std::vector<Image*> corners(9);
+  for(int i = 0; i < 9; i++) {
+    HarrisCornerDetector(patterns[i], corners[i]);
+  }
+
+  //Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
+  //vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
 
   float* pattern_data = imgGetData(corners);
 
