@@ -314,14 +314,13 @@ void initGamuts()
       glm::vec3 tmp = createCIEXYZ(beta, illum, xyzbar, 1);
       cloud_points[colorspace::CIEXYZ].push_back(tmp);
 
-      glm::vec3 tmp2;
-      corCIEXYZtoCIERGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b);
-      cloud_points[colorspace::CIERGB].push_back(tmp2);
+      cloud_points[colorspace::CIERGB].push_back(CIEXYZtoCIERGB(tmp));
 
+      glm::vec3 tmp2;
       corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
       cloud_points[colorspace::sRGB].push_back(tmp2);
 
-      corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
+      corCIEXYZtoLab(tmp.x, tmp.y, tmp.z, &tmp2.g, &tmp2.r, &tmp2.b, D65);
       cloud_points[colorspace::CIELab].push_back(tmp2);
 
       memset(beta, 0, sizeof(float) * 400);
@@ -331,14 +330,14 @@ void initGamuts()
   delete[] beta;
   delete[] illum;
     
-  cieclouds[colorspace::CIEXYZ] = new CIEPointCloud(cloud_points[colorspace::CIEXYZ]);
+  cieclouds[colorspace::CIEXYZ] = new CIEPointCloud(cloud_points[colorspace::CIEXYZ], cloud_points[colorspace::sRGB]);
   cieclouds[colorspace::CIEXYZ]->setDrawCb(drawPointsArrays);
   cieclouds[colorspace::CIEXYZ]->setMaterialColor(glm::vec4(0));
   cieclouds[colorspace::CIEXYZ]->m_modelMatrix = glm::mat4(1.f);
   cieclouds[colorspace::CIEXYZ]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[colorspace::CIEXYZ]->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "CIExyzCloud", cieclouds[colorspace::CIEXYZ]);
   
-  cieclouds[colorspace::CIERGB] = new CIEPointCloud(cloud_points[colorspace::CIERGB]);
+  cieclouds[colorspace::CIERGB] = new CIEPointCloud(cloud_points[colorspace::CIERGB], cloud_points[colorspace::sRGB]);
   cieclouds[colorspace::CIERGB]->setDrawCb(drawPointsArrays);
   cieclouds[colorspace::CIERGB]->setMaterialColor(glm::vec4(0));
   cieclouds[colorspace::CIERGB]->m_modelMatrix = glm::mat4(1.f);
@@ -352,7 +351,7 @@ void initGamuts()
   cieclouds[colorspace::sRGB]->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * cieclouds[colorspace::sRGB]->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "CIEsRGBCloud", cieclouds[colorspace::sRGB]);
 
-  cieclouds[colorspace::CIELab] = new CIEPointCloud(cloud_points[colorspace::CIELab]);
+  cieclouds[colorspace::CIELab] = new CIEPointCloud(cloud_points[colorspace::CIELab], cloud_points[colorspace::sRGB]);
   cieclouds[colorspace::CIELab]->setDrawCb(drawPointsArrays);
   cieclouds[colorspace::CIELab]->setMaterialColor(glm::vec4(0));
   cieclouds[colorspace::CIELab]->m_modelMatrix = glm::scale(glm::vec3(0.009f));
@@ -362,7 +361,7 @@ void initGamuts()
 
 void initShader()
 {
-  Shader* g_shader = new Shader("../Resources/fcgt1.vs", "../Resources/fcgt1.fs");
+  Shader* g_shader = new Shader("../Resources/shaders/fcgt1.vs", "../Resources/shaders/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);

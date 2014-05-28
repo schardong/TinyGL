@@ -8,6 +8,7 @@ class CIEPointCloud : public Mesh
 {
 public:
   CIEPointCloud(std::vector<glm::vec3> points);
+  CIEPointCloud(std::vector<glm::vec3> points, std::vector<glm::vec3> colors);
   virtual ~CIEPointCloud();
 };
 

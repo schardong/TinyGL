@@ -211,21 +211,22 @@ void initPatterns()
   for(int i = 0; i < 9; i++) {
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
   }
+  int w = imgGetWidth(patterns[0]);
+  int h = imgGetHeight(patterns[0]);
 
+  std::vector< std::vector<glm::vec2> > corner_values(9);
   std::vector<Image*> corners(9);
   for(int i = 0; i < 9; i++) {
-    HarrisCornerDetector(patterns[i], corners[i]);
+    corners[i] = imgCreate(w, h, 1);
+    corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
   }
 
-  //Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
-  //vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
+  float* pattern_data = imgGetData(corners[0]);
 
-  float* pattern_data = imgGetData(corners);
-
-  log->log("Found " + to_string(c.size()) + " corners in the given image.");
+  /*log->log("Found " + to_string(c.size()) + " corners in the given image.");
   for(auto it = c.begin(); it != c.end(); it++) {
     log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
-  }
+  }*/
   
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &pattern_tex);
@@ -234,10 +235,10 @@ void initPatterns()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glutReshapeWindow(imgGetWidth(pattern), imgGetHeight(pattern));
+  glutReshapeWindow(w, h);
   //glutReshapeWindow(patterns[0].cols, patterns[0].rows);
 }
 
