@@ -43,6 +43,7 @@ void initGamuts();
 void initShader();
 
 int g_window = -1;
+int g_pointSize = 1;
 
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
@@ -84,7 +85,7 @@ void initGLUT(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(WINDOW_W, WINDOW_H);
 
   g_window = glutCreateWindow(WINDOW_TITLE.c_str());
   glutReshapeFunc(reshape);
@@ -110,7 +111,7 @@ void initGLEW()
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glPointSize(2);
+  glPointSize(g_pointSize);
 
   initGLEWCalled = true;
 }
@@ -249,6 +250,14 @@ void specialKeyPress(int c, int x, int y)
     g_eye = back + g_center;
     cameraChanged = true;
     break;
+  case GLUT_KEY_F1:
+    if(g_pointSize <= 5)
+      g_pointSize++;
+    break;
+  case GLUT_KEY_F2:
+    if(g_pointSize >= 1)
+      g_pointSize--;
+    break;
   }
 
   if(cameraChanged) {
@@ -258,6 +267,8 @@ void specialKeyPress(int c, int x, int y)
     s->bind();
     s->setUniformMatrix("viewMatrix", viewMatrix);
   }
+
+  glPointSize(g_pointSize);
 }
 
 void exit_cb()
