@@ -41,6 +41,7 @@ void exit_cb();
 
 void initGamuts();
 void initShader();
+void printInstructions();
 
 int g_window = -1;
 int g_pointSize = 1;
@@ -76,6 +77,7 @@ int main(int argc, char** argv)
   initGLUT(argc, argv);
   initGLEW();
   init();
+  printInstructions();
 
   glutMainLoop();
   return 0;
@@ -210,15 +212,19 @@ void keyPress(unsigned char c, int x, int y)
   switch (c) {
   case '1':
     g_spaceRender = colorspace::CIEXYZ;
+    glutSetWindowTitle((WINDOW_TITLE + " - CIEXYZ").c_str());
     break;
   case '2':
     g_spaceRender = colorspace::CIERGB;
+    glutSetWindowTitle((WINDOW_TITLE + " - CIERGB").c_str());
     break;
   case '3':
     g_spaceRender = colorspace::sRGB;
+    glutSetWindowTitle((WINDOW_TITLE + " - sRGB").c_str());
     break;
   case '4':
     g_spaceRender = colorspace::CIELab;
+    glutSetWindowTitle((WINDOW_TITLE + " - CIELab").c_str());
     break;
   }
 }
@@ -302,7 +308,7 @@ void initGamuts()
   //the spectrum, from 380nm to 780nm wavelengths. Each one of this dislocations
   //produces a point in the CIEXYZ coordinate system. The larger the width of the
   //reflectance (beta) curve, the nearer the points are to the reference white value.
-  for(int window = 1; window < 400; window++) {
+  for(int window = 1; window <= 400; window++) {
 
     //This inner loop shifts the window by one unit of wavelength at each iteration.
     for(int i = 0; i < 400; i++) {
@@ -335,7 +341,7 @@ void initGamuts()
       cloud_points[colorspace::CIERGB].push_back(CIEXYZtoCIERGB(tmp));
 
       //Here I use the color ATD functions to convert from CIEXYZ to CIEsRGB and CIELab
-      //respectively. One minor note, I switched the L and a axes o the Lab colorspace to
+      //respectively. One minor note, I switched the L and a axes of the Lab colorspace to
       //correspond to most of the papers published.
       glm::vec3 tmp2;
       corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
@@ -393,4 +399,12 @@ void initShader()
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);
   g_shader->setUniformMatrix("projMatrix", projMatrix);
   TinyGL::getInstance()->addResource(SHADER, "fcgt1", g_shader);
+}
+
+void printInstructions()
+{
+  printf("O programa inicia exibindo os pontos do espaco CIEXYZ, para trocar para outro espaco pressione 1, 2, 3 ou 4.\n");
+  printf("1 = CIEXYZ;\n2 = CIERGB;\n3 = sRGB;\n4 = CIELab.\n");
+  printf("As setas direcionais movem a camera ao redor do ponto (0, 0, 0).\n");
+  printf("Os botoes F1 e F2 aumentam ou diminuem o tamanho dos pontos exibidos na tela.\n");
 }
