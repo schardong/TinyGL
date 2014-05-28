@@ -62,16 +62,6 @@ void drawPointsArrays(size_t num_points)
   glDrawArrays(GL_POINTS, 0, num_points);
 }
 
-void drawShortIdx(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_SHORT, NULL);
-}
-
-void drawByteIdx(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_BYTE, NULL);
-}
-
 void drawAxis(size_t num_points)
 {
   glDrawArrays(GL_LINES, 0, num_points);
@@ -127,7 +117,7 @@ void initGLEW()
 
 void init()
 {
-  g_eye = glm::vec3(2.0, 2.0, 2.0);
+  g_eye = glm::vec3(2.3, 2.3, 2.3);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), 1.f, 0.1f, 1000.f);
@@ -287,6 +277,8 @@ void initGamuts()
   std::vector<glm::vec3> xyzbar;
 
   memset(beta, 0, sizeof(float) * 400);
+
+  //Getting the xbar, ybar and zbar values.
   for (int i = 0; i < 400; i++)  {
     float x, y, z;
     illum[i] = corGetD65(380.f + i);
@@ -294,10 +286,17 @@ void initGamuts()
     xyzbar.push_back(glm::vec3(x, y, z));
   }
 
+  //This part of the algorithm creates a beta curve with a certain width that
+  //is increased by one each iteration. This produces a window that is dislocated through
+  //the spectrum, from 380nm to 780nm wavelengths. Each one of this dislocations
+  //produces a point in the CIEXYZ coordinate system. The larger the width of the
+  //reflectance (beta) curve, the nearer the points are to the reference white value.
   for(int window = 1; window < 400; window++) {
 
+    //This inner loop shifts the window by one unit of wavelength at each iteration.
     for(int i = 0; i < 400; i++) {
 
+      //This condition is necessary to make the window circular.
       if((i + window) >= 400) {
 
         int rest = (i + window) % 400;
@@ -311,11 +310,22 @@ void initGamuts()
           beta[j] = 1.f;
       }
 
+      //Here I feed the beta curve, plus the illuminant, xbar, ybar and zbar values
+      //to my function that creates a single CIEXYZ value. There is a function
+      //on the color ADT that does this, but I created my own for learning purposes.
+      //Reference: http://www.brucelindbloom.com/
       glm::vec3 tmp = createCIEXYZ(beta, illum, xyzbar, 1);
       cloud_points[colorspace::CIEXYZ].push_back(tmp);
 
+      //Also, the CIEXYZ->CIERGB convertion done on the color ADT is wrong. It's just
+      //the matrix, it is suposed to be the inverse of the CIERGB->CIEXYZ, but it is not.
+      //Since this matrix (CIERGB->CIEXYZ) is correct, I just copied it and used glm to
+      //calculate it's inverse and multiplied by the CIEXYZ point.
       cloud_points[colorspace::CIERGB].push_back(CIEXYZtoCIERGB(tmp));
 
+      //Here I use the color ATD functions to convert from CIEXYZ to CIEsRGB and CIELab
+      //respectively. One minor note, I switched the L and a axes o the Lab colorspace to
+      //correspond to most of the papers published.
       glm::vec3 tmp2;
       corCIEXYZtosRGB(tmp.x, tmp.y, tmp.z, &tmp2.r, &tmp2.g, &tmp2.b, D65);
       cloud_points[colorspace::sRGB].push_back(tmp2);
@@ -327,9 +337,14 @@ void initGamuts()
     }
   }
 
+  //Cleaning up.
   delete[] beta;
   delete[] illum;
     
+
+  //Here I create the point clouds to be rendered. The colors can either be the
+  //point coordinates or an arbitrary vector of glm::vec3. I used the sRGB values
+  //as colors for the point clouds.
   cieclouds[colorspace::CIEXYZ] = new CIEPointCloud(cloud_points[colorspace::CIEXYZ], cloud_points[colorspace::sRGB]);
   cieclouds[colorspace::CIEXYZ]->setDrawCb(drawPointsArrays);
   cieclouds[colorspace::CIEXYZ]->setMaterialColor(glm::vec4(0));
