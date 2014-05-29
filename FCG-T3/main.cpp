@@ -45,8 +45,8 @@ glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
-GLuint g_patternsTex[9];
-GLuint g_cornersTex[9];
+GLuint g_patternsTex[NUM_IMAGES];
+GLuint g_cornersTex[NUM_IMAGES];
 GLuint g_patternIdx = 0;
 bool g_showCorner = true;
 
@@ -73,7 +73,7 @@ void initGLUT(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(WINDOW_W, WINDOW_H);
 
   g_window = glutCreateWindow(WINDOW_TITLE.c_str());
   glutReshapeFunc(reshape);
@@ -99,7 +99,6 @@ void initGLEW()
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
   glEnable(GL_DEPTH_TEST);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  //glPointSize(2);
 
   initGLEWCalled = true;
 }
@@ -134,7 +133,8 @@ void destroy()
   TinyGL::getInstance()->freeResources();
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(12, g_patternsTex);
+  glDeleteTextures(NUM_IMAGES, g_patternsTex);
+  glDeleteTextures(NUM_IMAGES, g_cornersTex);
 }
 
 void update()
@@ -178,6 +178,8 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
+  WINDOW_W = w;
+  WINDOW_H = h;
 }
 
 void keyPress(unsigned char c, int x, int y)
@@ -217,6 +219,12 @@ void keyPress(unsigned char c, int x, int y)
     printf("(%d, %d) = %d, %c\n", x, y, c, c);
     break;
   }
+
+  string title = WINDOW_TITLE + " pattern";
+  if(g_patternIdx < 10) title += "0";
+  title += to_string(g_patternIdx + 1);
+  if(g_showCorner) title += " (corners)";
+  glutSetWindowTitle((title).c_str());
 }
 
 void specialKeyPress(int c, int x, int y)
@@ -240,16 +248,18 @@ void initPatterns()
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
   
-  std::vector<Image*> patterns(9);
-  for(int i = 0; i < 9; i++) {
-    patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
+  std::vector<Image*> patterns(NUM_IMAGES);
+  for(int i = 0; i < NUM_IMAGES; i++) {
+    string prefix = "../Resources/images/left";
+    if(i < 10) prefix += "0";
+    patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
   }
   int w = imgGetWidth(patterns[0]);
   int h = imgGetHeight(patterns[0]);
 
-  std::vector< std::vector<glm::vec2> > corner_values(9);
-  std::vector<Image*> corners(9);
-  for(int i = 0; i < 9; i++) {
+  std::vector< std::vector<glm::vec2> > corner_values(NUM_IMAGES);
+  std::vector<Image*> corners(NUM_IMAGES);
+  for(int i = 0; i < NUM_IMAGES; i++) {
     corners[i] = imgCreate(w, h, 1);
     log->log("Image " + to_string(i + 1) + ": finding corners");
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
@@ -257,8 +267,8 @@ void initPatterns()
   }
   
   glActiveTexture(GL_TEXTURE0);
-  glGenTextures(9, g_patternsTex);
-  for(int i = 0; i < 9; i++) {
+  glGenTextures(NUM_IMAGES, g_patternsTex);
+  for(int i = 0; i < NUM_IMAGES; i++) {
     float* pattern_data = imgGetData(patterns[i]);
     glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -268,8 +278,8 @@ void initPatterns()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
   }
 
-  glGenTextures(9, g_cornersTex);
-  for(int i = 0; i < 9; i++) {
+  glGenTextures(NUM_IMAGES, g_cornersTex);
+  for(int i = 0; i < NUM_IMAGES; i++) {
     float* corner_data = imgGetData(corners[i]);
     glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -279,6 +289,11 @@ void initPatterns()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  for(int i = 0; i < NUM_IMAGES; i++) {
+    imgDestroy(patterns[i]);
+    imgDestroy(corners[i]);
+  }
 
   glutReshapeWindow(w, h);
 }
