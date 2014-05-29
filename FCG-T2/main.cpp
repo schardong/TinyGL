@@ -46,6 +46,7 @@ glm::vec3 g_center;
 GLuint g_patternsTex[NUM_IMAGES];
 GLuint g_cornersTex[NUM_IMAGES];
 GLuint g_patternIdx = 0;
+GLuint g_patternOff = 0;
 bool g_showCorner = true;
 
 bool initCalled = false;
@@ -184,34 +185,14 @@ void reshape(int w, int h)
 
 void keyPress(unsigned char c, int x, int y)
 {
+  int t = c - 49;
+  if(t >= 1 || t <= 9) {
+    if(g_patternOff == 0 && t < NUM_PATTERNS)
+      g_patternIdx = t;
+    else if((g_patternOff == NUM_PATTERNS && t < NUM_FID) || (g_patternOff == NUM_PATTERNS + NUM_FID && t < NUM_SOCCER))
+      g_patternIdx = t + g_patternOff;
+  }
   switch (c) {
-  case '1':
-    g_patternIdx = 0;
-    break;
-  case '2':
-    g_patternIdx = 1;
-    break;
-  case '3':
-    g_patternIdx = 2;
-    break;
-  case '4':
-    g_patternIdx = 3;
-    break;
-  case '5':
-    g_patternIdx = 4;
-    break;
-  case '6':
-    g_patternIdx = 5;
-    break;
-  case '7':
-    g_patternIdx = 6;
-    break;
-  case '8':
-    g_patternIdx = 7;
-    break;
-  case '9':
-    g_patternIdx = 8;
-    break;
   case ' ':
     g_showCorner = !g_showCorner;
     break;
@@ -220,9 +201,13 @@ void keyPress(unsigned char c, int x, int y)
     break;
   }
 
-  string title = WINDOW_TITLE + " pattern";
-  if(g_patternIdx < 10) title += "0";
-  title += to_string(g_patternIdx + 1);
+  string title = WINDOW_TITLE;
+  if(g_patternOff == 0) title += " pattern";
+  else if(g_patternOff == NUM_PATTERNS) title += " fiducial";
+  else if(g_patternOff == NUM_PATTERNS + NUM_FID) title += " soccer_field";
+
+  if((g_patternIdx - g_patternOff) < 10) title += "0";
+  title += to_string(g_patternIdx - g_patternOff + 1);
   if(g_showCorner) title += " (corners)";
   glutSetWindowTitle((title).c_str());
 }
@@ -230,10 +215,32 @@ void keyPress(unsigned char c, int x, int y)
 void specialKeyPress(int c, int x, int y)
 {
   switch (c) {
+  case GLUT_KEY_F1:
+    g_patternOff = 0;
+    g_patternIdx = g_patternOff;
+    break;
+  case GLUT_KEY_F2:
+    g_patternOff = NUM_PATTERNS;
+    g_patternIdx = g_patternOff;
+    break;
+  case GLUT_KEY_F3:
+    g_patternOff = NUM_PATTERNS + NUM_FID;
+    g_patternIdx = g_patternOff;
+    break;
   default:
     printf("(%d, %d) = %d\n", x, y, c);
     break;
   }
+
+  string title = WINDOW_TITLE;
+  if(g_patternOff == 0) title += " pattern";
+  else if(g_patternOff == NUM_PATTERNS) title += " fiducial";
+  else if(g_patternOff == NUM_PATTERNS + NUM_FID) title += " soccer_field";
+
+  if((g_patternIdx - g_patternOff) < 10) title += "0";
+  title += to_string(g_patternIdx - g_patternOff + 1);
+  if(g_showCorner) title += " (corners)";
+  glutSetWindowTitle((title).c_str());
 }
 
 void exit_cb()
@@ -247,29 +254,51 @@ void initPatterns()
 {
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
-  
+
   std::vector<Image*> patterns(NUM_IMAGES);
-  for(int i = 0; i < NUM_IMAGES; i++) {
+
+  //Reading the chessboard patterns.
+  for(int i = 0; i < NUM_PATTERNS; i++) {
     string prefix = "../Resources/images/left";
     if(i < 10) prefix += "0";
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
-  int w = imgGetWidth(patterns[0]);
-  int h = imgGetHeight(patterns[0]);
 
+  //Reading the fiducials.
+  for(int i = 0; i < NUM_FID; i++) {
+    string prefix = "../Resources/images/padrao0";
+    patterns[i + NUM_PATTERNS] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+    log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  }
+
+  //Reading the soccer field.
+  for(int i = 0; i < NUM_SOCCER; i++) {
+    string prefix = "../Resources/images/soccer_field0";
+    patterns[i + NUM_PATTERNS + NUM_FID] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+    log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  }
+
+  log->log("Done reading the input images.");
+
+  //Detecting the corners.
   std::vector< std::vector<glm::vec2> > corner_values(NUM_IMAGES);
   std::vector<Image*> corners(NUM_IMAGES);
   for(int i = 0; i < NUM_IMAGES; i++) {
+    int w = imgGetWidth(patterns[i]);
+    int h = imgGetHeight(patterns[i]);
     corners[i] = imgCreate(w, h, 1);
     log->log("Finding corners of the image " + to_string(i + 1));
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
     log->log(to_string(corner_values[i].size()) + " corners found.");
   }
-  
+
+  //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(NUM_IMAGES, g_patternsTex);
   for(int i = 0; i < NUM_IMAGES; i++) {
+    int w = imgGetWidth(patterns[i]);
+    int h = imgGetHeight(patterns[i]);
     float* pattern_data = imgGetData(patterns[i]);
     glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -279,8 +308,11 @@ void initPatterns()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
   }
 
+  //Same as above.
   glGenTextures(NUM_IMAGES, g_cornersTex);
   for(int i = 0; i < NUM_IMAGES; i++) {
+    int w = imgGetWidth(patterns[i]);
+    int h = imgGetHeight(patterns[i]);
     float* corner_data = imgGetData(corners[i]);
     glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -291,12 +323,12 @@ void initPatterns()
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 
+  glutReshapeWindow(imgGetWidth(patterns[0]), imgGetHeight(patterns[0]));
+
   for(int i = 0; i < NUM_IMAGES; i++) {
     imgDestroy(patterns[i]);
     imgDestroy(corners[i]);
   }
-
-  glutReshapeWindow(w, h);
 }
 
 void drawQuad(size_t num_points)
