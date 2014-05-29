@@ -186,7 +186,7 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   int t = c - 49;
-  if(t >= 1 || t <= 9) {
+  if(t >= 1 && t <= 9) {
     if(g_patternOff == 0 && t < NUM_PATTERNS)
       g_patternIdx = t;
     else if((g_patternOff == NUM_PATTERNS && t < NUM_FID) || (g_patternOff == NUM_PATTERNS + NUM_FID && t < NUM_SOCCER))
