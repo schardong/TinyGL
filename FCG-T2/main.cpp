@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "shader.h"
 #include "harris.h"
+#include "quad.h"
 
 extern "C" {
 #include "image.h"
@@ -41,12 +42,15 @@ glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
-GLuint pattern_tex;
+GLuint g_patternsTex[9];
+GLuint g_cornersTex[9];
+GLuint g_patternIdx = 0;
+bool g_showCorner = true;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void createQuad();
+void initPatterns();
 void drawQuad(size_t num_points);
 
 int main(int argc, char** argv)
@@ -104,42 +108,22 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(45.f, 1.f, 1.f, 5.f);
 
-  createQuad();
+  Quad* q = new Quad();
+  q->setDrawCb(drawQuad);
+  q->setMaterialColor(glm::vec4(1.f));
+  q->m_modelMatrix = glm::mat4(1.f);
+  q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
+  TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  Image* pattern_rgb = imgReadBMP("../Resources/padrao.bmp");
-  Image* pattern = imgGrey(pattern_rgb);
-  imgDestroy(pattern_rgb);
-  Image* corners = imgCreate(imgGetWidth(pattern), imgGetHeight(pattern), 1);
-  std::vector<glm::vec2> c = HarrisCornerDetector(pattern, corners);
+  initPatterns();
 
-  float* pattern_data = imgGetData(corners);
-
-  Logger* log = Logger::getInstance();
-  log->log("Found " + to_string(c.size()) + " corners in the given image.");
-  for(auto it = c.begin(); it != c.end(); it++) {
-    log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
-  }
-  
-  glActiveTexture(GL_TEXTURE0);
-  glGenTextures(1, &pattern_tex);
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, imgGetWidth(pattern), imgGetHeight(pattern), 0, GL_RED, GL_FLOAT, pattern_data);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  //float screenSize[2] = {imgGetWidth(pattern_rgb), imgGetHeight(pattern_rgb)};
-
-  Shader* g_shader = new Shader("../Resources/fcgt2.vs", "../Resources/fcgt2.fs");
+  Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
-  glutReshapeWindow(imgGetWidth(pattern), imgGetHeight(pattern));
 }
 
 void destroy()
@@ -147,7 +131,7 @@ void destroy()
   TinyGL::getInstance()->freeResources();
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(1, &pattern_tex);
+  glDeleteTextures(12, g_patternsTex);
 }
 
 void update()
@@ -170,12 +154,14 @@ void draw()
 
   s->bind();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  if(!g_showCorner)
+    glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_patternIdx]);
+  else
+    glBindTexture(GL_TEXTURE_2D, g_cornersTex[g_patternIdx]);
 
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
   glPtr->getMesh("quad")->draw();
 
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
   glBindVertexArray(0);
   Shader::unbind();
 
@@ -189,15 +175,43 @@ void reshape(int w, int h)
     return;
 
   glViewport(0, 0, w, h);
-  //float screenSize[2] = {w, h};
-  //TinyGL::getInstance()->getShader("fcgt2")->setUniformfv("u_screenSize", screenSize, 2);
 }
 
 void keyPress(unsigned char c, int x, int y)
 {
   switch (c) {
+  case '1':
+    g_patternIdx = 0;
+    break;
+  case '2':
+    g_patternIdx = 1;
+    break;
+  case '3':
+    g_patternIdx = 2;
+    break;
+  case '4':
+    g_patternIdx = 3;
+    break;
+  case '5':
+    g_patternIdx = 4;
+    break;
+  case '6':
+    g_patternIdx = 5;
+    break;
+  case '7':
+    g_patternIdx = 6;
+    break;
+  case '8':
+    g_patternIdx = 7;
+    break;
+  case '9':
+    g_patternIdx = 8;
+    break;
+  case ' ':
+    g_showCorner = !g_showCorner;
+    break;
   default:
-    printf("(%d, %d) = %d, %c", x, y, c, c);
+    printf("(%d, %d) = %d, %c\n", x, y, c, c);
     break;
   }
 }
@@ -206,7 +220,7 @@ void specialKeyPress(int c, int x, int y)
 {
   switch (c) {
   default:
-    printf("(%d, %d) = %d", x, y, c);
+    printf("(%d, %d) = %d\n", x, y, c);
     break;
   }
 }
@@ -218,68 +232,54 @@ void exit_cb()
   exit(EXIT_SUCCESS);
 }
 
-void createQuad()
+void initPatterns()
 {
-  GLfloat vertices[] = {
-    -1, -1, 0,
-    1, -1, 0,
-    1, 1, 0,
-    -1, 1, 0
-  };
+  Logger* log = Logger::getInstance();
+  log->log("Initializing the patterns.");
 
-  GLfloat texCoord[] = {
-    0, 0,
-    1, 0,
-    1, 1,
-    0, 1
-  };
-    
-  GLubyte indices[] = {
-    1, 2, 0, 3
-  };
+
+  std::vector<Image*> patterns(9);
+  for(int i = 0; i < 9; i++) {
+    patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
+  }
+  int w = imgGetWidth(patterns[0]);
+  int h = imgGetHeight(patterns[0]);
+
+  std::vector< std::vector<glm::vec2> > corner_values(9);
+  std::vector<Image*> corners(9);
+  for(int i = 0; i < 9; i++) {
+    corners[i] = imgCreate(w, h, 1);
+    corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
+  }
   
-  Mesh* m = new Mesh();
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(9, g_patternsTex);
+  for(int i = 0; i < 9; i++) {
+    float* pattern_data = imgGetData(patterns[i]);
+    glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+  }
 
-  BufferObject* vbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, GL_STATIC_DRAW);
-  vbuff->sendData(&vertices[0]);
-  m->attachBuffer(vbuff);
+  glGenTextures(9, g_cornersTex);
+  for(int i = 0; i < 9; i++) {
+    float* corner_data = imgGetData(corners[i]);
+    glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
 
-  BufferObject* tbuff = new BufferObject(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, GL_STATIC_DRAW);
-  tbuff->sendData(&texCoord[0]);
-  m->attachBuffer(tbuff);
-
-  m->bind();
-
-  BufferObject* ibuff = new BufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 4, GL_STATIC_DRAW);
-  ibuff->sendData(&indices[0]);
-  m->attachBuffer(ibuff);
-
-  vbuff->bind();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(0);
-
-  tbuff->bind();
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
-
-  m->setNumPoints(4);
-  m->setDrawCb(drawQuad);
-  m->m_modelMatrix = glm::mat4(1.f);
-  m->setMaterialColor(glm::vec4(1.f));
-  TinyGL::getInstance()->addResource(MESH, "quad", m);
+  glutReshapeWindow(w, h);
 }
 
 void drawQuad(size_t num_points)
 {
   glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
-}
-
-void printInstructions()
-{
-  printf("O programa inicia exibindo os pontos do espaco CIEXYZ, para trocar para outro\nespaco pressione 1, 2, 3 ou 4.\n");
-  printf("1 = CIEXYZ;\n2 = CIERGB;\n3 = sRGB;\n4 = CIELab.\n");
-  printf("As setas direcionais movem a camera ao redor do ponto (0, 0, 0).\n");
-  printf("Os botoes F1 e F2 aumentam ou diminuem o tamanho dos pontos exibidos na tela.\n");
 }
