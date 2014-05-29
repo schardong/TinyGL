@@ -186,18 +186,19 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   int t = c - 49;
-  if(t >= 1 && t <= 9) {
+  if(t >= 0 && t <= 9) {
     if(g_patternOff == 0 && t < NUM_PATTERNS)
       g_patternIdx = t;
     else if((g_patternOff == NUM_PATTERNS && t < NUM_FID) || (g_patternOff == NUM_PATTERNS + NUM_FID && t < NUM_SOCCER))
       g_patternIdx = t + g_patternOff;
   }
+
   switch (c) {
   case ' ':
     g_showCorner = !g_showCorner;
     break;
   default:
-    printf("(%d, %d) = %d, %c\n", x, y, c, c);
+    //printf("(%d, %d) = %d, %c\n", x, y, c, c);
     break;
   }
 
@@ -226,6 +227,9 @@ void specialKeyPress(int c, int x, int y)
   case GLUT_KEY_F3:
     g_patternOff = NUM_PATTERNS + NUM_FID;
     g_patternIdx = g_patternOff;
+    break;
+  case GLUT_KEY_F10:
+    printInstructions();
     break;
   default:
     printf("(%d, %d) = %d\n", x, y, c);
@@ -338,7 +342,12 @@ void drawQuad(size_t num_points)
 
 void printInstructions()
 {
-  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/left*.\n");
+  printf("---------------------------------------------------------------\n");
+  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/*.bmp\n");
+  printf("A principio sao carregadas as imagens left*, padrao* e soccer_field*.\n");
   printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
+  printf("Para trocar a imagem do padrao tabuleiro de xadrez para o fiducial, ou o campo de futebol, aperte F1, F2 ou F3.");
   printf("Para trocar o modo de exibicao da imagem original para a imagem que exibe os cantos detectados, aperte barra de espaco.\n");
+  printf("Aperte F10 para exibir essas instrucoes novamente.\n");
+  printf("---------------------------------------------------------------\n");
 }
