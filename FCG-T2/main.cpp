@@ -275,3 +275,11 @@ void drawQuad(size_t num_points)
 {
   glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
 }
+
+void printInstructions()
+{
+  printf("O programa inicia exibindo os pontos do espaco CIEXYZ, para trocar para outro\nespaco pressione 1, 2, 3 ou 4.\n");
+  printf("1 = CIEXYZ;\n2 = CIERGB;\n3 = sRGB;\n4 = CIELab.\n");
+  printf("As setas direcionais movem a camera ao redor do ponto (0, 0, 0).\n");
+  printf("Os botoes F1 e F2 aumentam ou diminuem o tamanho dos pontos exibidos na tela.\n");
+}

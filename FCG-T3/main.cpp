@@ -45,7 +45,8 @@ glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
-GLuint pattern_tex;
+GLuint g_patternsTex[9];
+GLuint g_showPattern = 0;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
@@ -116,7 +117,7 @@ void init()
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
   initPatterns();
-  
+
   Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
@@ -124,7 +125,6 @@ void init()
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
   initCalled = true;
-  
 }
 
 void destroy()
@@ -132,7 +132,7 @@ void destroy()
   TinyGL::getInstance()->freeResources();
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(1, &pattern_tex);
+  glDeleteTextures(12, g_patternsTex);
 }
 
 void update()
@@ -155,12 +155,12 @@ void draw()
 
   s->bind();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_showPattern]);
 
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
   glPtr->getMesh("quad")->draw();
 
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
+  glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
   Shader::unbind();
 
@@ -179,6 +179,33 @@ void reshape(int w, int h)
 void keyPress(unsigned char c, int x, int y)
 {
   switch (c) {
+  case '1':
+    g_showPattern = 0;
+    break;
+  case '2':
+    g_showPattern = 1;
+    break;
+  case '3':
+    g_showPattern = 2;
+    break;
+  case '4':
+    g_showPattern = 3;
+    break;
+  case '5':
+    g_showPattern = 4;
+    break;
+  case '6':
+    g_showPattern = 5;
+    break;
+  case '7':
+    g_showPattern = 6;
+    break;
+  case '8':
+    g_showPattern = 7;
+    break;
+  case '9':
+    g_showPattern = 8;
+    break;
   default:
     printf("(%d, %d) = %d, %c\n", x, y, c, c);
     break;
@@ -206,7 +233,7 @@ void initPatterns()
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
 
-  
+
   std::vector<Image*> patterns(9);
   for(int i = 0; i < 9; i++) {
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
@@ -225,21 +252,23 @@ void initPatterns()
 
   /*log->log("Found " + to_string(c.size()) + " corners in the given image.");
   for(auto it = c.begin(); it != c.end(); it++) {
-    log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
+  log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
   }*/
-  
+
   glActiveTexture(GL_TEXTURE0);
-  glGenTextures(1, &pattern_tex);
-  glBindTexture(GL_TEXTURE_2D, pattern_tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+  glGenTextures(9, g_patternsTex);
+  for(int i = 0; i < 9; i++) {
+    float* pattern_data = imgGetData(corners[i]);
+    glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+  }
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glutReshapeWindow(w, h);
-  //glutReshapeWindow(patterns[0].cols, patterns[0].rows);
 }
 
 void drawQuad(size_t num_points)
