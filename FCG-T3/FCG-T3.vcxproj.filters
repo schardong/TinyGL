@@ -25,10 +25,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\fcgt2.fs">
+    <None Include="..\Resources\shaders\fcgt2.fs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Resources\fcgt2.vs">
+    <None Include="..\Resources\shaders\fcgt2.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

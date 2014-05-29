@@ -17,8 +17,8 @@
     <ClInclude Include="fcgt3config.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\fcgt2.fs" />
-    <None Include="..\Resources\fcgt2.vs" />
+    <None Include="..\Resources\shaders\fcgt2.fs" />
+    <None Include="..\Resources\shaders\fcgt2.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D344314-71FC-42BF-B049-1423B2200B57}</ProjectGuid>

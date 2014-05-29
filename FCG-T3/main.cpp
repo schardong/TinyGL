@@ -46,7 +46,9 @@ glm::vec3 g_eye;
 glm::vec3 g_center;
 
 GLuint g_patternsTex[9];
-GLuint g_showPattern = 0;
+GLuint g_cornersTex[9];
+GLuint g_patternIdx = 0;
+bool g_showCorner = true;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
@@ -155,12 +157,14 @@ void draw()
 
   s->bind();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_showPattern]);
+  if(!g_showCorner)
+    glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_patternIdx]);
+  else
+    glBindTexture(GL_TEXTURE_2D, g_cornersTex[g_patternIdx]);
 
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
   glPtr->getMesh("quad")->draw();
 
-  glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
   Shader::unbind();
 
@@ -180,31 +184,34 @@ void keyPress(unsigned char c, int x, int y)
 {
   switch (c) {
   case '1':
-    g_showPattern = 0;
+    g_patternIdx = 0;
     break;
   case '2':
-    g_showPattern = 1;
+    g_patternIdx = 1;
     break;
   case '3':
-    g_showPattern = 2;
+    g_patternIdx = 2;
     break;
   case '4':
-    g_showPattern = 3;
+    g_patternIdx = 3;
     break;
   case '5':
-    g_showPattern = 4;
+    g_patternIdx = 4;
     break;
   case '6':
-    g_showPattern = 5;
+    g_patternIdx = 5;
     break;
   case '7':
-    g_showPattern = 6;
+    g_patternIdx = 6;
     break;
   case '8':
-    g_showPattern = 7;
+    g_patternIdx = 7;
     break;
   case '9':
-    g_showPattern = 8;
+    g_patternIdx = 8;
+    break;
+  case ' ':
+    g_showCorner = !g_showCorner;
     break;
   default:
     printf("(%d, %d) = %d, %c\n", x, y, c, c);
@@ -247,24 +254,28 @@ void initPatterns()
     corners[i] = imgCreate(w, h, 1);
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
   }
-
-  float* pattern_data = imgGetData(corners[0]);
-
-  /*log->log("Found " + to_string(c.size()) + " corners in the given image.");
-  for(auto it = c.begin(); it != c.end(); it++) {
-  log->log("corner found at (" + to_string(it->x) +", " + to_string(it->y) + ")");
-  }*/
-
+  
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(9, g_patternsTex);
   for(int i = 0; i < 9; i++) {
-    float* pattern_data = imgGetData(corners[i]);
+    float* pattern_data = imgGetData(patterns[i]);
     glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+  }
+
+  glGenTextures(9, g_cornersTex);
+  for(int i = 0; i < 9; i++) {
+    float* corner_data = imgGetData(corners[i]);
+    glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 
