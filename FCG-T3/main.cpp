@@ -253,6 +253,7 @@ void initPatterns()
     string prefix = "../Resources/images/left";
     if(i < 10) prefix += "0";
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+    log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
   int w = imgGetWidth(patterns[0]);
   int h = imgGetHeight(patterns[0]);
@@ -261,7 +262,7 @@ void initPatterns()
   std::vector<Image*> corners(NUM_IMAGES);
   for(int i = 0; i < NUM_IMAGES; i++) {
     corners[i] = imgCreate(w, h, 1);
-    log->log("Image " + to_string(i + 1) + ": finding corners");
+    log->log("Finding corners of the image " + to_string(i + 1));
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
     log->log(to_string(corner_values[i].size()) + " corners found.");
   }
