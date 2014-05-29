@@ -22,10 +22,10 @@ extern "C" {
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/opencv_modules.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
-using namespace cv;
 
 void init();
 void initGLUT(int argc, char** argv);
@@ -239,8 +239,7 @@ void initPatterns()
 {
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
-
-
+  
   std::vector<Image*> patterns(9);
   for(int i = 0; i < 9; i++) {
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>(("../Resources/images/left0" + to_string(i+1) + ".bmp").c_str())));
@@ -252,7 +251,9 @@ void initPatterns()
   std::vector<Image*> corners(9);
   for(int i = 0; i < 9; i++) {
     corners[i] = imgCreate(w, h, 1);
+    log->log("Image " + to_string(i + 1) + ": finding corners");
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
+    log->log(to_string(corner_values[i].size()) + " corners found.");
   }
   
   glActiveTexture(GL_TEXTURE0);
