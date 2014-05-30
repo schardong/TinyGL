@@ -251,41 +251,55 @@ void initPatternsCV()
 
   //Detecting the chessboard corners.
   vector< vector<Point2f> > corner_values(NUM_IMAGES);
-  vector<Mat> corners(NUM_IMAGES);
   vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
+  vector<Mat> corners(NUM_IMAGES);
 
   for(int i = 0; i < NUM_IMAGES; i++) {
     log->log("Finding the chessboard corners on the image " + to_string(i + 1));
-    bool found = findChessboardCorners(patterns[i], Size(8, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
+    Size s(7, 6);
     corners[i] = Mat::zeros(patterns[i].size(), CV_32FC1);
 
-    cornerSubPix(patterns[i], corner_values[i], Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
-    for(size_t j = 0; j < corner_values[i].size(); j++)
-      corners[i].at<float>(corner_values[i][j]) = 1.f;
+    bool found = findChessboardCorners(patterns[i], s, corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
 
-    log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
+    if(found) {
+      cornerSubPix(patterns[i], corner_values[i], Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
 
-    //Creating the object space coordinate points for camera calibration.
-    for(size_t j = 0; j < corner_values[i].size(); j++)
-      obj_space_points[i].push_back(Point3f(j % 8, 6 - j / 6, 0));
+      for(size_t j = 0; j < corner_values[i].size(); j++)
+        corners[i].at<float>(corner_values[i][j]) = 1.f;
+
+      log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
+
+      //Creating the object space coordinate points for camera calibration.
+      for(size_t j = 0; j < corner_values[i].size(); j++)
+        obj_space_points[i].push_back(Point3f(corner_values[i][j].x / s.width, corner_values[i][j].y / s.height, 0));
+    }
     
+  }
+
+  for(size_t i = 0; i < corner_values.size(); i++) {
+    if(corner_values[i].empty()) {
+      corner_values[i].erase(corner_values[i].begin() + i);
+      obj_space_points[i].erase(obj_space_points[i].begin() + i);
+    }
   }
 
   log->log("Detection complete. Initializing calibration parameters.");
   //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
   Mat cam_matrix;
-  Mat dist_coeffs;
+  Mat dist_coeffs = Mat::zeros(8, 1, CV_64F);
   vector<Mat> rvecs;
   vector<Mat> tvecs;
 
-  cam_matrix = Mat::eye(3, 3, CV_64FC1);
+  cam_matrix = Mat::eye(3, 3, CV_64F);
   cam_matrix.ptr<double>(0)[0] = 1;
-  cam_matrix.ptr<float>(1)[1] = 1;
+  cam_matrix.ptr<double>(1)[1] = 1;
 
   //Calibrating.
   log->log("Calibration starting.");
-  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs, CV_CALIB_FIX_ASPECT_RATIO);
+  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
   log->log("Calibration finished.");
+
+  cout << cam_matrix << endl;
 
   /*for(int i = 0; i < rvecs.size(); i++) {
     cout << rvecs[i] << endl;
