@@ -337,14 +337,19 @@ void initPatternsCV()
 
   log->log("Done reading the input images.");
 
-  //Detecting the corners.
+  //Detecting the chessboard corners.
   std::vector< std::vector<Point2f> > corner_values(NUM_IMAGES);
   std::vector<Mat> corners(NUM_IMAGES);
   for(int i = 0; i < NUM_IMAGES; i++) {
-    log->log("Finding the chessboard of the image " + to_string(i + 1));
-    bool found = findChessboardCorners(patterns[i], Size(7, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+    log->log("Finding the chessboard corners of the image " + to_string(i + 1));
+    bool found = findChessboardCorners(patterns[i], Size(8, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
+    corners[i] = Mat::zeros(patterns[i].size(), CV_32FC1);
 
-    log->log(to_string(corner_values[i].size()) + " corners found.");
+    cornerSubPix(patterns[i], corner_values[i], Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+    for(size_t j = 0; j < corner_values[i].size(); j++)
+      corners[i].at<float>(corner_values[i][j]) = 1.f;
+
+    log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
   }
 
   //Creating the textures to show the results.
