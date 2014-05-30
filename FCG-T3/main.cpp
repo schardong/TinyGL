@@ -335,15 +335,10 @@ void initPatternsCV()
 
   log->log("Done reading the input images.");
 
-  //Detecting the chessboard corners and calibrating the camera.
+  //Detecting the chessboard corners.
   vector< vector<Point2f> > corner_values(NUM_IMAGES);
   vector<Mat> corners(NUM_IMAGES);
   vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
-
-  vector<Mat> cam_matrix(NUM_IMAGES);
-  vector<Mat> dist_coeffs(NUM_IMAGES);
-  vector< vector<Mat> > rvecs(NUM_IMAGES);
-  vector< vector<Mat> > tvecs(NUM_IMAGES);
 
   for(int i = 0; i < NUM_IMAGES; i++) {
     log->log("Finding the chessboard corners on the image " + to_string(i + 1));
@@ -357,18 +352,36 @@ void initPatternsCV()
     log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
 
     //Creating the object space coordinate points for camera calibration.
-    for(size_t j = 0; j < corner_values[i].size(); j++) {
+    for(size_t j = 0; j < corner_values[i].size(); j++)
       obj_space_points[i].push_back(Point3f(j / 8, j % 8, 0));
-    }
-
-    //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
-    cam_matrix[i] = Mat(3, 3, CV_32FC1);
-    cam_matrix[i].ptr<float>(0)[0] = 1;
-    cam_matrix[i].ptr<float>(1)[1] = 1;
-
-    //LET THE DOGS OUT!
-    calibrateCamera(obj_space_points[i], corner_values[i], patterns[i].size(), cam_matrix[i], dist_coeffs[i], rvecs[i], tvecs[i]);
+    
   }
+
+  log->log("Detection complete. Initializing calibration parameters.");
+  //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
+  Mat cam_matrix;
+  Mat dist_coeffs;
+  vector<Mat> rvecs;
+  vector<Mat> tvecs;
+
+  cam_matrix = Mat(3, 3, CV_32FC1);
+  cam_matrix.ptr<float>(0)[0] = 1;
+  cam_matrix.ptr<float>(1)[1] = 1;
+
+  //Calibrating.
+  log->log("Calibration starting.");
+  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
+  log->log("Calibration finished.");
+
+  /*for(int i = 0; i < rvecs.size(); i++) {
+    cout << rvecs[i] << endl;
+  }
+  cout << endl;*/
+
+  for(int i = 0; i < tvecs.size(); i++) {
+    cout << tvecs[i] << endl;
+  }
+  cout << endl;
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
@@ -390,7 +403,7 @@ void initPatternsCV()
   for(int i = 0; i < NUM_IMAGES; i++) {
     int w = corners[i].cols;
     int h = corners[i].rows;
-    float* corner_data = (float*)corners[i].data;//imgGetData(corners[i]);
+    float* corner_data = (float*)corners[i].data;
     glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
