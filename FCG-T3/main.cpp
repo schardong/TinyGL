@@ -55,7 +55,6 @@ bool g_showCorner = true;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void initPatterns();
 void initPatternsCV();
 void drawQuad(size_t num_points);
 
@@ -121,7 +120,6 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  //initPatterns();
   initPatternsCV();
   printInstructions();
 
@@ -325,7 +323,7 @@ void initPatternsCV()
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
 
-  std::vector<Mat> patterns(NUM_IMAGES);
+  vector<Mat> patterns(NUM_IMAGES);
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_PATTERNS; i++) {
@@ -338,10 +336,11 @@ void initPatternsCV()
   log->log("Done reading the input images.");
 
   //Detecting the chessboard corners.
-  std::vector< std::vector<Point2f> > corner_values(NUM_IMAGES);
-  std::vector<Mat> corners(NUM_IMAGES);
+  vector< vector<Point2f> > corner_values(NUM_IMAGES);
+  vector<Mat> corners(NUM_IMAGES);
+  vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
   for(int i = 0; i < NUM_IMAGES; i++) {
-    log->log("Finding the chessboard corners of the image " + to_string(i + 1));
+    log->log("Finding the chessboard corners on the image " + to_string(i + 1));
     bool found = findChessboardCorners(patterns[i], Size(8, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
     corners[i] = Mat::zeros(patterns[i].size(), CV_32FC1);
 
@@ -350,6 +349,13 @@ void initPatternsCV()
       corners[i].at<float>(corner_values[i][j]) = 1.f;
 
     log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
+
+    //Creating the object space coordinate points for camera calibration.
+    for(size_t j = 0; j < corner_values[i].size(); j++) {
+      obj_space_points[i].push_back(Point3f(j / 8, j % 8, 0));
+    }
+
+    calibrateCamera(obj_space_points[i], corner_values[i], patterns[i].size(), );
   }
 
   //Creating the textures to show the results.
