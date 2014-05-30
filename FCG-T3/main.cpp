@@ -26,6 +26,7 @@ extern "C" {
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
+using namespace cv;
 
 void init();
 void initGLUT(int argc, char** argv);
@@ -49,13 +50,13 @@ glm::vec3 g_center;
 GLuint g_patternsTex[NUM_IMAGES];
 GLuint g_cornersTex[NUM_IMAGES];
 GLuint g_patternIdx = 0;
-GLuint g_patternOff = 0;
 bool g_showCorner = true;
 
 bool initCalled = false;
 bool initGLEWCalled = false;
 
 void initPatterns();
+void initPatternsCV();
 void drawQuad(size_t num_points);
 
 int main(int argc, char** argv)
@@ -120,7 +121,8 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  initPatterns();
+  //initPatterns();
+  initPatternsCV();
   printInstructions();
 
   Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
@@ -190,10 +192,8 @@ void keyPress(unsigned char c, int x, int y)
 {
   int t = c - 49;
   if(t >= 0 && t <= 9) {
-    if(g_patternOff == 0 && t < NUM_PATTERNS)
+    if(t < NUM_PATTERNS)
       g_patternIdx = t;
-    else if((g_patternOff == NUM_PATTERNS && t < NUM_FID) || (g_patternOff == NUM_PATTERNS + NUM_FID && t < NUM_SOCCER))
-      g_patternIdx = t + g_patternOff;
   }
 
   switch (c) {
@@ -205,13 +205,10 @@ void keyPress(unsigned char c, int x, int y)
     break;
   }
 
-  string title = WINDOW_TITLE;
-  if(g_patternOff == 0) title += " pattern";
-  else if(g_patternOff == NUM_PATTERNS) title += " fiducial";
-  else if(g_patternOff == NUM_PATTERNS + NUM_FID) title += " soccer_field";
+  string title = WINDOW_TITLE + " pattern";
 
-  if((g_patternIdx - g_patternOff) < 10) title += "0";
-  title += to_string(g_patternIdx - g_patternOff + 1);
+  if(g_patternIdx < 10) title += "0";
+  title += to_string(g_patternIdx + 1);
   if(g_showCorner) title += " (corners)";
   glutSetWindowTitle((title).c_str());
 }
@@ -219,18 +216,6 @@ void keyPress(unsigned char c, int x, int y)
 void specialKeyPress(int c, int x, int y)
 {
   switch (c) {
-  case GLUT_KEY_F1:
-    g_patternOff = 0;
-    g_patternIdx = g_patternOff;
-    break;
-  case GLUT_KEY_F2:
-    g_patternOff = NUM_PATTERNS;
-    g_patternIdx = g_patternOff;
-    break;
-  case GLUT_KEY_F3:
-    g_patternOff = NUM_PATTERNS + NUM_FID;
-    g_patternIdx = g_patternOff;
-    break;
   case GLUT_KEY_F10:
     printInstructions();
     break;
@@ -239,13 +224,10 @@ void specialKeyPress(int c, int x, int y)
     break;
   }
 
-  string title = WINDOW_TITLE;
-  if(g_patternOff == 0) title += " pattern";
-  else if(g_patternOff == NUM_PATTERNS) title += " fiducial";
-  else if(g_patternOff == NUM_PATTERNS + NUM_FID) title += " soccer_field";
+  string title = WINDOW_TITLE + " pattern";
 
-  if((g_patternIdx - g_patternOff) < 10) title += "0";
-  title += to_string(g_patternIdx - g_patternOff + 1);
+  if(g_patternIdx < 10) title += "0";
+  title += to_string(g_patternIdx + 1);
   if(g_showCorner) title += " (corners)";
   glutSetWindowTitle((title).c_str());
 }
@@ -259,44 +241,109 @@ void exit_cb()
 
 void initPatterns()
 {
+  //Logger* log = Logger::getInstance();
+  //log->log("Initializing the patterns.");
+
+  //std::vector<Image*> patterns(NUM_IMAGES);
+
+  ////Reading the chessboard patterns.
+  //for(int i = 0; i < NUM_PATTERNS; i++) {
+  //  string prefix = "../Resources/images/left";
+  //  if(i < 10) prefix += "0";
+  //  patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+  //  log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  //}
+
+  ////Reading the fiducials.
+  //for(int i = 0; i < NUM_FID; i++) {
+  //  string prefix = "../Resources/images/padrao0";
+  //  patterns[i + NUM_PATTERNS] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+  //  log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  //}
+
+  ////Reading the soccer field.
+  //for(int i = 0; i < NUM_SOCCER; i++) {
+  //  string prefix = "../Resources/images/soccer_field0";
+  //  patterns[i + NUM_PATTERNS + NUM_FID] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+  //  log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  //}
+
+  //log->log("Done reading the input images.");
+
+  ////Detecting the corners.
+  //std::vector< std::vector<glm::vec2> > corner_values(NUM_IMAGES);
+  //std::vector<Image*> corners(NUM_IMAGES);
+  //for(int i = 0; i < NUM_IMAGES; i++) {
+  //  int w = imgGetWidth(patterns[i]);
+  //  int h = imgGetHeight(patterns[i]);
+  //  corners[i] = imgCreate(w, h, 1);
+  //  log->log("Finding corners of the image " + to_string(i + 1));
+  //  corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
+  //  log->log(to_string(corner_values[i].size()) + " corners found.");
+  //}
+
+  ////Creating the textures to show the results.
+  //glActiveTexture(GL_TEXTURE0);
+  //glGenTextures(NUM_IMAGES, g_patternsTex);
+  //for(int i = 0; i < NUM_IMAGES; i++) {
+  //  int w = imgGetWidth(patterns[i]);
+  //  int h = imgGetHeight(patterns[i]);
+  //  float* pattern_data = imgGetData(patterns[i]);
+  //  glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+  //}
+
+  ////Same as above.
+  //glGenTextures(NUM_IMAGES, g_cornersTex);
+  //for(int i = 0; i < NUM_IMAGES; i++) {
+  //  int w = imgGetWidth(patterns[i]);
+  //  int h = imgGetHeight(patterns[i]);
+  //  float* corner_data = imgGetData(corners[i]);
+  //  glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
+  //}
+  //glBindTexture(GL_TEXTURE_2D, 0);
+
+  //glutReshapeWindow(imgGetWidth(patterns[0]), imgGetHeight(patterns[0]));
+
+  //for(int i = 0; i < NUM_IMAGES; i++) {
+  //  imgDestroy(patterns[i]);
+  //  imgDestroy(corners[i]);
+  //}
+}
+
+void initPatternsCV()
+{
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
 
-  std::vector<Image*> patterns(NUM_IMAGES);
+  std::vector<Mat> patterns(NUM_IMAGES);
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_PATTERNS; i++) {
     string prefix = "../Resources/images/left";
     if(i < 10) prefix += "0";
-    patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
-    log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
-  }
-
-  //Reading the fiducials.
-  for(int i = 0; i < NUM_FID; i++) {
-    string prefix = "../Resources/images/padrao0";
-    patterns[i + NUM_PATTERNS] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
-    log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
-  }
-
-  //Reading the soccer field.
-  for(int i = 0; i < NUM_SOCCER; i++) {
-    string prefix = "../Resources/images/soccer_field0";
-    patterns[i + NUM_PATTERNS + NUM_FID] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
+    patterns[i] = imread(prefix + to_string(i+1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
 
   log->log("Done reading the input images.");
 
   //Detecting the corners.
-  std::vector< std::vector<glm::vec2> > corner_values(NUM_IMAGES);
-  std::vector<Image*> corners(NUM_IMAGES);
+  std::vector< std::vector<Point2f> > corner_values(NUM_IMAGES);
+  std::vector<Mat> corners(NUM_IMAGES);
   for(int i = 0; i < NUM_IMAGES; i++) {
-    int w = imgGetWidth(patterns[i]);
-    int h = imgGetHeight(patterns[i]);
-    corners[i] = imgCreate(w, h, 1);
-    log->log("Finding corners of the image " + to_string(i + 1));
-    corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
+    log->log("Finding the chessboard of the image " + to_string(i + 1));
+    bool found = findChessboardCorners(patterns[i], Size(7, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+
     log->log(to_string(corner_values[i].size()) + " corners found.");
   }
 
@@ -304,23 +351,23 @@ void initPatterns()
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(NUM_IMAGES, g_patternsTex);
   for(int i = 0; i < NUM_IMAGES; i++) {
-    int w = imgGetWidth(patterns[i]);
-    int h = imgGetHeight(patterns[i]);
-    float* pattern_data = imgGetData(patterns[i]);
+    int w = patterns[i].cols;
+    int h = patterns[i].rows;
+    uchar* pattern_data = patterns[i].data;
     glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, pattern_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, pattern_data);
   }
 
   //Same as above.
   glGenTextures(NUM_IMAGES, g_cornersTex);
   for(int i = 0; i < NUM_IMAGES; i++) {
-    int w = imgGetWidth(patterns[i]);
-    int h = imgGetHeight(patterns[i]);
-    float* corner_data = imgGetData(corners[i]);
+    int w = corners[i].cols;
+    int h = corners[i].rows;
+    float* corner_data = (float*)corners[i].data;//imgGetData(corners[i]);
     glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -330,12 +377,7 @@ void initPatterns()
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glutReshapeWindow(imgGetWidth(patterns[0]), imgGetHeight(patterns[0]));
-
-  for(int i = 0; i < NUM_IMAGES; i++) {
-    imgDestroy(patterns[i]);
-    imgDestroy(corners[i]);
-  }
+  glutReshapeWindow(patterns[0].cols, patterns[0].rows);
 }
 
 void drawQuad(size_t num_points)
