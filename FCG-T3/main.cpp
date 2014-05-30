@@ -353,7 +353,7 @@ void initPatternsCV()
 
     //Creating the object space coordinate points for camera calibration.
     for(size_t j = 0; j < corner_values[i].size(); j++)
-      obj_space_points[i].push_back(Point3f(j / 8, j % 8, 0));
+      obj_space_points[i].push_back(Point3f(j % 8, 6 - j / 6, 0));
     
   }
 
@@ -364,13 +364,13 @@ void initPatternsCV()
   vector<Mat> rvecs;
   vector<Mat> tvecs;
 
-  cam_matrix = Mat(3, 3, CV_32FC1);
-  cam_matrix.ptr<float>(0)[0] = 1;
+  cam_matrix = Mat::eye(3, 3, CV_64FC1);
+  cam_matrix.ptr<double>(0)[0] = 1;
   cam_matrix.ptr<float>(1)[1] = 1;
 
   //Calibrating.
   log->log("Calibration starting.");
-  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
+  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs, CV_CALIB_FIX_ASPECT_RATIO);
   log->log("Calibration finished.");
 
   /*for(int i = 0; i < rvecs.size(); i++) {
@@ -378,10 +378,10 @@ void initPatternsCV()
   }
   cout << endl;*/
 
-  for(int i = 0; i < tvecs.size(); i++) {
+  /*for(int i = 0; i < tvecs.size(); i++) {
     cout << tvecs[i] << endl;
   }
-  cout << endl;
+  cout << endl;*/
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
