@@ -278,8 +278,8 @@ void initPatternsCV()
 
   for(size_t i = 0; i < corner_values.size(); i++) {
     if(corner_values[i].empty()) {
-      corner_values[i].erase(corner_values[i].begin() + i);
-      obj_space_points[i].erase(obj_space_points[i].begin() + i);
+      corner_values.erase(corner_values.begin() + i);
+      obj_space_points.erase(obj_space_points.begin() + i);
     }
   }
 
