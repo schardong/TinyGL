@@ -335,10 +335,16 @@ void initPatternsCV()
 
   log->log("Done reading the input images.");
 
-  //Detecting the chessboard corners.
+  //Detecting the chessboard corners and calibrating the camera.
   vector< vector<Point2f> > corner_values(NUM_IMAGES);
   vector<Mat> corners(NUM_IMAGES);
   vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
+
+  vector<Mat> cam_matrix(NUM_IMAGES);
+  vector<Mat> dist_coeffs(NUM_IMAGES);
+  vector< vector<Mat> > rvecs(NUM_IMAGES);
+  vector< vector<Mat> > tvecs(NUM_IMAGES);
+
   for(int i = 0; i < NUM_IMAGES; i++) {
     log->log("Finding the chessboard corners on the image " + to_string(i + 1));
     bool found = findChessboardCorners(patterns[i], Size(8, 6), corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
@@ -355,7 +361,13 @@ void initPatternsCV()
       obj_space_points[i].push_back(Point3f(j / 8, j % 8, 0));
     }
 
-    calibrateCamera(obj_space_points[i], corner_values[i], patterns[i].size(), );
+    //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
+    cam_matrix[i] = Mat(3, 3, CV_32FC1);
+    cam_matrix[i].ptr<float>(0)[0] = 1;
+    cam_matrix[i].ptr<float>(1)[1] = 1;
+
+    //LET THE DOGS OUT!
+    calibrateCamera(obj_space_points[i], corner_values[i], patterns[i].size(), cam_matrix[i], dist_coeffs[i], rvecs[i], tvecs[i]);
   }
 
   //Creating the textures to show the results.
