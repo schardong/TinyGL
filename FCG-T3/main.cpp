@@ -301,15 +301,15 @@ void initPatternsCV()
 
   cout << cam_matrix << endl;
 
-  /*for(int i = 0; i < rvecs.size(); i++) {
+  for(int i = 0; i < rvecs.size(); i++) {
     cout << rvecs[i] << endl;
   }
-  cout << endl;*/
+  cout << endl;
 
-  /*for(int i = 0; i < tvecs.size(); i++) {
+  for(int i = 0; i < tvecs.size(); i++) {
     cout << tvecs[i] << endl;
   }
-  cout << endl;*/
+  cout << endl;
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
@@ -353,9 +353,9 @@ void printInstructions()
 {
   printf("---------------------------------------------------------------\n");
   printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/*.bmp\n");
-  printf("A principio sao carregadas as imagens left*, padrao* e soccer_field*.\n");
+  printf("O programa usa as varias imagens de tabuleiros de xadrez para calibrar a camera.\n");
+  printf("Essa calibracao nos da duas matrizes, a de parametros intrinsicos e extrinsicos.\n");
   printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
-  printf("Para trocar a imagem do padrao tabuleiro de xadrez para o fiducial, ou o campo de futebol, aperte F1, F2 ou F3.");
   printf("Para trocar o modo de exibicao da imagem original para a imagem que exibe os cantos detectados, aperte barra de espaco.\n");
   printf("Aperte F10 para exibir essas instrucoes novamente.\n");
   printf("---------------------------------------------------------------\n");
