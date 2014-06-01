@@ -1,7 +1,10 @@
 #include "harris.h"
 #include "logger.h"
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+using namespace std;
 
 #define _USE_MATH_DEFINES
 extern "C" {
@@ -28,6 +31,7 @@ bool ApplyKernel(Image* src_img, Image* dst_img, float* kernel, size_t order);
 bool Threshold(Image* src_img, Image* dst_img, float t);
 bool NonmaximaSuppression(Image* src_img, Image* dst_img, int neigh_width);
 float trace(float* m, size_t order);
+vector<float> eigenval(glm::mat2 m);
 
 std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
 {
@@ -98,9 +102,13 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
 
   float* r = imgGetData(int_img[R]);
   for(int i = 0; i < img_size; i++) {
+    //Harris detector
     float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
     float d = glm::determinant(harris_mat[i]);
     r[i] = d - (0.004f * t * t);
+    //Shi-tomasi detector
+    /*vector<float> e = eigenval(harris_mat[i]);
+    r[i] = min(e[0], e[1]);*/
   }
 
   NonmaximaSuppression(int_img[R], int_img[THRESH], 7);
@@ -170,7 +178,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img, int neigh_width)
 
   int w = imgGetWidth(src_img);
   int h = imgGetHeight(src_img);
-  neigh_width = ceil(neigh_width / 2);
+  neigh_width = (int)ceil(neigh_width / 2);
   float* src_data = imgGetData(src_img);
   float* dst_data = imgGetData(dst_img);
 
@@ -202,4 +210,18 @@ float trace(float* m, size_t order) {
     t += m[i];
 
   return t;
+}
+
+vector<float> eigenval(glm::mat2 m)
+{
+  float t = trace(glm::value_ptr(m), 2);
+  float d = glm::determinant(m);
+
+  float tmp = sqrt((t*t) / 4 - d);
+
+  vector<float> ev(2);
+  ev[0] = t/2 + tmp;
+  ev[1] = t/2 - tmp;
+
+  return ev;
 }
