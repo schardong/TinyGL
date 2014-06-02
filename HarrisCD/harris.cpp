@@ -33,7 +33,7 @@ bool NonmaximaSuppression(Image* src_img, Image* dst_img, int neigh_width);
 float trace(float* m, size_t order);
 vector<float> eigenval(glm::mat2 m);
 
-std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
+std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img, Detector d, double thresh)
 {
   std::vector<glm::vec2> corners;
   if(src_img == NULL || dst_img == NULL) {
@@ -101,22 +101,26 @@ std::vector<glm::vec2> HarrisCornerDetector(Image* src_img, Image* dst_img)
   float* dst_data = imgGetData(dst_img);
 
   float* r = imgGetData(int_img[R]);
-  for(int i = 0; i < img_size; i++) {
-    //Harris detector
-    float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
-    float d = glm::determinant(harris_mat[i]);
-    r[i] = d - (0.004f * t * t);
-    //Shi-tomasi detector
-    /*vector<float> e = eigenval(harris_mat[i]);
-    r[i] = min(e[0], e[1]);*/
-  }
 
+  if(d == HARRIS) {
+    for(int i = 0; i < img_size; i++) {
+      float t = (float) trace(glm::value_ptr(harris_mat[i]), 2);
+      float d = glm::determinant(harris_mat[i]);
+      r[i] = d - (0.004f * t * t);
+    }
+  } else if(d == SHI_TOMASI) {
+    for(int i = 0; i < img_size; i++) {
+      vector<float> e = eigenval(harris_mat[i]);
+      r[i] = min(e[0], e[1]);
+    }
+  }
+  
   NonmaximaSuppression(int_img[R], int_img[THRESH], 7);
-  Threshold(int_img[THRESH], dst_img, 0.9f);
+  Threshold(int_img[THRESH], dst_img, (float)thresh);
   
   for(int i = 0; i < h; i++)
     for(int j = 0; j < w; j++)
-      if(dst_data[i * w + j] >= 0.9f) corners.push_back(glm::vec2(i, j));
+      if(dst_data[i * w + j] >= thresh) corners.push_back(glm::vec2(i, j));
   
   for(int i = DX; i < num_images; i++) {
     imgDestroy(int_img[i]);

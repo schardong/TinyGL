@@ -15,6 +15,7 @@ extern "C" {
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #define GLM_FORCE_RADIANS
 
@@ -24,7 +25,7 @@ extern "C" {
 
 using namespace std;
 
-void init();
+void init(int argc, char** argv);
 void initGLUT(int argc, char** argv);
 void initGLEW();
 void destroy();
@@ -52,17 +53,17 @@ bool g_showCorner = true;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void initPatterns();
+void initPatterns(Detector detect, double thresh);
 void drawQuad(size_t num_points);
 
 int main(int argc, char** argv)
 {
   Logger::getInstance()->setLogStream(&cout);
   Logger::getInstance()->log(TINYGL_LIBNAME + string(" v") + to_string(TINYGL_MAJOR_VERSION) + "." + to_string(TINYGL_MINOR_VERSION));
-
+  
   initGLUT(argc, argv);
   initGLEW();
-  init();
+  init(argc, argv);
 
   glutMainLoop();
   return 0;
@@ -103,7 +104,7 @@ void initGLEW()
   initGLEWCalled = true;
 }
 
-void init()
+void init(int argc, char** argv)
 {
   g_eye = glm::vec3(0.0, 0.0, 2.0);
   g_center = glm::vec3(0, 0, 0);
@@ -117,7 +118,24 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  initPatterns();
+  Detector d = HARRIS;
+  double thresh = 0.9;
+
+  //Basic argument parsing.
+  if(argc >= 3) {
+    string param = string(argv[1]);
+    if(param == "--shi-tomasi" || param == "-s")
+      d = SHI_TOMASI;
+    param = string(argv[2]);
+    stringstream ss(param);
+    ss >> thresh;
+  } else if(argc == 2) {
+    string param = string(argv[1]);
+    if(param == "--shi-tomasi" || param == "-s")
+      d = SHI_TOMASI;
+  }
+
+  initPatterns(d, thresh);
   printInstructions();
 
   Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
@@ -254,7 +272,7 @@ void exit_cb()
   exit(EXIT_SUCCESS);
 }
 
-void initPatterns()
+void initPatterns(Detector detect, double thresh)
 {
   Logger* log = Logger::getInstance();
   log->log("Initializing the patterns.");
@@ -293,7 +311,7 @@ void initPatterns()
     int h = imgGetHeight(patterns[i]);
     corners[i] = imgCreate(w, h, 1);
     log->log("Finding corners of the image " + to_string(i + 1));
-    corner_values[i] = HarrisCornerDetector(patterns[i], corners[i]);
+    corner_values[i] = HarrisCornerDetector(patterns[i], corners[i], detect, thresh);
     log->log(to_string(corner_values[i].size()) + " corners found.");
   }
 
@@ -349,5 +367,10 @@ void printInstructions()
   printf("Para trocar a imagem do padrao tabuleiro de xadrez para o fiducial, ou o campo de futebol, aperte F1, F2 ou F3.");
   printf("Para trocar o modo de exibicao da imagem original para a imagem que exibe os cantos detectados, aperte barra de espaco.\n");
   printf("Aperte F10 para exibir essas instrucoes novamente.\n");
+  printf("Modo de uso: FCG-T2.exe [--harris,-h ou --shi-tomasi,-s] [threshold].\n");
+  printf("O threshold eh uma valor numerico, ponto-flutuante entre 0 e 1.\n");
+  printf("O valor de threshold soh pode ser especificado se o algoritmo tambem o for.\n");
+  printf("Exemplo de uso:\n\tFCG-T2.exe --harris\n\tFCG-T2.exe -h 0.3\n\tFCG-T2.exe --shi-tomasi 0.86\n\tFCG-T2.exe -s\n");
+  printf("Os valores padrao sao: --harris 0.9\n");
   printf("---------------------------------------------------------------\n");
 }
