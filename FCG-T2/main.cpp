@@ -313,6 +313,10 @@ void initPatterns(Detector detect, double thresh)
     log->log("Finding corners of the image " + to_string(i + 1));
     corner_values[i] = HarrisCornerDetector(patterns[i], corners[i], detect, thresh);
     log->log(to_string(corner_values[i].size()) + " corners found.");
+
+    /*for(size_t j = 0; j < corner_values[i].size(); j++) {
+      cout << "(" << corner_values[i][j].x << ", " << corner_values[i][j].y << ")\n";
+    }*/
   }
 
   //Creating the textures to show the results.
