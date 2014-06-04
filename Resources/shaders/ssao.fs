@@ -12,8 +12,9 @@ uniform mat4 viewMatrix;
 uniform int u_numLights;
 uniform float u_zNear;
 uniform float u_zFar;
-
 uniform vec2 u_screenSize;
+
+#define M_PI 3.1415926535897932384626433832795
 
 const int g_maxLights = 50;
 
@@ -25,7 +26,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 8;
+const int g_radius = 16;
 
 const vec2 g_poissonSamples[] = vec2[](
   vec2( -0.94201624,  -0.39906216 ),
@@ -45,7 +46,7 @@ const vec2 g_poissonSamples[] = vec2[](
   vec2(  0.19984126,   0.78641367 ),
   vec2(  0.14383161,  -0.14100790 )
 );
-                               
+
 float rand(vec2 co){
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
@@ -56,6 +57,18 @@ float linearizeDepth(vec2 texcoord)
   return z;
 }
 
+mat4 rotationMatrix(float angle, vec3 axis)
+{
+  axis = normalize(axis);
+  float s = sin(angle);
+  float c = cos(angle);
+  float oc = 1.0 - c;
+    
+  return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+              oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+              oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+              0.0,                                0.0,                                0.0,                                1.0);
+}
 
 /**
  * calcOcclusion - Calculates the occlusion factor given the point's position
@@ -69,7 +82,7 @@ float calcOcclusion(vec3 pt_pos, vec3 pt_normal, vec3 occ_pos, vec3 occ_normal)
   
   return max(0.0, dot(pt_normal, occ_dir)) / (1.0 + d);
 }
-                               
+
 void main()
 {
   vec3 normal_camera = (texture(u_normalMap, vTexCoord)).xyz;
@@ -79,20 +92,19 @@ void main()
   else {
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
-        
+    
+    vec3 rot_axis = texture(u_rndNormalMap, vTexCoord).xyz;
+    mat3 rot_mat = mat3(rotationMatrix(acos(dot(rot_axis, normal_camera)), rot_axis));
+    
     for(int i = 0; i < g_sampleCount; i++) {
-      //float depth = texture(u_depthMap, vTexCoord).r;
+      float depth = texture(u_depthMap, vTexCoord).r;
       vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       vec3 sampleNormal = texture(u_normalMap, sampleTexCoord).xyz;
       
-      /*vec3 V = samplePos - vertex_camera;
-      float d = length(V);
-      V = normalize(V);*/
-      
-      occ_factor += calcOcclusion(vertex_camera, normal_camera, samplePos, sampleNormal);//max(0.0, dot(normal_camera, V)) / (1.0 + d);
+      occ_factor += calcOcclusion(vertex_camera, normal_camera, samplePos, sampleNormal);
     }
     
-    fColor = 1 - 2*occ_factor / g_sampleCount;
+    fColor = 1 - 2 * occ_factor / g_sampleCount;
   }
  }

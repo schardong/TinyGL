@@ -9,9 +9,9 @@ in vec2 vTexCoord;
 
 float GaussBlur(vec2 tex_coord)
 {
-  float kernel[9] = float[](1.f/16, 2.f/16, 1.f/16,
-                            2.f/16, 4.f/16, 2.f/16,
-                            1.f/16, 2.f/16, 1.f/16);
+  float kernel[9] = float[](1, 2, 1,
+                            2, 4, 2,
+                            1, 2, 1);
                      
   float blurred_color = 0;
   
@@ -23,7 +23,7 @@ float GaussBlur(vec2 tex_coord)
   off[6] = vec2(-s.x, s.y);  off[7] = vec2(0.0, s.y);  off[8] = vec2(s.x, s.y);
     
   for(int i = 0; i < 9; i++) {
-    blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).x * kernel[i]) / 1;
+    blurred_color += (texture(u_ssaoMap, vTexCoord + off[i]).x * kernel[i]) / 16;
   }
   
   return blurred_color;
