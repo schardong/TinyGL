@@ -299,9 +299,10 @@ void initPatternsCV()
   double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
   log->log("Calibration finished. Reprojection error = " + to_string(rpe));
 
-  cout << cam_matrix << endl;
+  cout << "Camera matrix: " << cam_matrix << endl;
+  cout << "Distortion coefficients: " << dist_coeffs << endl;
 
-  for(int i = 0; i < rvecs.size(); i++) {
+  /*for(int i = 0; i < rvecs.size(); i++) {
     cout << rvecs[i] << endl;
   }
   cout << endl;
@@ -309,7 +310,7 @@ void initPatternsCV()
   for(int i = 0; i < tvecs.size(); i++) {
     cout << tvecs[i] << endl;
   }
-  cout << endl;
+  cout << endl;*/
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
