@@ -152,7 +152,7 @@ void init()
   setupFBO(WINDOW_W, WINDOW_H);
   setupLights();
 
-  Image* rnd_normal = imgReadBMP("../Resources/noise.bmp");
+  Image* rnd_normal = imgReadBMP("../Resources/images/noise.bmp");
   
   glGenTextures(1, &g_rndNormalId);
   glActiveTexture(GL_TEXTURE5);
@@ -414,6 +414,7 @@ void resendShaderUniforms()
   tPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
   tPass->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
   tPass->setUniform4fv("u_materialColor", quad->getMaterialColor());
+  tPass->setUniformfv("u_screenSize", ss, 2);
   
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
