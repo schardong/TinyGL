@@ -333,9 +333,9 @@ void keyPress(unsigned char c, int x, int y)
     delete sPass;
     delete tPass;
 
-    fPass = new Shader("../Resources/ssao_fpass.vs", "../Resources/def_fpass.fs");
-    sPass = new Shader("../Resources/def_spass.vs", "../Resources/ssao.fs");
-    tPass = new Shader("../Resources/def_spass.vs", "../Resources/blur.fs");
+    fPass = new Shader("../Resources/shaders/ssao_fpass.vs", "../Resources/shaders/def_fpass.fs");
+    sPass = new Shader("../Resources/shaders/def_spass.vs", "../Resources/shaders/ssao.fs");
+    tPass = new Shader("../Resources/shaders/def_spass.vs", "../Resources/shaders/blur.fs");
 
     TinyGL::getInstance()->addResource(SHADER, "fPass", fPass);
     TinyGL::getInstance()->addResource(SHADER, "sPass", sPass);
@@ -501,9 +501,9 @@ void setupFBO(GLuint w, GLuint h)
 
 void setupShaders()
 {
-  Shader* fPass = new Shader("../Resources/ssao_fpass.vs", "../Resources/def_fpass.fs");
-  Shader* sPass = new Shader("../Resources/def_spass.vs", "../Resources/ssao.fs");
-  Shader* tPass = new Shader("../Resources/def_spass.vs", "../Resources/blur.fs");
+  Shader* fPass = new Shader("../Resources/shaders/ssao_fpass.vs", "../Resources/shaders/def_fpass.fs");
+  Shader* sPass = new Shader("../Resources/shaders/def_spass.vs", "../Resources/shaders/ssao.fs");
+  Shader* tPass = new Shader("../Resources/shaders/def_spass.vs", "../Resources/shaders/blur.fs");
 
   Shader::unbind();
 
