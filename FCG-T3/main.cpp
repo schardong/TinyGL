@@ -302,6 +302,11 @@ void initPatternsCV()
   cout << "Camera matrix: " << cam_matrix << endl;
   cout << "Distortion coefficients: " << dist_coeffs << endl;
 
+  /*for(size_t i = 0; i < obj_space_points[0].size(); i++) {
+    cout << "(" << obj_space_points[0][i].x << ", " << obj_space_points[0][i].y << ", " << obj_space_points[0][i].z << ")\t";
+    cout << "(" << corner_values[0][i].x << ", " << corner_values[0][i].y << ")\n";
+  }*/
+
   /*for(int i = 0; i < rvecs.size(); i++) {
     cout << rvecs[i] << endl;
   }

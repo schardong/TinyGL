@@ -93,6 +93,6 @@ void main()
       occ_factor += calcOcclusion(vertex_camera, normal_camera, samplePos, sampleNormal);//max(0.0, dot(normal_camera, V)) / (1.0 + d);
     }
     
-    fColor = 1 - occ_factor / g_sampleCount;
+    fColor = 1 - 2*occ_factor / g_sampleCount;
   }
  }
