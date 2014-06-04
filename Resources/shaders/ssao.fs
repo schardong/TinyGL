@@ -28,34 +28,24 @@ const int g_sampleCount = 16;
 const int g_radius = 8;
 
 const vec2 g_poissonSamples[] = vec2[](
-                                vec2( -0.94201624,  -0.39906216 ),
-                                vec2(  0.94558609,  -0.76890725 ),
-                                vec2( -0.094184101, -0.92938870 ),
-                                vec2(  0.34495938,   0.29387760 ),
-                                vec2( -0.91588581,   0.45771432 ),
-                                vec2( -0.81544232,  -0.87912464 ),
-                                vec2( -0.38277543,   0.27676845 ),
-                                vec2(  0.97484398,   0.75648379 ),
-                                vec2(  0.44323325,  -0.97511554 ),
-                                vec2(  0.53742981,  -0.47373420 ),
-                                vec2( -0.26496911,  -0.41893023 ),
-                                vec2(  0.79197514,   0.19090188 ),
-                                vec2( -0.24188840,   0.99706507 ),
-                                vec2( -0.81409955,   0.91437590 ),
-                                vec2(  0.19984126,   0.78641367 ),
-                                vec2(  0.14383161,  -0.14100790 )
-                               );
+  vec2( -0.94201624,  -0.39906216 ),
+  vec2(  0.94558609,  -0.76890725 ),
+  vec2( -0.094184101, -0.92938870 ),
+  vec2(  0.34495938,   0.29387760 ),
+  vec2( -0.91588581,   0.45771432 ),
+  vec2( -0.81544232,  -0.87912464 ),
+  vec2( -0.38277543,   0.27676845 ),
+  vec2(  0.97484398,   0.75648379 ),
+  vec2(  0.44323325,  -0.97511554 ),
+  vec2(  0.53742981,  -0.47373420 ),
+  vec2( -0.26496911,  -0.41893023 ),
+  vec2(  0.79197514,   0.19090188 ),
+  vec2( -0.24188840,   0.99706507 ),
+  vec2( -0.81409955,   0.91437590 ),
+  vec2(  0.19984126,   0.78641367 ),
+  vec2(  0.14383161,  -0.14100790 )
+);
                                
-vec3 g_sphereSamples[] = vec3[](
-      vec3( 0.5381, 0.1856,-0.4319), vec3( 0.1379, 0.2486, 0.4430),
-      vec3( 0.3371, 0.5679,-0.0057), vec3(-0.6999,-0.0451,-0.0019),
-      vec3( 0.0689,-0.1598,-0.8547), vec3( 0.0560, 0.0069,-0.1843),
-      vec3(-0.0146, 0.1402, 0.0762), vec3( 0.0100,-0.1924,-0.0344),
-      vec3(-0.3577,-0.5301,-0.4358), vec3(-0.3169, 0.1063, 0.0158),
-      vec3( 0.0103,-0.5869, 0.0046), vec3(-0.0897,-0.4940, 0.3287),
-      vec3( 0.7119,-0.0154,-0.0918), vec3(-0.0533, 0.0596,-0.5411),
-      vec3( 0.0352,-0.0631, 0.5460), vec3(-0.4776, 0.2847,-0.0271));
-
 float rand(vec2 co){
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
@@ -66,8 +56,18 @@ float linearizeDepth(vec2 texcoord)
   return z;
 }
 
-void AlchemyAO()
+
+/**
+ * calcOcclusion - Calculates the occlusion factor given the point's position
+ * and normal vectors and the occluder's position and normal vectors.
+ */
+float calcOcclusion(vec3 pt_pos, vec3 pt_normal, vec3 occ_pos, vec3 occ_normal)
 {
+  vec3 occ_dir = occ_pos - pt_pos;
+  float d = length(occ_dir);
+  occ_dir = normalize(occ_dir);
+  
+  return max(0.0, dot(pt_normal, occ_dir)) / (1.0 + d);
 }
                                
 void main()
@@ -84,12 +84,13 @@ void main()
       //float depth = texture(u_depthMap, vTexCoord).r;
       vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
+      vec3 sampleNormal = texture(u_normalMap, sampleTexCoord).xyz;
       
-      vec3 V = samplePos - vertex_camera;
+      /*vec3 V = samplePos - vertex_camera;
       float d = length(V);
-      V = normalize(V);
+      V = normalize(V);*/
       
-      occ_factor += max(0.0, dot(normal_camera, V)) / (1.0 + d);
+      occ_factor += calcOcclusion(vertex_camera, normal_camera, samplePos, sampleNormal);//max(0.0, dot(normal_camera, V)) / (1.0 + d);
     }
     
     fColor = 1 - occ_factor / g_sampleCount;

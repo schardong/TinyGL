@@ -15,7 +15,7 @@ float GaussBlur(vec2 tex_coord)
                      
   float blurred_color = 0;
   
-  vec2 s = 1 / u_screenSize;
+  vec2 s = 1.f / u_screenSize;
   vec2 off[9];
   
   off[0] = -s; off[1] = vec2(0.0, -s.y); off[2] = vec2(s.x, -s.y);
@@ -31,6 +31,6 @@ float GaussBlur(vec2 tex_coord)
 
 void main()
 {
-  //fColor = vec4(GaussBlur(vTexCoord));
+  //fColor = vec4(vec3(GaussBlur(vTexCoord)), 1.f);
   fColor.rgb = texture(u_ssaoMap, vTexCoord).rrr;
 }
