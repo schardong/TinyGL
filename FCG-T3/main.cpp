@@ -297,7 +297,7 @@ void initPatternsCV()
   //Calibrating.
   log->log("Calibration starting.");
   double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
-  log->log("Calibration finished.");
+  log->log("Calibration finished. Reprojection error = " + to_string(rpe));
 
   cout << cam_matrix << endl;
 
