@@ -152,7 +152,7 @@ void init()
   setupFBO(WINDOW_W, WINDOW_H);
   setupLights();
 
-  Image* rnd_normal = imgReadBMP("../Resources/images/noise.bmp");
+  Image* rnd_normal = imgReadBMP("../Resources/images/noise_norm.bmp");
   
   glGenTextures(1, &g_rndNormalId);
   glActiveTexture(GL_TEXTURE5);
@@ -269,7 +269,7 @@ void reshape(int w, int h)
   for (int i = 0; i < num_buffers; i++) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGB, GL_FLOAT, NULL);
   }
 
   glActiveTexture(GL_TEXTURE4);
@@ -278,7 +278,7 @@ void reshape(int w, int h)
 
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, NULL);
 
   glViewport(0, 0, w, h);
   projMatrix = glm::perspective(static_cast<float>(M_PI / 4.f), static_cast<float>(w) / static_cast<float>(h), 1.f, 100.f);
@@ -466,7 +466,7 @@ void setupFBO(GLuint w, GLuint h)
 
   for (int i = 0; i < num_buffers; i++) {
     glBindTexture(GL_TEXTURE_2D, g_colorId[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGB, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -476,7 +476,7 @@ void setupFBO(GLuint w, GLuint h)
 
   glGenTextures(1, &g_blurColorId);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
