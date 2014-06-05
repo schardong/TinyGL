@@ -93,7 +93,7 @@ void main()
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
     
-    float angle = rand(vTexCoord);//acos(dot(texture(u_rndNormalMap, vTexCoord).xyz, normal_camera));
+    float angle = rand(vTexCoord);
     
     mat2 rot_mat = mat2(rotationMatrix(angle, vec3(0, 0, 1)));
     
