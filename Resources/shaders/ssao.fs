@@ -26,7 +26,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 16;
+const int g_radius = 8;
 
 const vec2 g_poissonSamples[] = vec2[](
   vec2( -0.94201624,  -0.39906216 ),
@@ -93,12 +93,13 @@ void main()
     float occ_factor = 0;
     vec3 vertex_camera = (texture(u_vertexMap, vTexCoord)).xyz;
     
-    vec3 rot_axis = texture(u_rndNormalMap, vTexCoord).xyz;
-    mat3 rot_mat = mat3(rotationMatrix(acos(dot(rot_axis, normal_camera)), rot_axis));
+    float angle = rand(vTexCoord);//acos(dot(texture(u_rndNormalMap, vTexCoord).xyz, normal_camera));
+    
+    mat2 rot_mat = mat2(rotationMatrix(angle, vec3(0, 0, 1)));
     
     for(int i = 0; i < g_sampleCount; i++) {
       float depth = texture(u_depthMap, vTexCoord).r;
-      vec2 sampleTexCoord = vTexCoord + (g_poissonSamples[i] * g_radius / u_screenSize.x);
+      vec2 sampleTexCoord = vTexCoord + ((rot_mat * g_poissonSamples[i]) * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       vec3 sampleNormal = texture(u_normalMap, sampleTexCoord).xyz;
       

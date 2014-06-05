@@ -31,6 +31,6 @@ float GaussBlur(vec2 tex_coord)
 
 void main()
 {
-  fColor = vec4(vec3(GaussBlur(vTexCoord)), 1.f);
-  //fColor.rgb = texture(u_ssaoMap, vTexCoord).rrr;
+  //fColor = vec4(vec3(GaussBlur(vTexCoord)), 1.f);
+  fColor.rgb = texture(u_ssaoMap, vTexCoord).rrr;
 }
