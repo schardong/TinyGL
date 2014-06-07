@@ -26,7 +26,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 16;
+const int g_radius = 24;
 
 const vec2 g_poissonDisk[] = vec2[](
   vec2( -0.94201624,  -0.39906216 ),
@@ -117,8 +117,8 @@ void main()
     mat2 rot_mat = mat2(rotationMatrix(angle, vec3(0, 0, 1)));
     
     for(int i = 0; i < g_sampleCount; i++) {
-      float depth = texture(u_depthMap, vTexCoord).r;
-      vec2 sampleTexCoord = vTexCoord + ((rot_mat * g_poissonDisk[i]) * g_radius / u_screenSize.x);
+      float depth = linearizeDepth(vTexCoord);
+      vec2 sampleTexCoord = vTexCoord + ((rot_mat * g_poissonDisk[i]) * (1 - depth) * g_radius / u_screenSize.x);
       vec3 samplePos = texture(u_vertexMap, sampleTexCoord).xyz;
       vec3 sampleNormal = texture(u_normalMap, sampleTexCoord).xyz;
       
