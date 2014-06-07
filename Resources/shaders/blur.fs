@@ -80,7 +80,7 @@ float BilateralBlur(vec2 tex_coord)
     float closeness = distance(curr_sample, vec3(blurred_color)) / length(vec3(1));
     
     float sample_w = closeness * gauss_coeff;
-    blurred_color += curr_sample * sample_w;
+    blurred_color += curr_sample.x * sample_w;
     norm_fact += sample_w;
   }
   
