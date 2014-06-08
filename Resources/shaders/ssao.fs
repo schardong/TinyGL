@@ -26,7 +26,7 @@ layout (std140) uniform LightPos
 };
 
 const int g_sampleCount = 16;
-const int g_radius = 24;
+const int g_radius = 16;
 
 const vec2 g_poissonDisk[] = vec2[](
   vec2( -0.94201624,  -0.39906216 ),
