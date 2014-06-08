@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-TARGET = alchemy
+TARGET = SSAO
 
 CONFIG += c++11
 
@@ -28,21 +28,25 @@ INSTALLS += shader
 
 win32 {
     CONFIG(release, debug|release) {
+        DESTDIR = $$PWD/../build/release/INF2610-T4
+        OBJECTS_DIR = $$PWD/../build/release/INF2610-T4/obj
         LIBS += -L$$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
         LIBS += -L$$PWD/../glew/lib/ -lglew32
-        LIBS += -L$$OUT_PWD/release/ -ltinygl
+        LIBS += -L$$PWD/../build/release/TinyGL -ltinygl
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
         PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32.lib
-        PRE_TARGETDEPS += $$OUT_PWD/release/tinygl.lib
+        PRE_TARGETDEPS += $$PWD/../build/release/TinyGL/tinygl.lib
     }
 
     CONFIG(debug, debug|release) {
+        DESTDIR = $$PWD/../build/debug/INF2610-T4
+        OBJECTS_DIR = $$PWD/../build/debug/INF2610-T4/obj
         LIBS += -L$$PWD/../../build/x86/freeglut/lib/Debug/ -lfreeglutd
         LIBS += -L$$PWD/../../glew/lib/ -lglew32d
-        LIBS += -L$$OUT_PWD/debug/ -ltinygld
+        LIBS += -L$$PWD/../build/debug/TinyGL -ltinygld
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Debug/freeglutd.lib
         PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32d.lib
-        PRE_TARGETDEPS += $$OUT_PWD/debug/tinygld.lib
+        PRE_TARGETDEPS += $$PWD/../build/debug/TinyGL/tinygld.lib
     }
     message($$LIBS)
 }
@@ -65,7 +69,7 @@ unix {
     message($$LIBS)
 }
 
-INCLUDEPATH += $$PWD/../..//freeglut/include
+INCLUDEPATH += $$PWD/../../freeglut/include
 DEPENDPATH += $$PWD/../../freeglut/include
 
 INCLUDEPATH += $$PWD/../../glew/include

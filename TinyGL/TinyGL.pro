@@ -44,6 +44,8 @@ INSTALLS += header
 win32 {
     CONFIG(release, debug|release) {
         TARGET = tinygl
+        DESTDIR = $$PWD/../build/release/TinyGL
+        OBJECTS_DIR = $$PWD/../build/release/TinyGL/obj
         LIBS += -L$$PWD/../build/x86/freeglut/lib/Release/ -lfreeglut
         LIBS += -L$$PWD/../glew/lib/ -lglew32
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
@@ -52,6 +54,8 @@ win32 {
 
     CONFIG(debug, debug|release) {
         TARGET = tinygld
+        DESTDIR = $$PWD/../build/debug/TinyGL
+        OBJECTS_DIR = $$PWD/../build/debug/TinyGL/obj
         LIBS += -L$$PWD/../build/x86/freeglut/lib/Debug/ -lfreeglutd
         LIBS += -L$$PWD/../glew/lib/ -lglew32d
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Debug/freeglutd.lib
