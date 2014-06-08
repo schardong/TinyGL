@@ -118,7 +118,7 @@ void init()
   initPatternsCV();
   printInstructions();
 
-  Shader* g_shader = new Shader("../../Resources/shaders/fcgt2.vs", "../../Resources/shaders/fcgt2.fs");
+  Shader* g_shader = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
@@ -241,7 +241,7 @@ void initPatternsCV()
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_PATTERNS; i++) {
-    string prefix = "../../Resources/images/left";
+    string prefix = "../../../Resources/images/left";
     if(i < 10) prefix += "0";
     patterns[i] = imread(prefix + to_string(i+1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
@@ -358,7 +358,7 @@ void drawQuad(size_t num_points)
 void printInstructions()
 {
   printf("---------------------------------------------------------------\n");
-  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../../Resources/images/*.bmp\n");
+  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../../../Resources/images/*.bmp\n");
   printf("O programa usa as varias imagens de tabuleiros de xadrez para calibrar a camera.\n");
   printf("Essa calibracao nos da duas matrizes, a de parametros intrinsicos e extrinsicos.\n");
   printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
