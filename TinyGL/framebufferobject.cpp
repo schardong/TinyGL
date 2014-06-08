@@ -15,7 +15,7 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::attachTexBuffer(GLenum target, GLenum attach, GLenum textarg, GLuint texid, GLint level)
 {
-  glFramebufferTexture2D(target, attach, textarg, texid, 0);
+  glFramebufferTexture2D(target, attach, textarg, texid, level);
   m_attMap[attach] = texid;
 }
 
