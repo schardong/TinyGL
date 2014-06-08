@@ -138,7 +138,7 @@ void init(int argc, char** argv)
   initPatterns(d, thresh);
   printInstructions();
 
-  Shader* g_shader = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
+  Shader* g_shader = new Shader("../../Resources/shaders/fcgt2.vs", "../../Resources/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
@@ -281,7 +281,7 @@ void initPatterns(Detector detect, double thresh)
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_PATTERNS; i++) {
-    string prefix = "../Resources/images/left";
+    string prefix = "../../Resources/images/left";
     if(i < 10) prefix += "0";
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
@@ -289,14 +289,14 @@ void initPatterns(Detector detect, double thresh)
 
   //Reading the fiducials.
   for(int i = 0; i < NUM_FID; i++) {
-    string prefix = "../Resources/images/padrao0";
+    string prefix = "../../Resources/images/padrao0";
     patterns[i + NUM_PATTERNS] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
 
   //Reading the soccer field.
   for(int i = 0; i < NUM_SOCCER; i++) {
-    string prefix = "../Resources/images/soccer_field0";
+    string prefix = "../../Resources/images/soccer_field0";
     patterns[i + NUM_PATTERNS + NUM_FID] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
@@ -365,7 +365,7 @@ void drawQuad(size_t num_points)
 void printInstructions()
 {
   printf("---------------------------------------------------------------\n");
-  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/*.bmp\n");
+  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../../Resources/images/*.bmp\n");
   printf("A principio sao carregadas as imagens left*, padrao* e soccer_field*.\n");
   printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
   printf("Para trocar a imagem do padrao tabuleiro de xadrez para o fiducial, ou o campo de futebol, aperte F1, F2 ou F3.");

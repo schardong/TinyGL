@@ -393,7 +393,7 @@ void initGamuts()
 
 void initShader()
 {
-  Shader* g_shader = new Shader("../Resources/shaders/fcgt1.vs", "../Resources/shaders/fcgt1.fs");
+  Shader* g_shader = new Shader("../../Resources/shaders/fcgt1.vs", "../../Resources/shaders/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);

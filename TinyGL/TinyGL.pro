@@ -1,9 +1,8 @@
 QT -= opengl core gui
 
-QMAKE_CXXFLAGS += -std=c++11 -MMD
-
 TEMPLATE = lib
 CONFIG += staticlib
+CONFIG += c++11
 
 SOURCES += \
     axis.cpp \
@@ -14,7 +13,10 @@ SOURCES += \
     mesh.cpp \
     shader.cpp \
     sphere.cpp \
-    tinygl.cpp
+    tinygl.cpp \
+    cube.cpp \
+    framebufferobject.cpp \
+    quad.cpp
 
 HEADERS += \
     axis.h \
@@ -27,7 +29,10 @@ HEADERS += \
     singleton.h \
     sphere.h \
     tglconfig.h \
-    tinygl.h
+    tinygl.h \
+    cube.h \
+    framebufferobject.h \
+    quad.h
 
 INCLUDEPATH += ../include
 
@@ -36,18 +41,38 @@ header.files = $$HEADERS
 
 INSTALLS += header
 
-CONFIG(release, debug|release) {
-    QMAKE_CXXFLAGS += -g0 -O2
-    TARGET = tinygl
-    LIBS += -L$$PWD/../build/x86/freeglut/lib/Release/ -lfreeglut
-    LIBS += -L$$PWD/../glew/lib/ -lglew32
+win32 {
+    CONFIG(release, debug|release) {
+        TARGET = tinygl
+        LIBS += -L$$PWD/../build/x86/freeglut/lib/Release/ -lfreeglut
+        LIBS += -L$$PWD/../glew/lib/ -lglew32
+        PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
+        PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32.lib
+    }
+
+    CONFIG(debug, debug|release) {
+        TARGET = tinygld
+        LIBS += -L$$PWD/../build/x86/freeglut/lib/Debug/ -lfreeglutd
+        LIBS += -L$$PWD/../glew/lib/ -lglew32d
+        PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Debug/freeglutd.lib
+        PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32d.lib
+    }
 }
 
-CONFIG(debug, debug|release) {
-    QMAKE_CXXFLAGS += -g3 -pg -O0
-    TARGET = tinygld
-    LIBS += -L$$PWD/../build/x86/freeglut/lib/Debug/ -lfreeglutd
-    LIBS += -L$$PWD/../glew/lib/ -lglew32d
+unix {
+    CONFIG(release, debug|release) {
+        QMAKE_CXXFLAGS += -g0 -O2
+        TARGET = tinygl
+        LIBS += -L$$PWD/../build/x86/freeglut/lib/Release/ -lfreeglut
+        LIBS += -L$$PWD/../glew/lib/ -lglew32
+    }
+
+    CONFIG(debug, debug|release) {
+        QMAKE_CXXFLAGS += -g3 -pg -O0
+        TARGET = tinygld
+        LIBS += -L$$PWD/../build/x86/freeglut/lib/Debug/ -lfreeglutd
+        LIBS += -L$$PWD/../glew/lib/ -lglew32d
+    }
 }
 
 INCLUDEPATH += $$PWD/../../freeglut/include
