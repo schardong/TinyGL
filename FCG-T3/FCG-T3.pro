@@ -7,9 +7,11 @@ TARGET = CameraCalib
 
 CONFIG += c++11
 
-HEADERS += fcgt3config.h
+HEADERS += fcgt3config.h \
+    calibration.h
 
-SOURCES += main.cpp 
+SOURCES += main.cpp \ 
+    calibration.cpp
 
 OTHER_FILES += \
     ../Resources/shaders/fcgt2.vs \

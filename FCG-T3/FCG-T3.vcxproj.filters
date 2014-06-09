@@ -18,9 +18,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="calibration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fcgt3config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="calibration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
