@@ -55,22 +55,23 @@ double Calibration::runCalibration()
                                rvecs,
                                tvecs);
 
-  cout << "Calibration test:\n";
-  cout << m_intCamMatrix << endl << endl;
-  cout << m_distCoeff << endl << endl;
+//  cout << "Calibration test:\n";
+//  cout << m_intCamMatrix << endl << endl;
+//  cout << m_distCoeff << endl << endl;
 
-  Mat R(4, 4, CV_64F);
-  Rodrigues(rvecs[0], R);
+//  Mat R(4, 4, CV_64F);
+//  Rodrigues(rvecs[0], R);
 
-  cout << "Rodrigues matrix:\n" << R << endl << endl;
-  cout << "Camera position:\n" << tvecs[0] << endl << endl;
+//  cout << "Rodrigues matrix:\n" << R << endl << endl;
+//  cout << "Camera position:\n" << tvecs[0] << endl << endl;
 
   return rpe;
 }
 
-Mat Calibration::getIntCamMatrixOpenGL()
+Mat Calibration::getIntCamMatrixOpenGL(float near, float far)
 {
-  Mat glIntMat(m_intCamMatrix);
+  Mat glIntMat = Mat::zeros(4, 4, m_intCamMatrix.type());
+  m_intCamMatrix.copyTo(glIntMat.colRange(0, 3).rowRange(0, 3));
 
   //Since OpenCV uses a different set of axes from OpenGL, we need to negate
   //the second and third columns of K. This will force the Y axis to point up
@@ -78,12 +79,48 @@ Mat Calibration::getIntCamMatrixOpenGL()
   //down upon the Z axis(like OpenGL) instead of the positive Z axis(OpenCV).
   //Reference: http://ksimek.github.io/2012/08/14/decompose/
 
+  //Plus, we need to add another row and column to the matrix to avoid losing
+  //Z-depth information. This new matrix will come from this:
+  //[a, s, -x0]
+  //[0, b, -y0]
+  //[0, 0,  -1]
+
+  //to this:
+  //[a, s, -x0, 0]
+  //[0, b, -y0, 0]
+  //[0, 0,   A, B]
+  //[0, 0,  -1, 0]
+
+  //where A and B are equal to near + far and near * far respectively. a is the
+  //x-axis focal length, b is the y-axis focal length, s is the world axis skew,
+  //x0 and y0 are the image origin in camera coordinates.
+
   glIntMat.col(1) = -glIntMat.col(1);
   glIntMat.col(2) = -glIntMat.col(2);
 
-  cout << "OpenCV->OpenGL matrix:\n" << glIntMat << endl << endl;
+  glIntMat.col(2).row(3) = near + far;
+  glIntMat.col(3).row(2) = near * far;
 
   return glIntMat;
+}
+
+Mat Calibration::getOrthoMatrix(float l, float r, float b, float t, float n, float f)
+{
+  Mat ndc = Mat::eye(4, 4, m_intCamMatrix.type());
+  ndc.col(0).row(0) = 2 / (r - l);
+  ndc.col(1).row(1) = 2 / (t - b);
+  ndc.col(2).row(2) = -2 / (f - n);
+
+  ndc.col(3).row(0) = -(r + l) / (r - l);
+  ndc.col(3).row(1) = -(t + b) / (t - b);
+  ndc.col(3).row(2) = -(f + n) / (f - n);
+
+  return ndc;
+}
+
+Mat Calibration::getProjMatrixGL(float l, float r, float b, float t, float n, float f)
+{
+  return Mat(getOrthoMatrix(l, r, b, t, n, f) * getIntCamMatrixOpenGL(n, f));
 }
 
 bool Calibration::getChessboardCorners(Mat& chess_patt, vector<Point2f> &corners, Size board_size)

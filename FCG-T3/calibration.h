@@ -27,7 +27,9 @@ public:
     return Mat(m_distCoeff);
   }
 
-  Mat getIntCamMatrixOpenGL();
+  Mat getIntCamMatrixOpenGL(float near, float far);
+  Mat getOrthoMatrix(float l, float r, float b, float t, float n, float f);
+  Mat getProjMatrixGL(float l, float r, float b, float t, float n, float f);
 
 private:
   vector<Mat> m_inputPatt;  //Input patterns.
