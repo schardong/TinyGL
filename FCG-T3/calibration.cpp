@@ -18,6 +18,11 @@ Calibration::Calibration(vector<string> img_paths)
 
 Calibration::~Calibration()
 {
+  m_intCamMatrix.release();
+  m_distCoeff.release();
+  for(size_t i = 0; i < m_inputPatt.size(); i++)
+    m_inputPatt[i].release();
+  m_inputPatt.clear();
 }
 
 double Calibration::runCalibration()
@@ -54,7 +59,31 @@ double Calibration::runCalibration()
   cout << m_intCamMatrix << endl << endl;
   cout << m_distCoeff << endl << endl;
 
+  Mat R(4, 4, CV_64F);
+  Rodrigues(rvecs[0], R);
+
+  cout << "Rodrigues matrix:\n" << R << endl << endl;
+  cout << "Camera position:\n" << tvecs[0] << endl << endl;
+
   return rpe;
+}
+
+Mat Calibration::getIntCamMatrixOpenGL()
+{
+  Mat glIntMat(m_intCamMatrix);
+
+  //Since OpenCV uses a different set of axes from OpenGL, we need to negate
+  //the second and third columns of K. This will force the Y axis to point up
+  //(like in OpenGL) instead of down(like in OpenCV) and the camera wil look
+  //down upon the Z axis(like OpenGL) instead of the positive Z axis(OpenCV).
+  //Reference: http://ksimek.github.io/2012/08/14/decompose/
+
+  glIntMat.col(1) = -glIntMat.col(1);
+  glIntMat.col(2) = -glIntMat.col(2);
+
+  cout << "OpenCV->OpenGL matrix:\n" << glIntMat << endl << endl;
+
+  return glIntMat;
 }
 
 bool Calibration::getChessboardCorners(Mat& chess_patt, vector<Point2f> &corners, Size board_size)

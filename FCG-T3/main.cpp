@@ -122,13 +122,13 @@ void init()
   vector<string> patt_path;
 
   for(int i = 0; i < NUM_IMAGES / 2; i++) {
-    string prefix = "../Resources/images/left";
+    string prefix = "../../../Resources/images/left";
     if(i < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i+1) + ".bmp"));
   }
 
   for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
-    string prefix = "../Resources/images/right";
+    string prefix = "../../../Resources/images/right";
     if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp"));
   }
@@ -137,6 +137,7 @@ void init()
   c = new Calibration(patt_path);
   double rpe = c->runCalibration();
   cout << "Calibration class test rpe = " << rpe << endl << endl;
+  c->getIntCamMatrixOpenGL();
 
   Shader* g_shader = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   g_shader->bind();

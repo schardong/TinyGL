@@ -19,10 +19,20 @@ public:
 
   double runCalibration();
 
+  Mat getIntCamMatrix() {
+    return Mat(m_intCamMatrix);
+  }
+
+  Mat getDistCoeffs() {
+    return Mat(m_distCoeff);
+  }
+
+  Mat getIntCamMatrixOpenGL();
+
 private:
-  vector<Mat> m_inputPatt;
-  Mat m_intCamMatrix; //Intrinsic camera matrix.
-  Mat m_distCoeff;    //Distortion coefficients.
+  vector<Mat> m_inputPatt;  //Input patterns.
+  Mat m_intCamMatrix;       //Intrinsic camera matrix.
+  Mat m_distCoeff;          //Distortion coefficients.
 
   bool getChessboardCorners(Mat &chess_patt, vector<Point2f>& corners, Size board_size);
   void getObjSpacePoints(vector<Point3f>& obj_space_pts, Size board_size, float square_size);
