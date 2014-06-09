@@ -30,9 +30,10 @@ public:
   Mat getIntCamMatrixOpenGL(float near, float far);
   Mat getOrthoMatrix(float l, float r, float b, float t, float n, float f);
   Mat getProjMatrixGL(float l, float r, float b, float t, float n, float f);
+  void getMVPMatrixGL(float l, float r, float b, float t, float n, float f);
 
   //temporary variables.
-  vector<Mat> m_mvMatrices;
+  vector<Mat> m_mvpMatrices;
 
 private:
   vector<Mat> m_inputPatt;  //Input patterns.

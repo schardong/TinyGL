@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "quad.h"
 #include "sphere.h"
+#include "cube.h"
 #include "calibration.h"
 
 #include <GL/glew.h>
@@ -111,6 +112,15 @@ void init()
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
   projMatrix = glm::perspective(45.f, 1.f, 1.f, 5.f);
 
+  for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++)
+      cout << viewMatrix[i][j] << " ";
+    cout << endl;
+  }
+
+  cout << endl;
+
+
   Quad* q = new Quad();
   q->setDrawCb(drawQuad);
   q->setMaterialColor(glm::vec4(1.f));
@@ -118,7 +128,7 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  Sphere* sph = new Sphere(30, 30);
+  Sphere* sph = new Sphere(80, 80);
   sph->setDrawCb(drawSphere);
   sph->setMaterialColor(glm::vec4(0, 0, 1, 0));
   sph->m_modelMatrix = glm::mat4(1.f);
@@ -149,17 +159,18 @@ void init()
     Logger::getInstance()->error("Reprojection error larger than acceptable. " + to_string(rpe));
   }
 
-  Mat proj_cv = c->getProjMatrixGL(0, 640, 0, 480, 1, 5);
+  Mat proj_cv = c->getProjMatrixGL(0, 640, 0, 480, 1, 5000);
   cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
 
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
       projMatrix[i][j] = proj_cv.at<double>(i, j);
 
-  glm::mat4 MV = glm::mat4(1.f);
+  c->getMVPMatrixGL(0, 640, 0, 480, 1, 5000);
+  glm::mat4 MVP = glm::mat4(1.f);
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      MV[i][j] = c->m_mvMatrices[0].at<double>(i, j);
+      MVP[i][j] = c->m_mvpMatrices[0].at<double>(i, j);
 
   Shader* square = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   square->bind();
@@ -170,8 +181,7 @@ void init()
   Shader* simple = new Shader("../../../Resources/shaders/fcgt3.vs", "../../../Resources/shaders/fcgt3.fs");
   simple->bind();
   simple->bindFragDataLoc("fColor", 0);
-  simple->setUniformMatrix("MV", MV);
-  simple->setUniformMatrix("projMatrix", projMatrix);
+  simple->setUniformMatrix("MVP", MVP);
   TinyGL::getInstance()->addResource(SHADER, "simple", simple);
 
   delete c;
