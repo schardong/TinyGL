@@ -137,7 +137,12 @@ void init()
   c = new Calibration(patt_path);
   double rpe = c->runCalibration();
   cout << "Calibration class test rpe = " << rpe << endl << endl;
-  c->getIntCamMatrixOpenGL();
+  Mat proj_cv = c->getProjMatrixGL(0, 640, 0, 480, 1, 5);
+  cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
+
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      projMatrix[i][j] = proj_cv.at<double>(i, j);
 
   Shader* g_shader = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   g_shader->bind();
