@@ -12,8 +12,8 @@ HEADERS += fcgt3config.h
 SOURCES += main.cpp 
 
 OTHER_FILES += \
-    ../../../Resources/fcgt2.vs \
-    ../../../Resources/fcgt2.fs
+    ../Resources/shaders/fcgt2.vs \
+    ../Resources/shaders/fcgt2.fs
 
 shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
