@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "shader.h"
 #include "quad.h"
+#include "sphere.h"
 #include "calibration.h"
 
 #include <GL/glew.h>
@@ -53,6 +54,7 @@ bool initGLEWCalled = false;
 
 void initPatternsCV();
 void drawQuad(size_t num_points);
+void drawSphere(size_t num_points);
 
 int main(int argc, char** argv)
 {
@@ -116,7 +118,13 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-//  initPatternsCV();
+  Sphere* sph = new Sphere(30, 30);
+  sph->setDrawCb(drawSphere);
+  sph->setMaterialColor(glm::vec4(0, 0, 1, 0));
+  sph->m_modelMatrix = glm::mat4(1.f);
+  sph->m_normalMatrix = glm::mat3(1.f);
+  TinyGL::getInstance()->addResource(MESH, "sphere", sph);
+
   printInstructions();
 
   vector<string> patt_path;
@@ -136,7 +144,11 @@ void init()
   Calibration* c;
   c = new Calibration(patt_path);
   double rpe = c->runCalibration();
-  cout << "Calibration class test rpe = " << rpe << endl << endl;
+
+  if(rpe > 1.f) {
+    Logger::getInstance()->error("Reprojection error larger than acceptable. " + to_string(rpe));
+  }
+
   Mat proj_cv = c->getProjMatrixGL(0, 640, 0, 480, 1, 5);
   cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
 
@@ -144,11 +156,23 @@ void init()
     for(int j = 0; j < 4; j++)
       projMatrix[i][j] = proj_cv.at<double>(i, j);
 
-  Shader* g_shader = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
-  g_shader->bind();
-  g_shader->bindFragDataLoc("fColor", 0);
-  g_shader->setUniform1i("u_image", 0);
-  TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
+  glm::mat4 MV = glm::mat4(1.f);
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      MV[i][j] = c->m_mvMatrices[0].at<double>(i, j);
+
+  Shader* square = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
+  square->bind();
+  square->bindFragDataLoc("fColor", 0);
+  square->setUniform1i("u_image", 0);
+  TinyGL::getInstance()->addResource(SHADER, "square", square);
+
+  Shader* simple = new Shader("../../../Resources/shaders/fcgt3.vs", "../../../Resources/shaders/fcgt3.fs");
+  simple->bind();
+  simple->bindFragDataLoc("fColor", 0);
+  simple->setUniformMatrix("MV", MV);
+  simple->setUniformMatrix("projMatrix", projMatrix);
+  TinyGL::getInstance()->addResource(SHADER, "simple", simple);
 
   delete c;
   initCalled = true;
@@ -179,7 +203,7 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   TinyGL* glPtr = TinyGL::getInstance();
-  Shader* s = glPtr->getShader("fcgt2");
+  Shader* s = glPtr->getShader("square");
 
   s->bind();
   glActiveTexture(GL_TEXTURE0);
@@ -190,6 +214,14 @@ void draw()
 
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
   glPtr->getMesh("quad")->draw();
+
+
+  s = glPtr->getShader("simple");
+  s->bind();
+
+  Mesh* m = glPtr->getMesh("sphere");
+  m->bind();
+  m->draw();
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -429,6 +461,11 @@ void initPatternsCV()
 void drawQuad(size_t num_points)
 {
   glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
+}
+
+void drawSphere(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
 void printInstructions()

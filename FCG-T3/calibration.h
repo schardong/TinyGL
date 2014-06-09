@@ -31,6 +31,9 @@ public:
   Mat getOrthoMatrix(float l, float r, float b, float t, float n, float f);
   Mat getProjMatrixGL(float l, float r, float b, float t, float n, float f);
 
+  //temporary variables.
+  vector<Mat> m_mvMatrices;
+
 private:
   vector<Mat> m_inputPatt;  //Input patterns.
   Mat m_intCamMatrix;       //Intrinsic camera matrix.

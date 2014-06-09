@@ -14,8 +14,8 @@ SOURCES += main.cpp \
     calibration.cpp
 
 OTHER_FILES += \
-    ../Resources/shaders/fcgt2.vs \
-    ../Resources/shaders/fcgt2.fs
+    ../Resources/shaders/fcgt3.vs \
+    ../Resources/shaders/fcgt3.fs
 
 shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
