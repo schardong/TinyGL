@@ -14,12 +14,11 @@ SOURCES += main.cpp \
     image.c
 
 OTHER_FILES += \
-    ../Resources/ssao_fpass.vs \
-    ../Resources/ssao_fpass.fs \
-    ../Resources/def_spass.vs \
-    ../Resources/ssao.fs \
-    ../Resources/def_spass.vs \
-    ../Resources/blur.fs \
+    ../Resources/shaders/ssao_fpass.vs \
+    ../Resources/shaders/def_fpass.fs \
+    ../Resources/shaders/def_spass.vs \
+    ../Resources/shaders/ssao.fs \
+    ../Resources/shaders/blur.fs \
 
 shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES
@@ -30,9 +29,11 @@ win32 {
     CONFIG(release, debug|release) {
         DESTDIR = $$PWD/../build/release/INF2610-T4
         OBJECTS_DIR = $$PWD/../build/release/INF2610-T4/obj
-        LIBS += -L$$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
-        LIBS += -L$$PWD/../glew/lib/ -lglew32
+
+        LIBS += -L$$PWD/../../build/x86/freeglut/lib/Release/ -lfreeglut
+        LIBS += -L$$PWD/../../glew/lib/ -lglew32
         LIBS += -L$$PWD/../build/release/TinyGL -ltinygl
+
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Release/freeglut.lib
         PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32.lib
         PRE_TARGETDEPS += $$PWD/../build/release/TinyGL/tinygl.lib
@@ -41,9 +42,11 @@ win32 {
     CONFIG(debug, debug|release) {
         DESTDIR = $$PWD/../build/debug/INF2610-T4
         OBJECTS_DIR = $$PWD/../build/debug/INF2610-T4/obj
+
         LIBS += -L$$PWD/../../build/x86/freeglut/lib/Debug/ -lfreeglutd
         LIBS += -L$$PWD/../../glew/lib/ -lglew32d
         LIBS += -L$$PWD/../build/debug/TinyGL -ltinygld
+
         PRE_TARGETDEPS += $$PWD/../../build/x86/freeglut/lib/Debug/freeglutd.lib
         PRE_TARGETDEPS += $$PWD/../../glew/lib/glew32d.lib
         PRE_TARGETDEPS += $$PWD/../build/debug/TinyGL/tinygld.lib

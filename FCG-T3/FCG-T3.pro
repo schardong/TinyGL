@@ -25,7 +25,7 @@ win32 {
         DESTDIR = $$PWD/../build/release/FCG-T3
         OBJECTS_DIR = $$PWD/../build/release/INF2610-T4/obj
 
-        LIBS +=-L$$PWD/../../build/x86/freeglut/lib/Release/ -lfreeglut
+        LIBS += -L$$PWD/../../build/x86/freeglut/lib/Release/ -lfreeglut
         LIBS += -L$$PWD/../../glew/lib/ -lglew32
         LIBS += -L$$PWD/../build/release/TinyGL -ltinygl
         LIBS += -L$$PWD/../../opencv/build/x86/vc11/lib/ -lopencv_core249
