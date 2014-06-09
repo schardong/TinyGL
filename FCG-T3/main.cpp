@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "shader.h"
 #include "quad.h"
+#include "calibration.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -115,8 +116,27 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  initPatternsCV();
+//  initPatternsCV();
   printInstructions();
+
+  vector<string> patt_path;
+
+  for(int i = 0; i < NUM_IMAGES / 2; i++) {
+    string prefix = "../Resources/images/left";
+    if(i < 9) prefix += "0";
+    patt_path.push_back(string(prefix + to_string(i+1) + ".bmp"));
+  }
+
+  for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
+    string prefix = "../Resources/images/right";
+    if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
+    patt_path.push_back(string(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp"));
+  }
+
+  Calibration* c;
+  c = new Calibration(patt_path);
+  double rpe = c->runCalibration();
+  cout << "Calibration class test rpe = " << rpe << endl << endl;
 
   Shader* g_shader = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   g_shader->bind();
@@ -124,6 +144,7 @@ void init()
   g_shader->setUniform1i("u_image", 0);
   TinyGL::getInstance()->addResource(SHADER, "fcgt2", g_shader);
 
+  delete c;
   initCalled = true;
 }
 
@@ -240,11 +261,18 @@ void initPatternsCV()
   vector<Mat> patterns(NUM_IMAGES);
 
   //Reading the chessboard patterns.
-  for(int i = 0; i < NUM_PATTERNS; i++) {
-    string prefix = "../../../Resources/images/left";
-    if(i < 10) prefix += "0";
+  for(int i = 0; i < NUM_IMAGES / 2; i++) {
+    string prefix = "../Resources/images/left";
+    if(i < 9) prefix += "0";
     patterns[i] = imread(prefix + to_string(i+1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
+  }
+
+  for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
+    string prefix = "../Resources/images/right";
+    if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
+    patterns[i] = imread(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
+    log->log("Loaded " + prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp");
   }
 
   log->log("Done reading the input images.");
@@ -272,15 +300,18 @@ void initPatternsCV()
       //Creating the object space coordinate points for camera calibration.
       for(size_t j = 0; j < corner_values[i].size(); j++)
         obj_space_points[i].push_back(Point3f(corner_values[i][j].x / s.width, corner_values[i][j].y / s.height, 0));
+
     }
     
   }
 
   //Reducing the vector size if one of the patterns was not found.
-  for(size_t i = 0; i < corner_values.size(); i++) {
-    if(corner_values[i].empty()) {
+  for(size_t i = 0; i < corner_values.size();) {
+    if(corner_values[i].empty() || obj_space_points[i].empty()) {
       corner_values.erase(corner_values.begin() + i);
       obj_space_points.erase(obj_space_points.begin() + i);
+    } else {
+      i++;
     }
   }
 
@@ -307,7 +338,6 @@ void initPatternsCV()
 //  cout << R << endl << endl;
 
   R = R.t();
-  R.col(2) = -R.col(2);
 
 //  cout << "Transposed Rodrigues matrix:\n";
 //  cout << R << endl << endl;
@@ -328,9 +358,8 @@ void initPatternsCV()
 
   cout << T << endl;
 
-  cam_matrix.col(2) = -cam_matrix.col(2);
   cout << "Camera matrix:\n" << cam_matrix << endl;
-//  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
+  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
 
   /*------------------TESTS------------------*/
 //  vector<Mat> rvecs_test(obj_space_points.size());
@@ -357,16 +386,6 @@ void initPatternsCV()
     cout << "(" << obj_space_points[0][i].x << ", " << obj_space_points[0][i].y << ", " << obj_space_points[0][i].z << ")\t";
     cout << "(" << corner_values[0][i].x << ", " << corner_values[0][i].y << ")\n";
   }*/
-
-  /*for(int i = 0; i < rvecs.size(); i++) {
-    cout << rvecs[i] << endl;
-  }
-  cout << endl;
-
-  for(int i = 0; i < tvecs.size(); i++) {
-    cout << tvecs[i] << endl;
-  }
-  cout << endl;*/
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
