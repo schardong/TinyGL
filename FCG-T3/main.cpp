@@ -30,7 +30,7 @@ void destroy();
 void update();
 void draw();
 void reshape(int w, int h);
-void keyPress(unsigned char c, int x, int y);
+void keyPress(unsigned char c, int, int);
 void specialKeyPress(int c, int x, int y);
 void exit_cb();
 void printInstructions();
@@ -181,7 +181,7 @@ void reshape(int w, int h)
   WINDOW_H = h;
 }
 
-void keyPress(unsigned char c, int x, int y)
+void keyPress(unsigned char c, int, int)
 {
   int t = c - 49;
   if(t >= 0 && t <= 9) {
@@ -276,6 +276,7 @@ void initPatternsCV()
     
   }
 
+  //Reducing the vector size if one of the patterns was not found.
   for(size_t i = 0; i < corner_values.size(); i++) {
     if(corner_values[i].empty()) {
       corner_values.erase(corner_values.begin() + i);
@@ -299,8 +300,57 @@ void initPatternsCV()
   double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
   log->log("Calibration finished. Reprojection error = " + to_string(rpe));
 
-  cout << "Camera matrix: " << cam_matrix << endl;
-  cout << "Distortion coefficients: " << dist_coeffs << endl;
+  Mat R;
+  Rodrigues(rvecs[0], R);
+
+  cout << "Rodrigues matrix:\n";
+  cout << R << endl << endl;
+
+  R = R.t();
+
+  cout << "Transposed Rodrigues matrix:\n";
+  cout << R << endl << endl;
+
+  Mat t = -R * tvecs[0];
+
+  cout << "Translation vector:\n";
+  cout << t << endl << endl;
+
+  Mat T(4, 4, R.type());
+  T(Range(0, 3), Range(0, 3)) = R;
+  T(Range(0, 3), Range(3, 4)) = t;
+
+  double* p = T.ptr<double>(3);
+  p[0] = p[1] = p[2] = 0;
+  p[3] = 1;
+
+  cout << T << endl;
+
+
+
+//  cout << "Camera matrix:\n" << cam_matrix << endl;
+//  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
+
+  /*------------------TESTS------------------*/
+//  vector<Mat> rvecs_test(obj_space_points.size());
+//  vector<Mat> tvecs_test(obj_space_points.size());
+
+//  log->log("Begining the solvePnP calls.");
+//  for(size_t i = 0; i < obj_space_points.size(); i++) {
+//    bool found = solvePnP(obj_space_points[i], corner_values[i], cam_matrix, dist_coeffs, rvecs_test[i], tvecs_test[i]);
+
+//    if(found) {
+//      cv::Mat diff = rvecs_test[i] != rvecs[i];
+//      bool eq = cv::countNonZero(diff) == 0;
+//      if(eq)
+//        cout << "Not the same rotation vector!\n" << rvecs_test[i] << endl << rvecs[i] << endl;
+
+//      diff = tvecs_test[i] != tvecs[i];
+//      eq = cv::countNonZero(diff) == 0;
+//      if(eq)
+//        cout << "Not the same translation vector!\n" << tvecs_test[i] << endl << tvecs[i] << endl;
+//    }
+//  }
 
   /*for(size_t i = 0; i < obj_space_points[0].size(); i++) {
     cout << "(" << obj_space_points[0][i].x << ", " << obj_space_points[0][i].y << ", " << obj_space_points[0][i].z << ")\t";
