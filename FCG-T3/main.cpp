@@ -303,32 +303,33 @@ void initPatternsCV()
   Mat R;
   Rodrigues(rvecs[0], R);
 
-  cout << "Rodrigues matrix:\n";
-  cout << R << endl << endl;
+//  cout << "Rodrigues matrix:\n";
+//  cout << R << endl << endl;
 
   R = R.t();
+  R.col(2) = -R.col(2);
 
-  cout << "Transposed Rodrigues matrix:\n";
-  cout << R << endl << endl;
+//  cout << "Transposed Rodrigues matrix:\n";
+//  cout << R << endl << endl;
 
   Mat t = -R * tvecs[0];
 
-  cout << "Translation vector:\n";
-  cout << t << endl << endl;
+//  cout << "Translation vector:\n";
+//  cout << t << endl << endl;
 
-  Mat T(4, 4, R.type());
-  T(Range(0, 3), Range(0, 3)) = R;
-  T(Range(0, 3), Range(3, 4)) = t;
+  Mat T = Mat::eye(4, 4, R.type());
 
-  double* p = T.ptr<double>(3);
-  p[0] = p[1] = p[2] = 0;
-  p[3] = 1;
+  R.copyTo(T.colRange(0, 3).rowRange(0, 3));
+  t.copyTo(T.colRange(3, 4).rowRange(0, 3));
+
+//  double* p = T.ptr<double>(3);
+//  p[0] = p[1] = p[2] = 0;
+//  p[3] = 1;
 
   cout << T << endl;
 
-
-
-//  cout << "Camera matrix:\n" << cam_matrix << endl;
+  cam_matrix.col(2) = -cam_matrix.col(2);
+  cout << "Camera matrix:\n" << cam_matrix << endl;
 //  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
 
   /*------------------TESTS------------------*/
