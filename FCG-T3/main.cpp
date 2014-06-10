@@ -45,6 +45,8 @@ glm::mat4 projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
+Calibration* g_calib;
+
 GLuint g_patternsTex[NUM_IMAGES];
 GLuint g_cornersTex[NUM_IMAGES];
 GLuint g_patternIdx = 0;
@@ -120,7 +122,6 @@ void init()
 
   cout << endl;
 
-
   Quad* q = new Quad();
   q->setDrawCb(drawQuad);
   q->setMaterialColor(glm::vec4(1.f));
@@ -136,6 +137,7 @@ void init()
   TinyGL::getInstance()->addResource(MESH, "sphere", sph);
 
   printInstructions();
+  initPatternsCV();
 
   vector<string> patt_path;
 
@@ -151,26 +153,26 @@ void init()
     patt_path.push_back(string(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp"));
   }
 
-  Calibration* c;
-  c = new Calibration(patt_path);
-  double rpe = c->runCalibration();
+
+  g_calib = new Calibration(patt_path);
+  double rpe = g_calib->runCalibration();
 
   if(rpe > 1.f) {
     Logger::getInstance()->error("Reprojection error larger than acceptable. " + to_string(rpe));
   }
 
-  Mat proj_cv = c->getProjMatrixGL(0, 640, 0, 480, 1, 5000);
-  cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
+  //Mat proj_cv = g_calib->getProjMatrixGL(0, 640, 0, 480, 1, 5000);
+  //cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
 
-  for(int i = 0; i < 4; i++)
-    for(int j = 0; j < 4; j++)
-      projMatrix[i][j] = proj_cv.at<double>(i, j);
+//  for(int i = 0; i < 4; i++)
+//    for(int j = 0; j < 4; j++)
+//      projMatrix[i][j] = proj_cv.at<double>(i, j);
 
-  c->getMVPMatrixGL(0, 640, 0, 480, 1, 5000);
+  g_calib->getMVPMatrixGL(0, 640, 0, 480, 1, 5000);
   glm::mat4 MVP = glm::mat4(1.f);
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      MVP[i][j] = c->m_mvpMatrices[0].at<double>(i, j);
+      MVP[i][j] = g_calib->m_mvpMatrices[g_patternIdx].at<double>(i, j);
 
   Shader* square = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
   square->bind();
@@ -184,7 +186,6 @@ void init()
   simple->setUniformMatrix("MVP", MVP);
   TinyGL::getInstance()->addResource(SHADER, "simple", simple);
 
-  delete c;
   initCalled = true;
 }
 
@@ -195,6 +196,7 @@ void destroy()
   glBindTexture(GL_TEXTURE_2D, 0);
   glDeleteTextures(NUM_IMAGES, g_patternsTex);
   glDeleteTextures(NUM_IMAGES, g_cornersTex);
+  delete g_calib;
 }
 
 void update()
@@ -215,6 +217,7 @@ void draw()
   TinyGL* glPtr = TinyGL::getInstance();
   Shader* s = glPtr->getShader("square");
 
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   s->bind();
   glActiveTexture(GL_TEXTURE0);
   if(!g_showCorner)
@@ -229,6 +232,7 @@ void draw()
   s = glPtr->getShader("simple");
   s->bind();
 
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   Mesh* m = glPtr->getMesh("sphere");
   m->bind();
   m->draw();
@@ -268,6 +272,16 @@ void keyPress(unsigned char c, int, int)
   }
 
   string title = WINDOW_TITLE + " pattern";
+
+  glm::mat4 MVP = glm::mat4(1.f);
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      MVP[i][j] = g_calib->m_mvpMatrices[g_patternIdx].at<double>(i, j);
+
+  Shader* s = TinyGL::getInstance()->getShader("simple");
+  s->bind();
+  s->setUniformMatrix("MVP", MVP);
+  Shader::unbind();
 
   if(g_patternIdx < 10) title += "0";
   title += to_string(g_patternIdx + 1);
@@ -310,14 +324,14 @@ void initPatternsCV()
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_IMAGES / 2; i++) {
-    string prefix = "../Resources/images/left";
+    string prefix = "../../../Resources/images/left";
     if(i < 9) prefix += "0";
     patterns[i] = imread(prefix + to_string(i+1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
 
   for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
-    string prefix = "../Resources/images/right";
+    string prefix = "../../../Resources/images/right";
     if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
     patterns[i] = imread(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp");
@@ -326,114 +340,114 @@ void initPatternsCV()
   log->log("Done reading the input images.");
 
   //Detecting the chessboard corners.
-  vector< vector<Point2f> > corner_values(NUM_IMAGES);
-  vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
-  vector<Mat> corners(NUM_IMAGES);
+//  vector< vector<Point2f> > corner_values(NUM_IMAGES);
+//  vector< vector<Point3f> > obj_space_points(NUM_IMAGES);
+//  vector<Mat> corners(NUM_IMAGES);
 
-  for(int i = 0; i < NUM_IMAGES; i++) {
-    log->log("Finding the chessboard corners on the image " + to_string(i + 1));
-    Size s(7, 6);
-    corners[i] = Mat::zeros(patterns[i].size(), CV_32FC1);
+//  for(int i = 0; i < NUM_IMAGES; i++) {
+//    log->log("Finding the chessboard corners on the image " + to_string(i + 1));
+//    Size s(7, 6);
+//    corners[i] = Mat::zeros(patterns[i].size(), CV_32FC1);
 
-    bool found = findChessboardCorners(patterns[i], s, corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
-
-    if(found) {
-      cornerSubPix(patterns[i], corner_values[i], Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
-
-      for(size_t j = 0; j < corner_values[i].size(); j++)
-        corners[i].at<float>(corner_values[i][j]) = 1.f;
-
-      log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
-
-      //Creating the object space coordinate points for camera calibration.
-      for(size_t j = 0; j < corner_values[i].size(); j++)
-        obj_space_points[i].push_back(Point3f(corner_values[i][j].x / s.width, corner_values[i][j].y / s.height, 0));
-
-    }
-    
-  }
-
-  //Reducing the vector size if one of the patterns was not found.
-  for(size_t i = 0; i < corner_values.size();) {
-    if(corner_values[i].empty() || obj_space_points[i].empty()) {
-      corner_values.erase(corner_values.begin() + i);
-      obj_space_points.erase(obj_space_points.begin() + i);
-    } else {
-      i++;
-    }
-  }
-
-  log->log("Detection complete. Initializing calibration parameters.");
-  //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
-  Mat cam_matrix;
-  Mat dist_coeffs = Mat::zeros(8, 1, CV_64F);
-  vector<Mat> rvecs;
-  vector<Mat> tvecs;
-
-  cam_matrix = Mat::eye(3, 3, CV_64F);
-  cam_matrix.ptr<double>(0)[0] = 1;
-  cam_matrix.ptr<double>(1)[1] = 1;
-
-  //Calibrating.
-  log->log("Calibration starting.");
-  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
-  log->log("Calibration finished. Reprojection error = " + to_string(rpe));
-
-  Mat R;
-  Rodrigues(rvecs[0], R);
-
-//  cout << "Rodrigues matrix:\n";
-//  cout << R << endl << endl;
-
-  R = R.t();
-
-//  cout << "Transposed Rodrigues matrix:\n";
-//  cout << R << endl << endl;
-
-  Mat t = -R * tvecs[0];
-
-//  cout << "Translation vector:\n";
-//  cout << t << endl << endl;
-
-  Mat T = Mat::eye(4, 4, R.type());
-
-  R.copyTo(T.colRange(0, 3).rowRange(0, 3));
-  t.copyTo(T.colRange(3, 4).rowRange(0, 3));
-
-//  double* p = T.ptr<double>(3);
-//  p[0] = p[1] = p[2] = 0;
-//  p[3] = 1;
-
-  cout << T << endl;
-
-  cout << "Camera matrix:\n" << cam_matrix << endl;
-  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
-
-  /*------------------TESTS------------------*/
-//  vector<Mat> rvecs_test(obj_space_points.size());
-//  vector<Mat> tvecs_test(obj_space_points.size());
-
-//  log->log("Begining the solvePnP calls.");
-//  for(size_t i = 0; i < obj_space_points.size(); i++) {
-//    bool found = solvePnP(obj_space_points[i], corner_values[i], cam_matrix, dist_coeffs, rvecs_test[i], tvecs_test[i]);
+//    bool found = findChessboardCorners(patterns[i], s, corner_values[i], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FAST_CHECK);
 
 //    if(found) {
-//      cv::Mat diff = rvecs_test[i] != rvecs[i];
-//      bool eq = cv::countNonZero(diff) == 0;
-//      if(eq)
-//        cout << "Not the same rotation vector!\n" << rvecs_test[i] << endl << rvecs[i] << endl;
+//      cornerSubPix(patterns[i], corner_values[i], Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
 
-//      diff = tvecs_test[i] != tvecs[i];
-//      eq = cv::countNonZero(diff) == 0;
-//      if(eq)
-//        cout << "Not the same translation vector!\n" << tvecs_test[i] << endl << tvecs[i] << endl;
+//      for(size_t j = 0; j < corner_values[i].size(); j++)
+//        corners[i].at<float>(corner_values[i][j]) = 1.f;
+
+//      log->log(to_string(corner_values[i].size()) + " chessboard corners found.");
+
+//      //Creating the object space coordinate points for camera calibration.
+//      for(size_t j = 0; j < corner_values[i].size(); j++)
+//        obj_space_points[i].push_back(Point3f(corner_values[i][j].x / s.width, corner_values[i][j].y / s.height, 0));
+
+//    }
+    
+//  }
+
+//  //Reducing the vector size if one of the patterns was not found.
+//  for(size_t i = 0; i < corner_values.size();) {
+//    if(corner_values[i].empty() || obj_space_points[i].empty()) {
+//      corner_values.erase(corner_values.begin() + i);
+//      obj_space_points.erase(obj_space_points.begin() + i);
+//    } else {
+//      i++;
 //    }
 //  }
 
-  /*for(size_t i = 0; i < obj_space_points[0].size(); i++) {
-    cout << "(" << obj_space_points[0][i].x << ", " << obj_space_points[0][i].y << ", " << obj_space_points[0][i].z << ")\t";
-    cout << "(" << corner_values[0][i].x << ", " << corner_values[0][i].y << ")\n";
-  }*/
+//  log->log("Detection complete. Initializing calibration parameters.");
+//  //Initializing the camera matrix. Horizontal and vertical aspect ratios are assumed 1.
+//  Mat cam_matrix;
+//  Mat dist_coeffs = Mat::zeros(8, 1, CV_64F);
+//  vector<Mat> rvecs;
+//  vector<Mat> tvecs;
+
+//  cam_matrix = Mat::eye(3, 3, CV_64F);
+//  cam_matrix.ptr<double>(0)[0] = 1;
+//  cam_matrix.ptr<double>(1)[1] = 1;
+
+//  //Calibrating.
+//  log->log("Calibration starting.");
+//  double rpe = calibrateCamera(obj_space_points, corner_values, patterns[0].size(), cam_matrix, dist_coeffs, rvecs, tvecs);
+//  log->log("Calibration finished. Reprojection error = " + to_string(rpe));
+
+//  Mat R;
+//  Rodrigues(rvecs[0], R);
+
+////  cout << "Rodrigues matrix:\n";
+////  cout << R << endl << endl;
+
+//  R = R.t();
+
+////  cout << "Transposed Rodrigues matrix:\n";
+////  cout << R << endl << endl;
+
+//  Mat t = -R * tvecs[0];
+
+////  cout << "Translation vector:\n";
+////  cout << t << endl << endl;
+
+//  Mat T = Mat::eye(4, 4, R.type());
+
+//  R.copyTo(T.colRange(0, 3).rowRange(0, 3));
+//  t.copyTo(T.colRange(3, 4).rowRange(0, 3));
+
+////  double* p = T.ptr<double>(3);
+////  p[0] = p[1] = p[2] = 0;
+////  p[3] = 1;
+
+//  cout << T << endl;
+
+//  cout << "Camera matrix:\n" << cam_matrix << endl;
+//  cout << "Distortion coefficients:\n" << dist_coeffs << endl;
+
+//  /*------------------TESTS------------------*/
+////  vector<Mat> rvecs_test(obj_space_points.size());
+////  vector<Mat> tvecs_test(obj_space_points.size());
+
+////  log->log("Begining the solvePnP calls.");
+////  for(size_t i = 0; i < obj_space_points.size(); i++) {
+////    bool found = solvePnP(obj_space_points[i], corner_values[i], cam_matrix, dist_coeffs, rvecs_test[i], tvecs_test[i]);
+
+////    if(found) {
+////      cv::Mat diff = rvecs_test[i] != rvecs[i];
+////      bool eq = cv::countNonZero(diff) == 0;
+////      if(eq)
+////        cout << "Not the same rotation vector!\n" << rvecs_test[i] << endl << rvecs[i] << endl;
+
+////      diff = tvecs_test[i] != tvecs[i];
+////      eq = cv::countNonZero(diff) == 0;
+////      if(eq)
+////        cout << "Not the same translation vector!\n" << tvecs_test[i] << endl << tvecs[i] << endl;
+////    }
+////  }
+
+//  /*for(size_t i = 0; i < obj_space_points[0].size(); i++) {
+//    cout << "(" << obj_space_points[0][i].x << ", " << obj_space_points[0][i].y << ", " << obj_space_points[0][i].z << ")\t";
+//    cout << "(" << corner_values[0][i].x << ", " << corner_values[0][i].y << ")\n";
+//  }*/
 
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
@@ -451,18 +465,18 @@ void initPatternsCV()
   }
 
   //Same as above.
-  glGenTextures(NUM_IMAGES, g_cornersTex);
-  for(int i = 0; i < NUM_IMAGES; i++) {
-    int w = corners[i].cols;
-    int h = corners[i].rows;
-    float* corner_data = (float*)corners[i].data;
-    glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
-  }
+//  glGenTextures(NUM_IMAGES, g_cornersTex);
+//  for(int i = 0; i < NUM_IMAGES; i++) {
+//    int w = corners[i].cols;
+//    int h = corners[i].rows;
+//    float* corner_data = (float*)corners[i].data;
+//    glBindTexture(GL_TEXTURE_2D, g_cornersTex[i]);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_FLOAT, corner_data);
+//  }
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glutReshapeWindow(patterns[0].cols, patterns[0].rows);
