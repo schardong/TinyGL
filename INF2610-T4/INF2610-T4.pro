@@ -19,6 +19,7 @@ OTHER_FILES += \
     ../Resources/shaders/def_spass.vs \
     ../Resources/shaders/ssao.fs \
     ../Resources/shaders/blur.fs \
+    ../Resources/shaders/def_qpass.fs \
 
 shader.path = $$OUT_PWD/../Resources
 shader.files = $$OTHER_FILES

@@ -27,7 +27,7 @@ extern "C" {
 static const int W_SPHERES = 10;
 static const int H_SPHERES = 10;
 static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 1;
+static const int NUM_LIGHTS = 2;
 static int WINDOW_W = 700;
 static int WINDOW_H = 700;
 
@@ -40,7 +40,7 @@ void destroy();
 void update();
 void draw();
 void reshape(int w, int h);
-void keyPress(unsigned char c, int x, int y);
+void keyPress(unsigned char c, int, int);
 void specialKeyPress(int c, int x, int y);
 void exit_cb();
 
@@ -66,11 +66,11 @@ enum {
 
 GLuint g_colorId[num_buffers];
 GLuint g_depthId;
+GLuint g_ssaoColorId;
 GLuint g_blurColorId;
 GLuint g_rndNormalId;
 
 void resendShaderUniforms();
-void setupLights();
 void setupFBO(GLuint w, GLuint h);
 void setupShaders();
 void setupGeometry();
@@ -150,7 +150,6 @@ void init()
   setupGeometry();
   setupShaders();
   setupFBO(WINDOW_W, WINDOW_H);
-  setupLights();
 
   Image* rnd_normal = imgReadBMP("../../../Resources/images/noise_norm.bmp");
   
@@ -187,7 +186,7 @@ void destroy()
 
   glDeleteTextures(num_buffers, g_colorId);
   glDeleteTextures(1, &g_depthId);
-  glDeleteTextures(1, &g_blurColorId);
+  glDeleteTextures(1, &g_ssaoColorId);
   glDeleteTextures(1, &g_rndNormalId);
 }
 
@@ -246,12 +245,23 @@ void draw()
 
   glPtr->draw("screenQuad");
 
-  FramebufferObject::unbind();
-
   //Third pass. Blurring the results.
+
+  drawBuffer[0] = GL_COLOR_ATTACHMENT4;
+  glDrawBuffers(1, &drawBuffer[0]);
+
   glClear(GL_COLOR_BUFFER_BIT);
 
   s = glPtr->getShader("tPass");
+  s->bind();
+
+  glPtr->draw("screenQuad");
+
+  FramebufferObject::unbind();
+  //Fourth pass. Composing the final scene.
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  s = glPtr->getShader("qPass");
   s->bind();
 
   glPtr->draw("screenQuad");
@@ -277,6 +287,10 @@ void reshape(int w, int h)
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
   glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, g_ssaoColorId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, NULL);
+
+  glActiveTexture(GL_TEXTURE7);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, NULL);
 
@@ -288,7 +302,7 @@ void reshape(int w, int h)
   Shader::unbind();
 }
 
-void keyPress(unsigned char c, int x, int y)
+void keyPress(unsigned char c, int, int)
 {
   bool cameraChanged = false;
   //printf("%d\n", c);
@@ -329,17 +343,21 @@ void keyPress(unsigned char c, int x, int y)
     Shader* fPass = TinyGL::getInstance()->getShader("fPass");
     Shader* sPass = TinyGL::getInstance()->getShader("sPass");
     Shader* tPass = TinyGL::getInstance()->getShader("tPass");
+    Shader* qPass = TinyGL::getInstance()->getShader("qPass");
     delete fPass;
     delete sPass;
     delete tPass;
+    delete qPass;
 
     fPass = new Shader("../../../Resources/shaders/ssao_fpass.vs", "../../../Resources/shaders/def_fpass.fs");
     sPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/ssao.fs");
     tPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/blur.fs");
+    qPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/def_qpass.fs");
 
     TinyGL::getInstance()->addResource(SHADER, "fPass", fPass);
     TinyGL::getInstance()->addResource(SHADER, "sPass", sPass);
-    TinyGL::getInstance()->addResource(SHADER, "tPass", tPass); 
+    TinyGL::getInstance()->addResource(SHADER, "tPass", tPass);
+    TinyGL::getInstance()->addResource(SHADER, "qPass", qPass);
 
     resendShaderUniforms();
     break;
@@ -373,6 +391,7 @@ void resendShaderUniforms()
   Shader* fPass = TinyGL::getInstance()->getShader("fPass");
   Shader* sPass = TinyGL::getInstance()->getShader("sPass");
   Shader* tPass = TinyGL::getInstance()->getShader("tPass");
+  Shader* qPass = TinyGL::getInstance()->getShader("qPass");
 
   fPass->bind();
   fPass->setUniformMatrix("viewMatrix", viewMatrix);
@@ -417,44 +436,22 @@ void resendShaderUniforms()
   tPass->setUniformfv("u_screenSize", ss, 2);
   
   glActiveTexture(GL_TEXTURE6);
-  glBindTexture(GL_TEXTURE_2D, g_blurColorId);
+  glBindTexture(GL_TEXTURE_2D, g_ssaoColorId);
   tPass->setUniform1i("u_ssaoMap", 6);
 
-}
+  qPass->bind();
+  qPass->bindFragDataLoc("fColor", 0);
+  qPass->setUniformMatrix("projMatrix", glm::ortho(-1.f, 1.f, -1.f, 1.f));
+  qPass->setUniformMatrix("modelMatrix", quad->m_modelMatrix);
+  qPass->setUniform4fv("u_materialColor", quad->getMaterialColor());
 
-void setupLights()
-{
-  Light** lightSources = new Light*[NUM_LIGHTS];
+  qPass->setUniform1i("u_diffuseMap", 0);
+  qPass->setUniform1i("u_normalMap", 1);
+  qPass->setUniform1i("u_vertexMap", 2);
+  qPass->setUniform1i("u_ssaoMap", 6);
+  qPass->setUniform4fv("u_lightPos", glm::vec4(30, 8, 2, 1));
 
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    lightSources[i] = new Light();
-    lightSources[i]->setPosition(glm::vec3(rand() % 35, 5 + rand() % 10, rand() % 35));
-    lightSources[i]->setColor(glm::vec3((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX));
-  }
-
-  GLfloat* lightCoords = new GLfloat[4 * NUM_LIGHTS];
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    glm::vec3 pos = lightSources[i]->getPosition();
-
-    lightCoords[i * 4] = pos.x;
-    lightCoords[i * 4 + 1] = pos.y;
-    lightCoords[i * 4 + 2] = pos.z;
-    lightCoords[i * 4 + 3] = 1.f;
-  }
-
-  Shader* s = TinyGL::getInstance()->getShader("sPass");
-  s->setUniform1i("u_numLights", NUM_LIGHTS);
-
-  GLuint idxPos = glGetUniformBlockIndex(s->getProgramId(), "LightPos");
-  glUniformBlockBinding(s->getProgramId(), idxPos, 0);
-
-  BufferObject* ubuffLightPos = new BufferObject(GL_UNIFORM_BUFFER, sizeof(GLfloat)* 3 * NUM_LIGHTS, GL_STATIC_DRAW);
-  ubuffLightPos->sendData(lightCoords);
-
-  glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubuffLightPos->getId());
-  TinyGL::getInstance()->addResource(BUFFER, "lightpos_buff", ubuffLightPos);
-
-  delete lightCoords;
+  Shader::unbind();
 }
 
 void setupFBO(GLuint w, GLuint h)
@@ -474,6 +471,15 @@ void setupFBO(GLuint w, GLuint h)
     fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, g_colorId[i], 0);
   }
 
+  glGenTextures(1, &g_ssaoColorId);
+  glBindTexture(GL_TEXTURE_2D, g_ssaoColorId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_ssaoColorId, 0);
+
   glGenTextures(1, &g_blurColorId);
   glBindTexture(GL_TEXTURE_2D, g_blurColorId);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, w, h, 0, GL_RED, GL_FLOAT, 0);
@@ -481,7 +487,7 @@ void setupFBO(GLuint w, GLuint h)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_blurColorId, 0);
+  fbo->attachTexBuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, g_blurColorId, 0);
 
   glGenTextures(1, &g_depthId);
   glBindTexture(GL_TEXTURE_2D, g_depthId);
@@ -505,12 +511,14 @@ void setupShaders()
   Shader* fPass = new Shader("../../../Resources/shaders/ssao_fpass.vs", "../../../Resources/shaders/def_fpass.fs");
   Shader* sPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/ssao.fs");
   Shader* tPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/blur.fs");
+  Shader* qPass = new Shader("../../../Resources/shaders/def_spass.vs", "../../../Resources/shaders/def_qpass.fs");
 
   Shader::unbind();
 
   TinyGL::getInstance()->addResource(SHADER, "fPass", fPass);
   TinyGL::getInstance()->addResource(SHADER, "sPass", sPass);
   TinyGL::getInstance()->addResource(SHADER, "tPass", tPass);
+  TinyGL::getInstance()->addResource(SHADER, "qPass", qPass);
 }
 
 void setupGeometry()

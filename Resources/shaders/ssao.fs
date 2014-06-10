@@ -1,6 +1,6 @@
 #version 330 core
 
-layout (location = 0) out float  fColor;
+layout (location = 0) out float fColor;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
@@ -16,17 +16,10 @@ uniform vec2 u_screenSize;
 
 #define M_PI 3.1415926535897932384626433832795
 
-const int g_maxLights = 50;
-
 in vec2 vTexCoord;
 
-layout (std140) uniform LightPos
-{
-  vec4 u_lightPos[g_maxLights];
-};
-
 const int g_sampleCount = 16;
-const int g_radius = 16;
+const int g_radius = 20;
 
 const vec2 g_poissonDisk[] = vec2[](
   vec2( -0.94201624,  -0.39906216 ),
@@ -125,6 +118,6 @@ void main()
       occ_factor += calcOcclusion(vertex_camera, normal_camera, samplePos, sampleNormal);
     }
     
-    fColor = 1 - 3 * occ_factor / g_sampleCount;
+    fColor = 1 - 5 * occ_factor / g_sampleCount;
   }
  }
