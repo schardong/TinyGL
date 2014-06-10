@@ -31,7 +31,7 @@ void main()
     float diff = max(dot(normal_camera, light_dir), 0.f);
     fColor.rgb += diff * diff_color.rgb;// / (dist);
       
-    if(diff > 0.f) {
+    /*if(diff > 0.f) {
       vec3 V = normalize(-vertex_camera);
       vec3 R = normalize(reflect(-light_dir, normal_camera));
       
@@ -39,7 +39,7 @@ void main()
       float spec = pow(angle, 128.f);
       vec3 specColor = vec3(spec);
       fColor.rgb += specColor;
-    }
+    }*/
       
     fColor *= ambient_color;
   }
