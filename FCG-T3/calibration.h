@@ -23,6 +23,10 @@ public:
 
   double runCalibration();
 
+  vector<Mat> getInputPatterns() {
+    return m_inputPatt;
+  }
+
   Mat getIntCamMatrix() {
     return Mat(m_intCamMatrix);
   }

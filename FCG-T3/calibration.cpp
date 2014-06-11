@@ -218,16 +218,12 @@ Mat Calibration::getViewMatrix(size_t idx)
   }
   view_mat.at<double>(3, 3) = 1.0f;
 
-  Mat cvToGl = Mat::zeros(4, 4, CV_64F);
-  cvToGl.at<double>(0, 0) = 1.0f;
-  cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
+  Mat cvToGl = Mat::eye(4, 4, CV_64F);
+  //cvToGl.at<double>(0, 0) = -1.0f; // Invert the y axis
+  //cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
   cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
-  cvToGl.at<double>(3, 3) = 1.0f;
   view_mat = cvToGl * view_mat;
-
-  Mat transp;
-  //transpose(view_mat, transp);
-
+  
   return view_mat;
 }
 
