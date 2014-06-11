@@ -10,8 +10,8 @@ HEADERS += fcgt2config.h
 SOURCES += main.cpp 
 
 OTHER_FILES += \
-    ../Resources/fcgt2.vs \
-    ../Resources/fcgt2.fs
+    ../Resources/shaders/fcgt2.vs \
+    ../Resources/shaders/fcgt2.fs
 
 INCLUDEPATH += ../include
 DEPENDPATH += ../include

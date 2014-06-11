@@ -115,8 +115,13 @@ Mat Calibration::getIntCamMatrixOpenGL(float near, float far)
   //glIntMat.col(1) = -glIntMat.col(1);
   //glIntMat.col(2) = -glIntMat.col(2);
 
-  glIntMat.col(2).row(3) = near + far;
-  glIntMat.col(3).row(2) = near * far;
+  glIntMat.at<double>(2, 2) = -near + far;
+  glIntMat.at<double>(2, 3) = -near * far;
+  glIntMat.at<double>(3, 2) = 1.f;
+
+//  glIntMat.col(2).row(3) = -near + far;
+//  glIntMat.col(3).row(2) = -near * far;
+//  glIntMat.col(2).row(3) = 1.f;
 
   return glIntMat;
 }
@@ -142,31 +147,27 @@ Mat Calibration::getProjMatrixGL(float l, float r, float b, float t, float n, fl
 
 void Calibration::getMVPMatrixGL(float l, float r, float b, float t, float n, float f)
 {
-  //Mat proj = getProjMatrixGL(l, r, b, t, n, f);
-  Mat proj = Mat::zeros(4, 4, m_mvpMatrices[0].type());
+  Mat proj = getProjMatrixGL(l, r, b, t, n, f);
+//  Mat proj = Mat::zeros(4, 4, m_mvpMatrices[0].type());
 
-  proj.at<double>(0, 0) = 2 * m_intCamMatrix.at<double>(0, 0) / (r - l);
-  proj.at<double>(1, 1) = 2 * m_intCamMatrix.at<double>(1, 1) / (t - b);
-  proj.at<double>(2, 2) = -(f + n) / (f - n);
-  proj.at<double>(3, 2) = -1;
+//  proj.at<double>(0, 0) = 2 * m_intCamMatrix.at<double>(0, 0) / (r - l);
+//  proj.at<double>(1, 1) = 2 * m_intCamMatrix.at<double>(1, 1) / (t - b);
+//  proj.at<double>(2, 2) = -(f + n) / (f - n);
+//  proj.at<double>(3, 2) = -1;
 
-  proj.at<double>(0, 2) = -1 + (2 * m_intCamMatrix.at<double>(0, 2) / (r - l));
-  proj.at<double>(1, 2) = -1 + (2 * m_intCamMatrix.at<double>(1, 2) / (t - b));
-  proj.at<double>(2, 3) = -2 * f * n / (f - n);
-
-//  Mat rot2D = Mat::eye(4, 4, CV_64FC1);
-//  rot2D.at<double>(0, 0) = rot2D.at<double>(1, 1) = 0;
-//  rot2D.at<double>(0, 1) = 1;
-//  rot2D.at<double>(1, 0) = -1;
+//  proj.at<double>(0, 2) = -1 + (2 * m_intCamMatrix.at<double>(0, 2) / (r - l));
+//  proj.at<double>(1, 2) = -1 + (2 * m_intCamMatrix.at<double>(1, 2) / (t - b));
+//  proj.at<double>(2, 3) = -2 * f * n / (f - n);
 
   cout << proj << endl << endl;
+//  cout << proj2 << endl << endl;
 
   for(size_t i = 0; i < m_mvpMatrices.size(); i++) {
     Mat tmp = Mat::eye(4, 4, m_mvpMatrices[i].type());
     tmp.at<double>(1, 1) = tmp.at<double>(2, 2) = -1;
 
     Mat a = tmp * m_mvpMatrices[i];
-    m_mvpMatrices[i] = proj * a;
+    m_mvpMatrices[i] = proj * m_mvpMatrices[i];
   }
 }
 

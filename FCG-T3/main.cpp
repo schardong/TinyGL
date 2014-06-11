@@ -168,7 +168,7 @@ void init()
 //    for(int j = 0; j < 4; j++)
 //      projMatrix[i][j] = proj_cv.at<double>(i, j);
 
-  g_calib->getMVPMatrixGL(0, 640, 0, 480, 1, 5000);
+  g_calib->getMVPMatrixGL(0, 640, 0, 480, 1, 100);
   glm::mat4 MVP = glm::mat4(1.f);
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
