@@ -6,8 +6,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/transform.hpp>
 
 using namespace std;
 using namespace cv;
@@ -35,9 +37,15 @@ public:
   void getMVPMatrixGL(float l, float r, float b, float t, float n, float f);
 
   glm::quat getRotationQuat(size_t idx);
+  glm::mat4 getProjMatrix(Size img_size, float near, float far);
+  glm::vec4 getTransVec(size_t idx);
+
+  Mat getViewMatrix(size_t idx);
 
   //temporary variables.
   vector<Mat> m_mvpMatrices;
+  vector<Mat> m_rvecs;
+  vector<Mat> m_tvecs;
 
 private:
   vector<Mat> m_inputPatt;  //Input patterns.

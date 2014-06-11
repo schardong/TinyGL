@@ -87,13 +87,6 @@ void Shader::setUniformMatrix(std::string name, glm::mat4 m)
 {
   GLint loc = getUniformLocation(name.c_str());
   if (loc == -1) {
-    //std::cerr << "ERROR: The variable name " << name << " was not set because its location was not found on the shader program " << getProgramId() << std::endl;
-    //std::cerr << "In files-> Vertex shader: " << m_sVertPath
-    //          << " Fragment shader: " << m_sFragPath
-    //          << " Geometry shader: " << m_sGeomPath
-    //          << " Tesselation control shader: " << m_sTessControlPath
-    //          << " Tesselation evaluation shader: " << m_sTessEvalPath
-    //          << std::endl;
     return;
   }
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));

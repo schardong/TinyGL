@@ -41,7 +41,7 @@ void printInstructions();
 int g_window = -1;
 
 glm::mat4 viewMatrix;
-glm::mat4 projMatrix;
+glm::mat4 g_projMatrix;
 glm::vec3 g_eye;
 glm::vec3 g_center;
 
@@ -112,7 +112,7 @@ void init()
   g_eye = glm::vec3(0.0, 0.0, 2.0);
   g_center = glm::vec3(0, 0, 0);
   viewMatrix = glm::lookAt(g_eye, g_center, glm::vec3(0, 1, 0));
-  projMatrix = glm::perspective(45.f, 1.f, 1.f, 5.f);
+  g_projMatrix = glm::perspective(48.265289f, 480.f/640.f, 1.f, 5.f);
 
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 4; j++)
@@ -129,7 +129,7 @@ void init()
   q->m_normalMatrix = glm::mat3(glm::inverseTranspose(viewMatrix * q->m_modelMatrix));
   TinyGL::getInstance()->addResource(MESH, "quad", q);
 
-  Sphere* sph = new Sphere(80, 80);
+  Sphere* sph = new Sphere(32, 32);
   sph->setDrawCb(drawSphere);
   sph->setMaterialColor(glm::vec4(0, 0, 1, 0));
   sph->m_modelMatrix = glm::mat4(1.f);
@@ -142,17 +142,16 @@ void init()
   vector<string> patt_path;
 
   for(int i = 0; i < NUM_IMAGES / 2; i++) {
-    string prefix = "../../../Resources/images/left";
+    string prefix = "../Resources/images/left";
     if(i < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i+1) + ".bmp"));
   }
 
   for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
-    string prefix = "../../../Resources/images/right";
+    string prefix = "../Resources/images/right";
     if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp"));
   }
-
 
   g_calib = new Calibration(patt_path);
   double rpe = g_calib->runCalibration();
@@ -161,29 +160,56 @@ void init()
     Logger::getInstance()->error("Reprojection error larger than acceptable. " + to_string(rpe));
   }
 
-  //Mat proj_cv = g_calib->getProjMatrixGL(0, 640, 0, 480, 1, 5000);
-  //cout << "Final ndc * proj matrix:\n" << proj_cv << endl << endl;
+  g_calib->getViewMatrix(0);
 
-//  for(int i = 0; i < 4; i++)
-//    for(int j = 0; j < 4; j++)
-//      projMatrix[i][j] = proj_cv.at<double>(i, j);
+  glm::mat4 MV(0);
 
-  g_calib->getMVPMatrixGL(0, 640, 0, 480, 1, 100);
-  glm::mat4 MVP = glm::mat4(1.f);
-  for(int i = 0; i < 4; i++)
-    for(int j = 0; j < 4; j++)
-      MVP[i][j] = g_calib->m_mvpMatrices[g_patternIdx].at<double>(i, j);
+  cout << "-------------------------------------------------------------\n";
+  for(size_t i = 0; i < 9; i++) {
+    glm::quat rot = g_calib->getRotationQuat(i);
+    cout << "rot_quat = (" << rot.w << ", " << rot.x << "i, " << rot.y << "j, " << rot.z << "k)\n";
+    glm::vec4 trans_vec = g_calib->getTransVec(i);
+    trans_vec /= trans_vec.w;
+    cout << "trans_vec = (" << trans_vec.x << ", " << trans_vec.y << ", " << trans_vec.z << ", " << trans_vec.w << ")\n\n";
+  }
+  cout << "-------------------------------------------------------------\n\n";
 
-  Shader* square = new Shader("../../../Resources/shaders/fcgt2.vs", "../../../Resources/shaders/fcgt2.fs");
+  cout << "-------------------------------------------------------------\n";
+  g_projMatrix = g_calib->getProjMatrix(Size(640, 480), 1.f, 30.f);
+  cout << "-------------------------------------------------------------\n\n";
+
+  /*for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++) {
+      cout << g_projMatrix[i][j] << " ";
+    }
+    cout << endl;
+  }*/
+
+  glm::quat rot = g_calib->getRotationQuat(0);
+  glm::vec4 trans = g_calib->getTransVec(0);
+  trans /= trans.w;
+  //MV = g_projMatrix * glm::rotate(rot.w, glm::vec3(rot.x, rot.y, rot.z)) * glm::translate(glm::vec3(trans));
+  Mat mv = g_calib->getViewMatrix(0);
+  cout << mv << endl << endl;
+
+  for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++) {
+      MV[j][i] = mv.at<double>(i, j);
+    }
+  }
+
+  Shader* square = new Shader("../Resources/shaders/fcgt2.vs", "../Resources/shaders/fcgt2.fs");
   square->bind();
   square->bindFragDataLoc("fColor", 0);
   square->setUniform1i("u_image", 0);
   TinyGL::getInstance()->addResource(SHADER, "square", square);
-
-  Shader* simple = new Shader("../../../Resources/shaders/fcgt3.vs", "../../../Resources/shaders/fcgt3.fs");
+  
+  Shader* simple = new Shader("../Resources/shaders/fcgt3.vs", "../Resources/shaders/fcgt3.fs");
   simple->bind();
   simple->bindFragDataLoc("fColor", 0);
-  simple->setUniformMatrix("MVP", MVP);
+  simple->setUniformMatrix("u_projMatrix", g_projMatrix);
+  simple->setUniformMatrix("MV", MV);
+  simple->setUniform4fv("u_materialColor", sph->getMaterialColor());
   TinyGL::getInstance()->addResource(SHADER, "simple", simple);
 
   initCalled = true;
@@ -226,8 +252,7 @@ void draw()
     glBindTexture(GL_TEXTURE_2D, g_cornersTex[g_patternIdx]);
 
   s->setUniformMatrix("modelMatrix", glPtr->getMesh("quad")->m_modelMatrix);
-  glPtr->getMesh("quad")->draw();
-
+  //glPtr->getMesh("quad")->draw();
 
   s = glPtr->getShader("simple");
   s->bind();
@@ -273,14 +298,30 @@ void keyPress(unsigned char c, int, int)
 
   string title = WINDOW_TITLE + " pattern";
 
-  glm::mat4 MVP = glm::mat4(1.f);
-  for(int i = 0; i < 4; i++)
+  glm::mat4 MV = glm::mat4(1.f);
+  glm::quat rot = g_calib->getRotationQuat(g_patternIdx);
+  glm::vec4 trans = g_calib->getTransVec(g_patternIdx);
+  trans /= trans.w;
+  MV = glm::rotate(rot.w, glm::vec3(rot.x, rot.y, rot.z)) * glm::translate(glm::vec3(trans));
+
+  
+  
+  /*for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      MVP[i][j] = g_calib->m_mvpMatrices[g_patternIdx].at<double>(i, j);
+      MV[i][j] = g_calib->m_mvpMatrices[g_patternIdx].at<double>(i, j);*/
 
   Shader* s = TinyGL::getInstance()->getShader("simple");
   s->bind();
-  s->setUniformMatrix("MVP", MVP);
+
+  Mat mv = g_calib->getViewMatrix(g_patternIdx);
+
+  for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++) {
+      MV[j][i] = mv.at<double>(i, j);
+    }
+  }
+
+  s->setUniformMatrix("MV", MV);
   Shader::unbind();
 
   if(g_patternIdx < 10) title += "0";
@@ -324,14 +365,14 @@ void initPatternsCV()
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_IMAGES / 2; i++) {
-    string prefix = "../../../Resources/images/left";
+    string prefix = "../Resources/images/left";
     if(i < 9) prefix += "0";
     patterns[i] = imread(prefix + to_string(i+1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
 
   for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
-    string prefix = "../../../Resources/images/right";
+    string prefix = "../Resources/images/right";
     if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
     patterns[i] = imread(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp", CV_LOAD_IMAGE_GRAYSCALE);
     log->log("Loaded " + prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp");
@@ -495,7 +536,7 @@ void drawSphere(size_t num_points)
 void printInstructions()
 {
   printf("---------------------------------------------------------------\n");
-  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../../../Resources/images/*.bmp\n");
+  printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/*.bmp\n");
   printf("O programa usa as varias imagens de tabuleiros de xadrez para calibrar a camera.\n");
   printf("Essa calibracao nos da duas matrizes, a de parametros intrinsicos e extrinsicos.\n");
   printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
