@@ -1,1 +1,7 @@
 http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=calibration
+
+https://stackoverflow.com/questions/18637494/camera-position-in-world-coordinate-from-cvsolvepnp
+https://stackoverflow.com/questions/14515200/python-opencv-solvepnp-yields-wrong-translation-vector?lq=1
+https://stackoverflow.com/questions/14444433/calculate-camera-world-position-with-opencv-python
+http://ksimek.github.io/2012/08/14/decompose/
+https://stackoverflow.com/questions/21997021/augmented-reality-openglopencv
