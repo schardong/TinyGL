@@ -64,7 +64,7 @@ double Calibration::runCalibration()
 
     Mat t =  tvecs[i];
 
-    Mat M = Mat::eye(4, 4, R.type());
+    Mat M = Mat::zeros(3, 4, R.type());
     R.copyTo(M.colRange(0, 3).rowRange(0, 3));
     t.copyTo(M.colRange(3, 4).rowRange(0, 3));
 
@@ -169,6 +169,21 @@ void Calibration::getMVPMatrixGL(float l, float r, float b, float t, float n, fl
     Mat a = tmp * m_mvpMatrices[i];
     m_mvpMatrices[i] = proj * m_mvpMatrices[i];
   }
+}
+
+glm::quat Calibration::getRotationQuat(size_t idx)
+{
+  Mat proj = getIntCamMatrix() * m_mvpMatrices[idx];
+
+  Mat euler_angles(3, 1, CV_64F);
+  Mat cam_mat(3, 3, CV_64F);
+  Mat rot_mat(3, 3, CV_64F);
+  Mat trans_mat(4, 1, CV_64F);
+
+  decomposeProjectionMatrix(proj, cam_mat, rot_mat, trans_mat, Mat(3, 3, CV_64F), Mat(3, 3, CV_64F), Mat(3, 3, CV_64F), euler_angles);
+
+  cout << "Euler angles:\n" << euler_angles << endl << endl;
+  return glm::quat(glm::vec3(euler_angles.at<double>(0, 0), euler_angles.at<double>(1, 0), euler_angles.at<double>(2, 0)));
 }
 
 bool Calibration::getChessboardCorners(Mat& chess_patt, vector<Point2f> &corners, Size board_size)

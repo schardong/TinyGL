@@ -6,6 +6,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_modules.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace std;
 using namespace cv;
@@ -31,6 +33,8 @@ public:
   Mat getOrthoMatrix(float l, float r, float b, float t, float n, float f);
   Mat getProjMatrixGL(float l, float r, float b, float t, float n, float f);
   void getMVPMatrixGL(float l, float r, float b, float t, float n, float f);
+
+  glm::quat getRotationQuat(size_t idx);
 
   //temporary variables.
   vector<Mat> m_mvpMatrices;
