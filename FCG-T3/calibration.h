@@ -35,15 +35,8 @@ public:
     return Mat(m_distCoeff);
   }
 
-  Mat getIntCamMatrixOpenGL(float near, float far);
   Mat getOrthoMatrix(float l, float r, float b, float t, float n, float f);
-  Mat getProjMatrixGL(float l, float r, float b, float t, float n, float f);
-  void getMVPMatrixGL(float l, float r, float b, float t, float n, float f);
-
-  glm::quat getRotationQuat(size_t idx);
-  glm::mat4 getProjMatrix(Size img_size, float near, float far);
-  glm::vec4 getTransVec(size_t idx);
-
+  Mat getProjMatrix(Size img_size, float near, float far);
   Mat getViewMatrix(size_t idx);
 
   //temporary variables.

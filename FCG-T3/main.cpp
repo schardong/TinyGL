@@ -100,9 +100,8 @@ void initGLEW()
   }
 
   glClearColor(0.8f, 0.8f, 0.8f, 1.f);
-  glEnable(GL_DEPTH_TEST);
+  glDisable(GL_DEPTH_TEST);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  //glPointSize(2);
 
   initGLEWCalled = true;
 }
@@ -129,8 +128,6 @@ void init()
 
   g_calib = new Calibration(patt_path);
   double rpe = g_calib->runCalibration();
-
-  g_projMatrix = g_calib->getProjMatrix(Size(640, 480), 1.f, 30.f);
 
   setupShaders();
   resendShaderUniforms();
@@ -165,28 +162,31 @@ void draw()
   TinyGL* glPtr = TinyGL::getInstance();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+  Shader* s = glPtr->getShader("square");
+  s->bind();
+
+  Mesh* m = glPtr->getMesh("quad");
   
-  Shader* s = glPtr->getShader("simple");
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_patternIdx]);
+
+  m->bind();
+  m->draw();
+
+  //Drawing the sphere.
+  s = glPtr->getShader("simple");
   s->bind();
   s->setUniformMatrix("MV", g_modelView);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  Mesh* m = glPtr->getMesh("sphere");
+  m = glPtr->getMesh("sphere");
   m->bind();
-  m->draw();
-
-  s = glPtr->getShader("square");
-
-  m = glPtr->getMesh("quad");
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  s->bind();
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, g_patternsTex[g_patternIdx]);
-
-  //s->setUniformMatrix("modelMatrix", m->m_modelMatrix);
-  //m->draw();
+  m->draw();  
 
   glBindVertexArray(0);
   Shader::unbind();
@@ -316,7 +316,6 @@ void setupShaders()
   Shader* simple = new Shader("../Resources/shaders/fcgt3.vs", "../Resources/shaders/fcgt3.fs");
   simple->bind();
   simple->bindFragDataLoc("fColor", 0);
-  simple->setUniformMatrix("u_projMatrix", g_projMatrix);
   TinyGL::getInstance()->addResource(SHADER, "simple", simple);
 }
 
@@ -325,14 +324,21 @@ void resendShaderUniforms()
   g_modelView = glm::mat4(1.f);
   
   Mat mv = g_calib->getViewMatrix(g_patternIdx);
+  Mat proj = g_calib->getProjMatrix(g_calib->getInputPatterns()[0].size(), 1.5, 30.0);
   
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
       g_modelView[j][i] = mv.at<double>(i, j);
 
+  glm::mat4 proj_mat;
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      proj_mat[j][i] = proj.at<double>(i, j);
+
   Shader* s = TinyGL::getInstance()->getShader("simple");
   s->bind();
   s->setUniform4fv("u_materialColor", TinyGL::getInstance()->getMesh("sphere")->getMaterialColor());
   s->setUniformMatrix("MV", g_modelView);
+  s->setUniformMatrix("u_projMatrix", proj_mat);
   Shader::unbind();
 }
