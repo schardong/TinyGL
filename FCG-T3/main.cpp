@@ -278,9 +278,14 @@ void printInstructions()
   printf("---------------------------------------------------------------\n");
   printf("O programa inicia carregando as imagens de tabuleiros de xadrex localizadas em ../Resources/images/*.bmp\n");
   printf("O programa usa as varias imagens de tabuleiros de xadrez para calibrar a camera.\n");
-  printf("Essa calibracao nos da duas matrizes, a de parametros intrinsicos e extrinsicos.\n");
-  printf("Para trocar a imagem exibida, aperte um numero [1,9].\n");
-  printf("Para trocar o modo de exibicao da imagem original para a imagem que exibe os cantos detectados, aperte barra de espaco.\n");
+  printf("Essa calibracao nos da duas matrizes, a de parametros intrinsicos (global) e extrinsecos (para cada tabuleiro).\n");
+  printf("As matrizes estão no sistema de coordenadas utilizado pelo OpenCV, e, como o presente trabalho usa OpenGL, elas precisam ser convertidas.\n");
+  printf("Para isso, a matriz de parametros intrinsicos, que nada mais eh que uma matriz de projeção possui sua dimensao aumentada, recebe os parametros de near e far, bem como eh convertida em uma matriz de projecao do OpenGL (multiplicda pela matriz homogenea).\n");
+  printf("As matrizes de paramentros extrinsecos (equivalente a modelview) possuem um sistema de eixos onde a origem se encontra no canto superior esquerdo da imagem, e o z cresce na direcao na qual a camera esta olhando. Essas diferencas de eixo devem ser corrigidas para que ela possa ser usada em um sistema OpenGL.\n");
+  printf("Feitas as correcoes (melhor detalhadas no relatorio presente em www.inf.puc-rio.br/~gschardong/FCG/T3/index.html), uma esfera eh criada e projetada no plano da imagem utilizando as matrizes para verificar se as transformacoes resultantes sao corretas.\n");
+  printf("A adaptacao desse sistema para um sistema em tempo real, que utilize imagens da camera para extrair os parametros deve ser simples, bastando executar uma etapa de pre-processamento onde a camera eh calibrada e a sua matriz de parametros intrinsecos a armazenada em arquivo.\n");
+  printf("Em uma segunda etapa, essa matriz seria utilizada para estimar a matriz de parametros extrinsecos a cada quadro, e um objeto, como uma esfera ou teapot pode ser plotado para verificar o resultado.\n");
+  printf("Para trocar a imagem exibida, basta usar os botoes + e -.\n");
   printf("Aperte F10 para exibir essas instrucoes novamente.\n");
   printf("---------------------------------------------------------------\n");
 }
