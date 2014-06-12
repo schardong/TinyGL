@@ -53,33 +53,6 @@ double Calibration::runCalibration()
                                m_rvecs,
                                m_tvecs);
 
-  //Converting the rotation and translation vectors into a modelview matrix
-  //to use with OpenGL.
-  cout << "--------------------------------------------\n";
-  for(size_t i = 0; i < m_rvecs.size(); i++) {
-    Mat R;
-    Rodrigues(m_rvecs[i], R);
-
-    Mat t =  m_tvecs[i];
-
-    Mat M = Mat::zeros(3, 4, R.type());
-    R.copyTo(M.colRange(0, 3).rowRange(0, 3));
-    t.copyTo(M.colRange(3, 4).rowRange(0, 3));
-
-    m_mvpMatrices.push_back(M);
-  }
-  cout << "--------------------------------------------\n\n";
-
-//  cout << "Calibration test:\n";
-//  cout << m_intCamMatrix << endl << endl;
-//  cout << m_distCoeff << endl << endl;
-
-//  Mat R(4, 4, CV_64F);
-//  Rodrigues(rvecs[0], R);
-
-//  cout << "Rodrigues matrix:\n" << R << endl << endl;
-//  cout << "Camera position:\n" << tvecs[0] << endl << endl;
-
   return rpe;
 }
 

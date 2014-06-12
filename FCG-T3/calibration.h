@@ -23,8 +23,12 @@ public:
 
   double runCalibration();
 
-  vector<Mat> getInputPatterns() {
-    return m_inputPatt;
+  Mat getInputPattern(size_t idx) {
+    return m_inputPatt[idx];
+  }
+
+  size_t getNumPatterns() {
+    return m_inputPatt.size();
   }
 
   Mat getIntCamMatrix() {
@@ -40,7 +44,6 @@ public:
   Mat getViewMatrix(size_t idx);
 
   //temporary variables.
-  vector<Mat> m_mvpMatrices;
   vector<Mat> m_rvecs;
   vector<Mat> m_tvecs;
 

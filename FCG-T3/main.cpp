@@ -52,7 +52,7 @@ GLuint g_patternIdx = 0;
 bool initCalled = false;
 bool initGLEWCalled = false;
 
-void initPatternsCV();
+void setupPatternTex();
 void setupMeshes();
 void setupShaders();
 void resendShaderUniforms();
@@ -131,7 +131,7 @@ void init()
 
   setupShaders();
   resendShaderUniforms();
-  initPatternsCV();
+  setupPatternTex();
 
   initCalled = true;
 }
@@ -207,19 +207,29 @@ void reshape(int w, int h)
 
 void keyPress(unsigned char c, int, int)
 {
-  int t = c - 49;
-  if(t >= 0 && t <= 9) {
-    if(t < NUM_PATTERNS)
-      g_patternIdx = t;
+  bool pattern_changed = false;
+  switch(c) {
+  case '=':
+    if(g_patternIdx < g_calib->getNumPatterns()) {
+      g_patternIdx++;
+      pattern_changed = true;
+    }
+    break;
+  case '-':
+    if(g_patternIdx >= 0) {
+      g_patternIdx--;
+      pattern_changed = true;
+    }
+    break;
   }
 
-  string title = WINDOW_TITLE + " pattern";
-
-  resendShaderUniforms();
-
-  if(g_patternIdx < 10) title += "0";
-  title += to_string(g_patternIdx + 1);
-  glutSetWindowTitle((title).c_str());
+  if(pattern_changed) {
+    resendShaderUniforms();
+    string title = WINDOW_TITLE + " pattern";
+    if(g_patternIdx < 10) title += "0";
+    title += to_string(g_patternIdx + 1);
+    glutSetWindowTitle((title).c_str());
+  }
 }
 
 void specialKeyPress(int c, int x, int y)
@@ -228,13 +238,9 @@ void specialKeyPress(int c, int x, int y)
   case GLUT_KEY_F10:
     printInstructions();
     break;
-  default:
-    printf("(%d, %d) = %d\n", x, y, c);
-    break;
   }
 
   string title = WINDOW_TITLE + " pattern";
-
   if(g_patternIdx < 10) title += "0";
   title += to_string(g_patternIdx + 1);
   glutSetWindowTitle((title).c_str());
@@ -247,16 +253,16 @@ void exit_cb()
   exit(EXIT_SUCCESS);
 }
 
-void initPatternsCV()
+void setupPatternTex()
 {
-  vector<Mat> patterns = g_calib->getInputPatterns();
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
-  glGenTextures(NUM_IMAGES, g_patternsTex);
-  for(int i = 0; i < NUM_IMAGES; i++) {
-    int w = patterns[i].cols;
-    int h = patterns[i].rows;
-    uchar* pattern_data = patterns[i].data;
+  glGenTextures(g_calib->getNumPatterns(), g_patternsTex);
+  for(int i = 0; i < g_calib->getNumPatterns(); i++) {
+    Mat pattern = g_calib->getInputPattern(i);
+    int w = pattern.cols;
+    int h = pattern.rows;
+    uchar* pattern_data = pattern.data;
     glBindTexture(GL_TEXTURE_2D, g_patternsTex[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -265,16 +271,6 @@ void initPatternsCV()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, pattern_data);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void drawQuad(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
-}
-
-void drawSphere(size_t num_points)
-{
-  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
 
 void printInstructions()
@@ -324,7 +320,7 @@ void resendShaderUniforms()
   g_modelView = glm::mat4(1.f);
   
   Mat mv = g_calib->getViewMatrix(g_patternIdx);
-  Mat proj = g_calib->getProjMatrix(g_calib->getInputPatterns()[0].size(), 1.5, 30.0);
+  Mat proj = g_calib->getProjMatrix(g_calib->getInputPattern(g_patternIdx).size(), 1.5, 30.0);
   
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
@@ -341,4 +337,14 @@ void resendShaderUniforms()
   s->setUniformMatrix("MV", g_modelView);
   s->setUniformMatrix("u_projMatrix", proj_mat);
   Shader::unbind();
+}
+
+void drawQuad(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLE_STRIP, num_points, GL_UNSIGNED_BYTE, NULL);
+}
+
+void drawSphere(size_t num_points)
+{
+  glDrawElements(GL_TRIANGLES, num_points, GL_UNSIGNED_INT, NULL);
 }
