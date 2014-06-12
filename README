@@ -16,4 +16,6 @@ The other projects are homeworks from the Real-time rendering (http://www.tecgra
 and Fundamentals of Computer Graphics (https://www.tecgraf.puc-rio.br/~mgattass/fcg/fcg.html)
 courses at PUC-Rio. They all need the TinyGL library, freeglut (http://freeglut.sourceforge.net/)
 and GLEW (http://glew.sourceforge.net/) APIs. Perhaps I will start using GLFW (http://www.glfw.org/)
-and IUP later. These projects will be stored at another website latter.
+or IUP later. These projects will be stored at another website.
+
+At some point I will create another repo for my TinyGL library.
