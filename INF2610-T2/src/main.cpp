@@ -1,4 +1,5 @@
 #include "tglconfig.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -17,10 +18,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
-
-static const int W_SPHERES = 10;
-static const int H_SPHERES = 10;
-static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
 
@@ -74,7 +71,7 @@ void initGLUT(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(WINDOW_W, WINDOW_H);
 
   g_window = glutCreateWindow("INF2610-T2");
   glutReshapeFunc(reshape);
@@ -149,13 +146,13 @@ void init()
     TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
   }
 
-  Shader* g_adsVertex = new Shader("../../Resources/ads_vertex.vs", "../../Resources/ads_vertex.fs");
+  Shader* g_adsVertex = new Shader(RESOURCE_PATH + "/shaders/ads_vertex.vs", RESOURCE_PATH + "/shaders/ads_vertex.fs");
   g_adsVertex->bind();
   g_adsVertex->bindFragDataLoc("out_vColor", 0);
   g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
   g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
 
-  Shader* g_adsFrag = new Shader("../../Resources/ads_frag.vs", "../../Resources/ads_frag.fs");
+  Shader* g_adsFrag = new Shader(RESOURCE_PATH + "/shaders/ads_frag.vs", RESOURCE_PATH + "/shaders/ads_frag.fs");
   g_adsFrag->bind();
   g_adsFrag->bindFragDataLoc("out_vColor", 0);
   g_adsFrag->setUniformMatrix("viewMatrix", viewMatrix);

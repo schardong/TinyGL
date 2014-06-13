@@ -1,4 +1,5 @@
 #include "tglconfig.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -17,10 +18,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
-
-static const int W_SPHERES = 10;
-static const int H_SPHERES = 10;
-static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
 
 using namespace std;
 
@@ -136,7 +133,7 @@ void init()
     }
   }
 
-  Shader* g_simple = new Shader("../../Resources/simple.vs", "../../Resources/simple.fs", "../../Resources/simple.gs");
+  Shader* g_simple = new Shader(RESOURCE_PATH + "/shaders/simple.vs", RESOURCE_PATH + "/shaders/simple.fs", RESOURCE_PATH + "/shaders/simple.gs");
   g_simple->bind();
   g_simple->bindFragDataLoc("out_vColor", 0);
   g_simple->setUniformMatrix("viewMatrix", viewMatrix);

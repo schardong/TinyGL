@@ -15,84 +15,84 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tinygl.cpp">
+    <ClCompile Include="src\axis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="logger.cpp">
+    <ClCompile Include="src\bufferobject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
+    <ClCompile Include="src\cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.cpp">
+    <ClCompile Include="src\framebufferobject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bufferobject.cpp">
+    <ClCompile Include="src\grid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="grid.cpp">
+    <ClCompile Include="src\light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sphere.cpp">
+    <ClCompile Include="src\logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="axis.cpp">
+    <ClCompile Include="src\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="light.cpp">
+    <ClCompile Include="src\quad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="framebufferobject.cpp">
+    <ClCompile Include="src\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cube.cpp">
+    <ClCompile Include="src\sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="quad.cpp">
+    <ClCompile Include="src\tinygl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tinygl.h">
+    <ClInclude Include="src\axis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="singleton.h">
+    <ClInclude Include="src\bufferobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="logger.h">
+    <ClInclude Include="src\cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="src\framebufferobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="src\grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bufferobject.h">
+    <ClInclude Include="src\light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="grid.h">
+    <ClInclude Include="src\logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sphere.h">
+    <ClInclude Include="src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="axis.h">
+    <ClInclude Include="src\quad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tglconfig.h">
+    <ClInclude Include="src\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="light.h">
+    <ClInclude Include="src\singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="framebufferobject.h">
+    <ClInclude Include="src\sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cube.h">
+    <ClInclude Include="src\tglconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="quad.h">
+    <ClInclude Include="src\tinygl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

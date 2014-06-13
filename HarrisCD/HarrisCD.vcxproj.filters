@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="harris.cpp">
+    <ClCompile Include="src\harris.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="image.c">
+    <ClCompile Include="src\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="harris.h">
+    <ClInclude Include="src\harris.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="image.h">
+    <ClInclude Include="src\image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

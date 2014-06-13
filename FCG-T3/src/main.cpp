@@ -258,7 +258,7 @@ void setupPatternTex()
   //Creating the textures to show the results.
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(g_calib->getNumPatterns(), g_patternsTex);
-  for(int i = 0; i < g_calib->getNumPatterns(); i++) {
+  for(size_t i = 0; i < g_calib->getNumPatterns(); i++) {
     Mat pattern = g_calib->getInputPattern(i);
     int w = pattern.cols;
     int h = pattern.rows;
@@ -329,12 +329,12 @@ void resendShaderUniforms()
   
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      g_modelView[j][i] = mv.at<double>(i, j);
+      g_modelView[j][i] = (float)mv.at<double>(i, j);
 
   glm::mat4 proj_mat;
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      proj_mat[j][i] = proj.at<double>(i, j);
+      proj_mat[j][i] = (float)proj.at<double>(i, j);
 
   Shader* s = TinyGL::getInstance()->getShader("simple");
   s->bind();

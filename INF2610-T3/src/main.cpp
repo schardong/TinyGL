@@ -1,4 +1,5 @@
 #include "tglconfig.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -19,13 +20,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
-
-static const int W_SPHERES = 10;
-static const int H_SPHERES = 10;
-static const int NUM_SPHERES = W_SPHERES * H_SPHERES;
-static const int NUM_LIGHTS = 20;
-static const int WINDOW_W = 800;
-static const int WINDOW_H = 600;
 
 using namespace std;
 
@@ -464,12 +458,12 @@ void setupFBO(GLuint w, GLuint h)
 
 void setupShaders()
 {
-  Shader* g_fPass = new Shader("../../Resources/shaders/def_fpass.vs", "../../Resources/shaders/def_fpass.fs");
+  Shader* g_fPass = new Shader(RESOURCE_PATH + "/shaders/def_fpass.vs", RESOURCE_PATH + "/shaders/def_fpass.fs");
   g_fPass->bind();
   g_fPass->setUniformMatrix("viewMatrix", viewMatrix);
   g_fPass->setUniformMatrix("projMatrix", projMatrix);
 
-  Shader* g_sPass = new Shader("../../Resources/shaders/def_spass.vs", "../../Resources/shaders/def_spass.fs");
+  Shader* g_sPass = new Shader(RESOURCE_PATH + "/shaders/def_spass.vs", RESOURCE_PATH +  "/shaders/def_spass.fs");
   g_sPass->bind();
   g_sPass->bindFragDataLoc("fColor", 0);
   g_sPass->setUniformMatrix("viewMatrix", viewMatrix);
