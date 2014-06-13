@@ -6,8 +6,9 @@ else
     CXXFLAGS += -g0 -O2 -DNDEBUG
 endif
 
-JUNK_DIR := obj
-CXXFLAGS += -std=c++11 -MMD
+JUNK_DIR := bin/$(CONFIG)
+CXXFLAGS += -std=c++0x -MMD -Iinclude
+
 
 MODULES := tinygl harriscd fcg-t1 fcg-t2 fcg-t3
 
@@ -20,13 +21,12 @@ fcg-t3_PATH := FCG-T3
 include $(foreach i,$(MODULES),$($(i)_PATH)/rules.mk)
 
 .DEFAULT_GOAL :=
-.PHONY: all
-all: $(foreach i,$(MODULES),$($(i)_TARGET))
+.PHONY : all
+all : $(foreach i,$(MODULES),$($(i)_TARGET))
 
-.PHONY: release
-release: all
+.PHONY : release
+release : all
 
-.PHONY: clean
-clean:
-	rm -Rf debug release
-
+.PHONY : clean
+clean :
+	rm -rf bin
