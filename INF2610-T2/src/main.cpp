@@ -146,13 +146,13 @@ void init()
     TinyGL::getInstance()->addResource(MESH, "sphere" + to_string(i), spheres[i]);
   }
 
-  Shader* g_adsVertex = new Shader(RESOURCE_PATH + "/shaders/ads_vertex.vs", RESOURCE_PATH + "/shaders/ads_vertex.fs");
+  Shader* g_adsVertex = new Shader(RESOURCE_PATH + string("/shaders/ads_vertex.vs"), RESOURCE_PATH + string("/shaders/ads_vertex.fs"));
   g_adsVertex->bind();
   g_adsVertex->bindFragDataLoc("out_vColor", 0);
   g_adsVertex->setUniformMatrix("viewMatrix", viewMatrix);
   g_adsVertex->setUniformMatrix("projMatrix", projMatrix);
 
-  Shader* g_adsFrag = new Shader(RESOURCE_PATH + "/shaders/ads_frag.vs", RESOURCE_PATH + "/shaders/ads_frag.fs");
+  Shader* g_adsFrag = new Shader(RESOURCE_PATH + string("/shaders/ads_frag.vs"), RESOURCE_PATH + string("/shaders/ads_frag.fs"));
   g_adsFrag->bind();
   g_adsFrag->bindFragDataLoc("out_vColor", 0);
   g_adsFrag->setUniformMatrix("viewMatrix", viewMatrix);

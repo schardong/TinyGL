@@ -17,10 +17,10 @@ harriscd_PATH := HarrisCD
 fcg-t1_PATH := FCG-T1
 fcg-t2_PATH := FCG-T2
 fcg-t3_PATH := FCG-T3
-#inf2610-t1_PATH := INF2610-T1
-#inf2610-t2_PATH := INF2610-T2
-#inf2610-t3_PATH := INF2610-T3
-#inf2610-t4_PATH := INF2610-T4
+inf2610-t1_PATH := INF2610-T1
+inf2610-t2_PATH := INF2610-T2
+inf2610-t3_PATH := INF2610-T3
+inf2610-t4_PATH := INF2610-T4
 
 include $(foreach i,$(MODULES),$($(i)_PATH)/rules.mk)
 

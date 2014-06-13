@@ -133,7 +133,7 @@ void init()
     }
   }
 
-  Shader* g_simple = new Shader(RESOURCE_PATH + "/shaders/simple.vs", RESOURCE_PATH + "/shaders/simple.fs", RESOURCE_PATH + "/shaders/simple.gs");
+  Shader* g_simple = new Shader(RESOURCE_PATH + string("/shaders/simple.vs"), RESOURCE_PATH + string("/shaders/simple.fs"), RESOURCE_PATH + string("/shaders/simple.gs"));
   g_simple->bind();
   g_simple->bindFragDataLoc("out_vColor", 0);
   g_simple->setUniformMatrix("viewMatrix", viewMatrix);

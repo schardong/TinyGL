@@ -142,7 +142,7 @@ void init()
   setupShaders();
   setupFBO(WINDOW_W, WINDOW_H);
 
-  string rnd_normal_path = RESOURCE_PATH + "/images/noise_norm.bmp";
+  string rnd_normal_path = RESOURCE_PATH + string("/images/noise_norm.bmp");
   Image* rnd_normal = imgReadBMP(const_cast<char*>(rnd_normal_path.c_str()));
   
   glGenTextures(1, &g_rndNormalId);
@@ -341,10 +341,10 @@ void keyPress(unsigned char c, int, int)
     delete tPass;
     delete qPass;
 
-    fPass = new Shader(RESOURCE_PATH +"/shaders/ssao_fpass.vs", RESOURCE_PATH + "/shaders/def_fpass.fs");
-    sPass = new Shader(RESOURCE_PATH +"/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/ssao.fs");
-    tPass = new Shader(RESOURCE_PATH +"/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/blur.fs");
-    qPass = new Shader(RESOURCE_PATH +"/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/def_qpass.fs");
+    fPass = new Shader(RESOURCE_PATH + string("/shaders/ssao_fpass.vs"), RESOURCE_PATH + string("/shaders/def_fpass.fs"));
+    sPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/ssao.fs"));
+    tPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/blur.fs"));
+    qPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/def_qpass.fs"));
 
     TinyGL::getInstance()->addResource(SHADER, "fPass", fPass);
     TinyGL::getInstance()->addResource(SHADER, "sPass", sPass);
@@ -500,10 +500,10 @@ void setupFBO(GLuint w, GLuint h)
 
 void setupShaders()
 {
-  Shader* fPass = new Shader(RESOURCE_PATH + "/shaders/ssao_fpass.vs", RESOURCE_PATH + "/shaders/def_fpass.fs");
-  Shader* sPass = new Shader(RESOURCE_PATH + "/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/ssao.fs");
-  Shader* tPass = new Shader(RESOURCE_PATH + "/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/blur.fs");
-  Shader* qPass = new Shader(RESOURCE_PATH + "/shaders/def_spass.vs", RESOURCE_PATH + "/shaders/def_qpass.fs");
+  Shader* fPass = new Shader(RESOURCE_PATH + string("/shaders/ssao_fpass.vs"), RESOURCE_PATH + string("/shaders/def_fpass.fs"));
+  Shader* sPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/ssao.fs"));
+  Shader* tPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/blur.fs"));
+  Shader* qPass = new Shader(RESOURCE_PATH + string("/shaders/def_spass.vs"), RESOURCE_PATH + string("/shaders/def_qpass.fs"));
 
   Shader::unbind();
 
