@@ -9,8 +9,7 @@ endif
 JUNK_DIR := bin/$(CONFIG)
 CXXFLAGS += -std=c++0x -MMD -Iinclude
 
-
-MODULES := tinygl harriscd fcg-t1 fcg-t2 fcg-t3 #inf2610-t1 inf2610-t2 inf2610-t3 inf2610-t4
+MODULES := tinygl harriscd fcg-t1 fcg-t2 fcg-t3 inf2610-t1 inf2610-t2 inf2610-t3 inf2610-t4
 
 tinygl_PATH := TinyGL
 harriscd_PATH := HarrisCD
