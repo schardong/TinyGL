@@ -10,6 +10,36 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\axis.cpp" />
+    <ClCompile Include="src\bufferobject.cpp" />
+    <ClCompile Include="src\cube.cpp" />
+    <ClCompile Include="src\framebufferobject.cpp" />
+    <ClCompile Include="src\grid.cpp" />
+    <ClCompile Include="src\light.cpp" />
+    <ClCompile Include="src\logger.cpp" />
+    <ClCompile Include="src\mesh.cpp" />
+    <ClCompile Include="src\quad.cpp" />
+    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\sphere.cpp" />
+    <ClCompile Include="src\tinygl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\axis.h" />
+    <ClInclude Include="src\bufferobject.h" />
+    <ClInclude Include="src\cube.h" />
+    <ClInclude Include="src\framebufferobject.h" />
+    <ClInclude Include="src\grid.h" />
+    <ClInclude Include="src\light.h" />
+    <ClInclude Include="src\logger.h" />
+    <ClInclude Include="src\mesh.h" />
+    <ClInclude Include="src\quad.h" />
+    <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\singleton.h" />
+    <ClInclude Include="src\sphere.h" />
+    <ClInclude Include="src\tglconfig.h" />
+    <ClInclude Include="src\tinygl.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{22F7B6AA-9185-4E3B-9C43-9E3EE2B7515E}</ProjectGuid>
     <RootNamespace>TinyGL</RootNamespace>
@@ -81,36 +111,6 @@
       <AdditionalDependencies>iup.lib;iupgl.lib;iupcontrols.lib;glew32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="axis.cpp" />
-    <ClCompile Include="bufferobject.cpp" />
-    <ClCompile Include="cube.cpp" />
-    <ClCompile Include="framebufferobject.cpp" />
-    <ClCompile Include="grid.cpp" />
-    <ClCompile Include="light.cpp" />
-    <ClCompile Include="logger.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="quad.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="sphere.cpp" />
-    <ClCompile Include="tinygl.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="axis.h" />
-    <ClInclude Include="bufferobject.h" />
-    <ClInclude Include="cube.h" />
-    <ClInclude Include="framebufferobject.h" />
-    <ClInclude Include="grid.h" />
-    <ClInclude Include="light.h" />
-    <ClInclude Include="logger.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="quad.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="singleton.h" />
-    <ClInclude Include="sphere.h" />
-    <ClInclude Include="tglconfig.h" />
-    <ClInclude Include="tinygl.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -10,6 +10,14 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\harris.cpp" />
+    <ClCompile Include="src\image.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\harris.h" />
+    <ClInclude Include="src\image.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{38D1996C-5DFF-4266-BDDB-D63AD1DFA68E}</ProjectGuid>
     <RootNamespace>HarrisCD</RootNamespace>
@@ -49,7 +57,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../glm;../TinyGL;../../opencv/build/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../glm;../TinyGL/src;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -64,7 +72,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../glm;../TinyGL;../../opencv/build/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../glm;../TinyGL/src;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -74,14 +82,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="harris.cpp" />
-    <ClCompile Include="image.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="harris.h" />
-    <ClInclude Include="image.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

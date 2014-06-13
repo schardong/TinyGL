@@ -11,19 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ciepointcloud.cpp" />
-    <ClCompile Include="color.c" />
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ciepointcloud.h" />
-    <ClInclude Include="color.h" />
-    <ClInclude Include="colorspace.h" />
-    <ClInclude Include="fcgt1config.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\Resources\fcgt1.fs" />
     <None Include="..\Resources\fcgt1.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ciepointcloud.cpp" />
+    <ClCompile Include="src\color.cpp" />
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ciepointcloud.h" />
+    <ClInclude Include="src\color.h" />
+    <ClInclude Include="src\colorspace.h" />
+    <ClInclude Include="src\fcgt1config.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}</ProjectGuid>
@@ -64,7 +64,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

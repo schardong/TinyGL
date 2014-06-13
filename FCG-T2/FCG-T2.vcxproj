@@ -11,14 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="fcgt2config.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\Resources\fcgt2.fs" />
     <None Include="..\Resources\fcgt2.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\fcgt2config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F748693C-B554-4D21-83DE-333DA07CA11D}</ProjectGuid>
@@ -59,7 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../HarrisCD;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL/src;../HarrisCD/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../TinyGL;../HarrisCD;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TinyGL/src;../HarrisCD/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
