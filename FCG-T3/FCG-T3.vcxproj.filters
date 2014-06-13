@@ -34,7 +34,7 @@
     <ClInclude Include="src\calibration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\fcgt3config.h">
+    <ClInclude Include="src\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

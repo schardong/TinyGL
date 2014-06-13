@@ -68,6 +68,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

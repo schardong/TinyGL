@@ -1,5 +1,5 @@
 #include "tglconfig.h"
-#include "fcgt3config.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -115,13 +115,13 @@ void init()
   vector<string> patt_path;
 
   for(int i = 0; i < NUM_IMAGES / 2; i++) {
-    string prefix = "../../Resources/images/left";
+    string prefix = RESOURCE_PATH + "/images/left";
     if(i < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i+1) + ".bmp"));
   }
 
   for(int i = NUM_IMAGES / 2; i < NUM_IMAGES; i++) {
-    string prefix = "../../Resources/images/right";
+    string prefix = RESOURCE_PATH + "/images/right";
     if((i - (NUM_IMAGES / 2)) < 9) prefix += "0";
     patt_path.push_back(string(prefix + to_string(i - (NUM_IMAGES/2) + 1) + ".bmp"));
   }
@@ -308,13 +308,13 @@ void setupMeshes()
 
 void setupShaders()
 {
-  Shader* square = new Shader("../../Resources/shaders/fcgt2.vs", "../../Resources/shaders/fcgt2.fs");
+  Shader* square = new Shader(RESOURCE_PATH + "/shaders/fcgt2.vs", RESOURCE_PATH +  "/shaders/fcgt2.fs");
   square->bind();
   square->bindFragDataLoc("fColor", 0);
   square->setUniform1i("u_image", 0);
   TinyGL::getInstance()->addResource(SHADER, "square", square);
   
-  Shader* simple = new Shader("../../Resources/shaders/fcgt3.vs", "../../Resources/shaders/fcgt3.fs");
+  Shader* simple = new Shader(RESOURCE_PATH + "/shaders/fcgt3.vs", RESOURCE_PATH + "/shaders/fcgt3.fs");
   simple->bind();
   simple->bindFragDataLoc("fColor", 0);
   TinyGL::getInstance()->addResource(SHADER, "simple", simple);

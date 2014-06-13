@@ -23,7 +23,7 @@
     <ClInclude Include="src\ciepointcloud.h" />
     <ClInclude Include="src\color.h" />
     <ClInclude Include="src\colorspace.h" />
-    <ClInclude Include="src\fcgt1config.h" />
+    <ClInclude Include="src\config.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D75C8AB2-962E-4C61-860A-2A7C90FCAECE}</ProjectGuid>
@@ -66,7 +66,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -83,7 +83,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

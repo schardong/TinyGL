@@ -43,7 +43,7 @@
     <ClInclude Include="src\colorspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\fcgt1config.h">
+    <ClInclude Include="src\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

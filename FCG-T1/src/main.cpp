@@ -1,5 +1,5 @@
 #include "tglconfig.h"
-#include "fcgt1config.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -392,7 +392,7 @@ void initGamuts()
 
 void initShader()
 {
-  Shader* g_shader = new Shader("../../Resources/shaders/fcgt1.vs", "../../Resources/shaders/fcgt1.fs");
+  Shader* g_shader = new Shader(RESOURCE_PATH + "/shaders/fcgt1.vs", RESOURCE_PATH + "/shaders/fcgt1.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("out_vColor", 0);
   g_shader->setUniformMatrix("viewMatrix", viewMatrix);

@@ -15,7 +15,7 @@
     <None Include="..\Resources\fcgt2.vs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\fcgt2config.h" />
+    <ClInclude Include="src\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../HarrisCD/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -78,7 +78,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../HarrisCD/src;../../freeglut/include;../../glm;../../glew/include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

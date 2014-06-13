@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\calibration.h" />
-    <ClInclude Include="src\fcgt3config.h" />
+    <ClInclude Include="src\config.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D344314-71FC-42BF-B049-1423B2200B57}</ProjectGuid>
@@ -63,7 +63,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;../../opencv/build/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -80,7 +80,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>../TinyGL/src;../../freeglut/include;../../glm;../../glew/include;../../opencv/build/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

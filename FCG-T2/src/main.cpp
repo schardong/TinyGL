@@ -1,5 +1,5 @@
 #include "tglconfig.h"
-#include "fcgt2config.h"
+#include "config.h"
 #include "tinygl.h"
 #include "logger.h"
 #include "shader.h"
@@ -135,7 +135,7 @@ void init(int argc, char** argv)
   initPatterns(d, thresh);
   printInstructions();
 
-  Shader* g_shader = new Shader("../../Resources/shaders/fcgt2.vs", "../../Resources/shaders/fcgt2.fs");
+  Shader* g_shader = new Shader(RESOURCE_PATH + "/shaders/fcgt2.vs", RESOURCE_PATH + "/shaders/fcgt2.fs");
   g_shader->bind();
   g_shader->bindFragDataLoc("fColor", 0);
   g_shader->setUniform1i("u_image", 0);
@@ -278,7 +278,7 @@ void initPatterns(Detector detect, double thresh)
 
   //Reading the chessboard patterns.
   for(int i = 0; i < NUM_PATTERNS; i++) {
-    string prefix = "../../Resources/images/left";
+    string prefix = RESOURCE_PATH + "/images/left";
     if(i < 10) prefix += "0";
     patterns[i] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
@@ -286,14 +286,14 @@ void initPatterns(Detector detect, double thresh)
 
   //Reading the fiducials.
   for(int i = 0; i < NUM_FID; i++) {
-    string prefix = "../../Resources/images/padrao0";
+    string prefix = RESOURCE_PATH + "/images/padrao0";
     patterns[i + NUM_PATTERNS] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
 
   //Reading the soccer field.
   for(int i = 0; i < NUM_SOCCER; i++) {
-    string prefix = "../../Resources/images/soccer_field0";
+    string prefix = RESOURCE_PATH + "/images/soccer_field0";
     patterns[i + NUM_PATTERNS + NUM_FID] = imgGrey(imgReadBMP(const_cast<char*>((prefix + to_string(i+1) + ".bmp").c_str())));
     log->log("Loaded " + prefix + to_string(i+1) + ".bmp");
   }
