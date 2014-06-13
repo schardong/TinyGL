@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstring>
 
 #define GLM_FORCE_RADIANS
 
@@ -22,9 +23,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-extern "C" {
 #include "color.h"
-}
 
 using namespace std;
 

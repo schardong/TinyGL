@@ -3,12 +3,10 @@
 
 #include <vector>
 #include <glm/glm.hpp>
-#include "logger.h"
+#include <cmath>
 
-extern "C" {
 #include "color.h"
-#include "math.h"
-}
+#include "logger.h"
 
 glm::vec3 createCIEXYZ(float* beta, float* illuminant, std::vector<glm::vec3> xyzbar, size_t step)
 {

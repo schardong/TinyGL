@@ -5,10 +5,7 @@
 #include "shader.h"
 #include "harris.h"
 #include "quad.h"
-
-extern "C" {
 #include "image.h"
-}
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>

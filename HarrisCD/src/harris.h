@@ -4,9 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-extern "C" {
 #include "image.h"
-}
 
 typedef enum {
   HARRIS,
