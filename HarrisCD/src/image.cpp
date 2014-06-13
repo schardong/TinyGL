@@ -401,7 +401,7 @@ float imgDif(Image*img0, Image*img1, float gamma)
 
             /* corrige por gamma */
             lum = luminance(rgb[0],rgb[1],rgb[2]);
-            new_lum = (float) pow(lum,1./gamma);
+            new_lum = (float) pow(lum,1.f/(float)gamma);
             ratio = new_lum/lum;
             rgb[0]*=ratio; rgb[1]*=ratio; rgb[2]*=ratio;
 
@@ -913,7 +913,7 @@ Image* imgReadPFM(char *filename)
   Image* img;
   int w,h,dcs;
 
-  char line[256];
+ // char line[256];
  
   fp = fopen(filename, "rb");
   if (fp == NULL) {  printf("%s nao pode ser aberto\n",filename); return NULL;}

@@ -735,7 +735,7 @@ float corDelta_2000_Lab( float L1, float a1, float b1, float L2, float a2, float
 		C1ab = (float)sqrt(a1*a1 + b1*b1);
 		C2ab = (float)sqrt(a2*a2 + b2*b2);
 		Cab = (C1ab + C2ab)/2;
-		Cab7 = (float) pow(Cab,7.0);
+		Cab7 = (float) pow(Cab,7.f);
 		G =  (float) (0.5 * (1.0 - sqrt(Cab7/(Cab7 + 6103515625.0))));
 		var_a1 = (1 + G) * a1;
 		var_a2 = (1 + G) * a2;
@@ -802,7 +802,7 @@ float corDelta_2000_Lab( float L1, float a1, float b1, float L2, float a2, float
 			            + 0.32*cos(DEG2RAD(3*h+6)) - 0.2*cos(DEG2RAD(4*h-63)));
 		hh = (h - 275)/25;
 		ddeg = (float) (30*exp(-hh * hh));
-		C7 = (float) pow(C,7.0);
+		C7 = (float) pow(C,7.f);
 		RC = (float) (2*sqrt(C7/(C7 + 6103515625.0)));
 		L50sq = (L - 50) * (L - 50);
 		SL = (float)(1 + (0.015 * L50sq)/sqrt(20.0 + L50sq));
