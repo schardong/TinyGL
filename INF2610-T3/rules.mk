@@ -1,8 +1,8 @@
 MODULE := inf2610-t3
 
-fcg-t1_TARGET := t3_defered_shader
-fcg-t1_CXXFLAGS := -ITinyGL/src
-fcg-t1_LIBS := -lglut -lGLEW -lGL
-fcg-t1_LOCALLIBS := $(tinygl_TARGET)
+inf2610-t3_TARGET := t3_defered_shader
+inf2610-t3_CXXFLAGS := -ITinyGL/src
+inf2610-t3_LIBS := -lglut -lGLEW -lGL
+inf2610-t3_LOCALLIBS := $(tinygl_TARGET)
 
 include common-rules.mk

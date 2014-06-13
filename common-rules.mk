@@ -10,21 +10,21 @@ endif
 
 $($(MODULE)_JUNK_DIR)/%.o : MODULE := $(MODULE)
 $($(MODULE)_JUNK_DIR)/%.o : $($(MODULE)_PATH)/src/%.cpp
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(CXX) -c -o $@ $(CXXFLAGS) $($(MODULE)_CXXFLAGS) $<
 
 ifeq ($(suffix $($(MODULE)_TARGET)), .a)
 
 $($(MODULE)_TARGET) : MODULE := $(MODULE)
 $($(MODULE)_TARGET) : $($(MODULE)_OBJS)
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(AR) rcs $@ $^
 
 else
 
 $($(MODULE)_TARGET) : MODULE := $(MODULE)
 $($(MODULE)_TARGET) : $($(MODULE)_OBJS) $($(MODULE)_LOCALLIBS)
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(CXX) -o $@ $(LDFLAGS) $($(MODULE)_LDFLAGS) $^ $($(MODULE)_LIBS)
 
 endif
