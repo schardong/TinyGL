@@ -7,10 +7,7 @@
 #include "sphere.h"
 #include "quad.h"
 #include "light.h"
-
-extern "C" {
 #include "image.h"
-}
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
